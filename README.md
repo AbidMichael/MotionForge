@@ -14,7 +14,10 @@
 That is the whole request (about 120 tokens). The equivalent hand-written Remotion code is hundreds of lines.
 
 # Exemple
-
+## English Version
+https://github.com/user-attachments/assets/9afe6faf-4649-4e60-95a7-a02cc6ac3703
+## French Version
+Same preset, onlys text changes
 https://github.com/user-attachments/assets/32802bee-ba6c-448b-aa4d-e8aa5f173b72
 
 ## Features
