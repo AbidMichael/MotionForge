@@ -39,7 +39,7 @@ That is the whole request (about 120 tokens). The equivalent hand-written Remoti
 ## Installation
 
 ```bash
-git clone https://github.com/<your-username>/motionforge.git
+git clone https://github.com/AbidMichael/motionforge.git
 cd motionforge
 npm install
 npm start
