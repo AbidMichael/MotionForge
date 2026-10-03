@@ -13,6 +13,10 @@
 
 That is the whole request (about 120 tokens). The equivalent hand-written Remotion code is hundreds of lines.
 
+#Exemple
+
+https://github.com/user-attachments/assets/32802bee-ba6c-448b-aa4d-e8aa5f173b72
+
 ## Features
 
 - **Preset-based DSL**: scenes, elements, animations, transitions, themes and art directions, all plain JSON with typed params.
