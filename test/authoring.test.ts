@@ -116,3 +116,23 @@ describe('composition files', () => {
     expect(() => resolveFile(cfg, path.join(dir, 'c.txt'), 'read')).toThrow(/\.json/);
   });
 });
+
+describe('visual QA', async () => {
+  const { staticChecks } = await import('../src/core/qa');
+  it('ignores stacked copies of the same text and judges moving layers where they go', () => {
+    const r = run({
+      format: '1280x720@30',
+      scenes: [{ d: 3, layers: [
+        { type: 'text', text: 'ALDERAAN', size: 120, x: 640, y: 300 },
+        { type: 'group', x: 0, y: 0, anchor: 'top-left', w: 1280, h: 720, children: [{ type: 'text', text: 'ALDERAAN', size: 120, x: 646, y: 300, blend: 'screen', color: '#f00' }] },
+        { type: 'rect', id: 'ship', w: 40, h: 20, fill: '#fff', motionPath: { path: 'M-200 500 L640 500', d: 2 } },
+        { type: 'rect', id: 'lost', w: 40, h: 20, fill: '#fff', motionPath: { path: 'M-400 500 L-200 500', d: 2 } },
+      ] }],
+    });
+    expect(r.errors).toEqual([]);
+    const issues = staticChecks(r.ir!);
+    expect(issues.filter((i) => i.kind === 'overlap')).toEqual([]);
+    const off = issues.filter((i) => i.kind === 'out-of-frame');
+    expect(off.map((i) => i.layer)).toEqual(['lost']);
+  });
+});

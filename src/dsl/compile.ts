@@ -769,6 +769,8 @@ export class Session {
           const rx = Number(e.rx ?? r);
           const ry = Number(e.ry ?? r);
           const start = Number(e.start ?? mp.start ?? 0);
+          if (start !== 0 && Math.abs(start) <= 6.3)
+            this.warn(`${p}.start`, `start is in degrees (0 = right, 90 = down): ${start}° is almost the same point for every value — for ${start} turn(s) write ${+(start * 360).toFixed(1)}`);
           const turns = Number(e.turns ?? mp.turns ?? 1);
           const cw = (e.dir ?? mp.dir ?? 'cw') !== 'ccw';
           const center = e.center ?? mp.center;

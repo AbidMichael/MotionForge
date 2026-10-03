@@ -7,7 +7,7 @@
  */
 import sharp from 'sharp';
 import type { IRDoc, IRLayer } from '../ir/types';
-import { parseColor } from '../ir/evaluate';
+import { evaluateAnims, parseColor } from '../ir/evaluate';
 import { intersection, area, type Rect } from '../ir/geometry';
 import { LayoutMap, type LBox } from '../dsl/layoutmap';
 
@@ -50,6 +50,57 @@ const insideRemapped = (b: LBox) => !!b.remapped;
 /** Hidden by design (cursor, typed clones, overlays added by passes). */
 const technical = (b: LBox) => /~|\.g\.|\.cw$|\.cam$/.test(b.layer.id);
 
+/** Does this layer (or one of its parents) move: motion path or position keyframes? */
+const moves = (b: LBox) => {
+  for (let p: LBox | undefined = b; p; p = p.parent) if (p.layer.anims.some((a) => a.path || a.tracks.dx || a.tracks.dy)) return true;
+  return false;
+};
+
+/**
+ * Where a box really is at a frame (relative to the scene root): its resting rect shifted by the dx/dy
+ * (motion paths included) of the layer and its parents, clipped by "overflow: hidden" parents, with the
+ * combined opacity. null when it is not on screen at that frame (outside its time, clipped away).
+ */
+function boxAt(b: LBox, f: number): { rect: Rect; opacity: number } | null {
+  if (f < b.abs0 || f >= b.abs1) return null;
+  let dx = 0;
+  let dy = 0;
+  let opacity = 1;
+  const chain: LBox[] = [];
+  for (let p: LBox | undefined = b; p && p.depth > 0; p = p.parent) chain.push(p);
+  // offsets of ancestors move everything below them; clips are applied with the ancestor's own offset
+  const offs = chain.map((p) => {
+    const st = evaluateAnims(p.layer.anims, f - p.abs0, 'layer');
+    return { p, st };
+  });
+  for (const { p, st } of offs) {
+    dx += st.dx;
+    dy += st.dy;
+    opacity *= st.opacity * (p.layer.opacity ?? 1);
+  }
+  let rect: Rect | null = { x: b.rect.x + dx, y: b.rect.y + dy, w: b.rect.w, h: b.rect.h };
+  let acc = { dx: 0, dy: 0 };
+  for (let i = offs.length - 1; i >= 1; i--) {
+    acc = { dx: acc.dx + offs[i].st.dx, dy: acc.dy + offs[i].st.dy };
+    const p = offs[i].p;
+    if (p.layer.overflow === 'hidden' && rect) {
+      rect = intersection(rect, { x: p.rect.x + acc.dx, y: p.rect.y + acc.dy, w: p.rect.w, h: p.rect.h });
+    }
+  }
+  if (!rect || rect.w < 1 || rect.h < 1) return null;
+  return { rect, opacity };
+}
+
+/** Sample frames across a box's life (or a shared interval). */
+const samples = (a0: number, a1: number, n = 9) => {
+  const out: number[] = [];
+  const len = Math.max(1, a1 - a0);
+  for (let i = 0; i < n; i++) out.push(Math.min(a1 - 1, Math.round(a0 + ((i + 0.5) / n) * len)));
+  return [...new Set(out)];
+};
+
+const sameText = (a: LBox, b: LBox) => (a.layer.text ?? '').trim().toLowerCase() === (b.layer.text ?? '').trim().toLowerCase() && !!(a.layer.text ?? '').trim();
+
 export function staticChecks(ir: IRDoc): QAIssue[] {
   const out: QAIssue[] = [];
   const W = ir.width;
@@ -61,6 +112,7 @@ export function staticChecks(ir: IRDoc): QAIssue[] {
     const tMid = +((info.start + (info.end - info.start) * 0.7) / ir.fps).toFixed(2);
     const texts = sc.layout.boxes.filter((b) => b.layer.type === 'text' && b.depth > 0 && !insideRemapped(b) && !technical(b) && (b.layer.opacity ?? 1) > 0.05);
     let words = 0;
+    const tiny: { b: LBox; size: number }[] = [];
     for (const b of texts) {
       const txt = b.layer.text ?? '';
       words += txt.trim().split(/\s+/).filter(Boolean).length;
@@ -72,7 +124,23 @@ export function staticChecks(ir: IRDoc): QAIssue[] {
         if (need > b.layer.h + 2) out.push({ severity: 'error', kind: 'text-overflow', scene: sc.index, t: tMid, layer: label(b), ptr: b.layer.textPtr ?? b.layer.ptr, rect: b.rect, msg: `text needs ${b.text.lines.length} lines (${Math.round(need)} px) but the box is ${b.layer.h} px tall`, fix: 'add "fit":"shrink" or "maxLines", or shorten it' });
       }
       const size = b.text?.size ?? 0;
-      if (size && size < Math.min(W, H) * 0.018) out.push({ severity: 'warning', kind: 'tiny-text', scene: sc.index, t: tMid, layer: label(b), ptr: b.layer.ptr, rect: b.rect, msg: `text is ${Math.round(size)} px — hard to read on a phone`, fix: `use at least ${Math.round(Math.min(W, H) * 0.022)} px` });
+      if (size && size < Math.min(W, H) * 0.018) tiny.push({ b, size });
+    }
+    if (tiny.length) {
+      // one issue per scene: many small labels (HUD, captions, timecodes) are usually one design choice
+      tiny.sort((x, y) => x.size - y.size);
+      const names = [...new Set(tiny.map((x) => label(x.b)))];
+      out.push({
+        severity: 'warning',
+        kind: 'tiny-text',
+        scene: sc.index,
+        t: tMid,
+        layer: names.slice(0, 3).join(', ') + (names.length > 3 ? ` +${names.length - 3}` : ''),
+        ptr: tiny[0].b.layer.ptr,
+        rect: tiny[0].b.rect,
+        msg: tiny.length === 1 ? `text is ${Math.round(tiny[0].size)} px — hard to read on a phone` : `${tiny.length} texts are ${Math.round(tiny[0].size)}–${Math.round(tiny[tiny.length - 1].size)} px — hard to read on a phone`,
+        fix: `use at least ${Math.round(Math.min(W, H) * 0.022)} px (fine for decorative HUD details)`,
+      });
     }
     // out of frame / edges (resting positions)
     for (const b of sc.layout.boxes) {
@@ -82,8 +150,25 @@ export function staticChecks(ir: IRDoc): QAIssue[] {
       if (r.w <= 1 || r.h <= 1) continue;
       if (r.w >= W * 0.98 && r.h >= H * 0.98) continue; // full-frame layers
       if (b.layer.type === 'group' && b.layer.children?.length && !b.layer.style.bg && !b.layer.style.fill) continue; // judged by its children
-      const inside = intersection(r, { x: 0, y: 0, w: W, h: H });
-      const visible = inside ? area(inside) / area(r) : 0;
+      const frame = { x: 0, y: 0, w: W, h: H };
+      const visibleIn = (rr: Rect) => {
+        const inside = intersection(rr, frame);
+        return inside ? area(inside) / area(rr) : 0;
+      };
+      if (moves(b)) {
+        // moving layers (motion paths, dx/dy): judge where it actually goes, not where it starts
+        let best = 0;
+        let bestRect = r;
+        for (const f of samples(b.abs0, b.abs1, 15)) {
+          const at = boxAt(b, f);
+          if (!at || at.opacity < 0.05) continue;
+          const v = visibleIn(at.rect);
+          if (v > best) (best = v), (bestRect = at.rect);
+        }
+        if (best < 0.05) out.push({ severity: 'error', kind: 'out-of-frame', scene: sc.index, t: tMid, layer: label(b), ptr: b.layer.ptr, rect: bestRect, msg: 'it moves but never enters the frame', fix: 'check its motion path / keyframes and position' });
+        continue;
+      }
+      const visible = visibleIn(r);
       if (visible < 0.999) {
         const sev = visible < 0.6 ? 'error' : 'warning';
         if (b.layer.type === 'text' || visible < 0.9) out.push({ severity: sev, kind: 'out-of-frame', scene: sc.index, t: tMid, layer: label(b), ptr: b.layer.ptr, rect: r, msg: `${Math.round((1 - visible) * 100)}% of it is outside the frame at rest`, fix: 'move it in, or reduce its size' });
@@ -91,17 +176,59 @@ export function staticChecks(ir: IRDoc): QAIssue[] {
         out.push({ severity: 'info', kind: 'edge', scene: sc.index, t: tMid, layer: label(b), ptr: b.layer.ptr, rect: r, msg: 'text touches the safe margin (2.5% of the frame)', fix: 'keep text inside the title-safe area' });
       }
     }
-    // overlapping text (both visible at the same time)
+    const overlapSeen = new Map<string, QAIssue>();
+    // overlapping text: both visible at the same time, at their real positions, for a good part of that time
     for (let i = 0; i < texts.length; i++) {
       for (let j = i + 1; j < texts.length; j++) {
         const a = texts[i];
         const b = texts[j];
-        if (a.abs1 <= b.abs0 || b.abs1 <= a.abs0) continue;
-        if (a.parent === b.parent && a.layer.text === b.layer.text) continue; // stacked copies (glitch, RGB split)
-        const x = intersection(a.rect, b.rect);
-        if (!x) continue;
-        const frac = area(x) / Math.min(area(a.rect), area(b.rect));
-        if (frac > 0.15) out.push({ severity: frac > 0.4 ? 'error' : 'warning', kind: 'overlap', scene: sc.index, t: +((info.start + Math.max(a.abs0, b.abs0)) / ir.fps + 0.5).toFixed(2), layer: `${label(a)} / ${label(b)}`, ptr: a.layer.ptr, rect: x, msg: `two texts overlap (${Math.round(frac * 100)}%)`, fix: 'move one, or show them at different times' });
+        const s0 = Math.max(a.abs0, b.abs0);
+        const s1 = Math.min(a.abs1, b.abs1);
+        if (s1 <= s0) continue;
+        // the same words drawn twice on top of each other are an effect (glitch, RGB split, shadow, echo, outline)
+        if (sameText(a, b)) continue;
+        let hits = 0;
+        let seen = 0;
+        let worst = 0;
+        let worstRect: Rect | null = null;
+        let worstF = s0;
+        for (const f of samples(s0, s1, 9)) {
+          const pa = boxAt(a, f);
+          const pb = boxAt(b, f);
+          if (!pa || !pb || pa.opacity < 0.15 || pb.opacity < 0.15) continue;
+          seen++;
+          const x = intersection(pa.rect, pb.rect);
+          if (!x) continue;
+          const frac = area(x) / Math.min(area(pa.rect), area(pb.rect));
+          if (frac > 0.15) hits++;
+          if (frac > worst) (worst = frac), (worstRect = x), (worstF = f);
+        }
+        // a crossing or a brief flash is fine; a lasting overlap (or a static one) is not
+        if (!seen || hits / seen < 0.5 || !worstRect) continue;
+        const issue: QAIssue = { severity: worst > 0.4 ? 'error' : 'warning', kind: 'overlap', scene: sc.index, t: +((info.start + worstF) / ir.fps).toFixed(2), layer: `${label(a)} / ${label(b)}`, ptr: a.layer.ptr, rect: worstRect, msg: `two texts overlap (${Math.round(worst * 100)}%)`, fix: 'move one, or show them at different times' };
+        // copies of the same text (effects) against the same other text: one issue, the worst
+        const key = [a.layer.text ?? a.layer.id, b.layer.text ?? b.layer.id].map((x) => x.trim().toLowerCase()).sort().join('|');
+        const prev = overlapSeen.get(key);
+        if (!prev) {
+          overlapSeen.set(key, issue);
+          out.push(issue);
+        } else if (worst * 100 > Number(/\((\d+)%\)/.exec(prev.msg)?.[1] ?? 0)) Object.assign(prev, issue);
+      }
+    }
+    // one source node repeated (repeat/list/each): one issue with a count
+    const sceneStart = out.findIndex((i) => i.scene === sc.index);
+    if (sceneStart >= 0) {
+      const groups = new Map<string, QAIssue[]>();
+      for (const i of out.slice(sceneStart)) {
+        if (i.kind !== 'out-of-frame') continue;
+        const k = `${i.ptr ?? String(i.layer).replace(/[.:#]\d+$/, '')}|${i.msg}`;
+        groups.set(k, [...(groups.get(k) ?? []), i]);
+      }
+      for (const g of groups.values()) {
+        if (g.length < 2) continue;
+        g[0].layer = `${g[0].layer} (+${g.length - 1} more of the same layer)`;
+        g[0].msg = `${g.length} repeated layers: ${g[0].msg}`;
+        for (const extra of g.slice(1)) out.splice(out.indexOf(extra), 1);
       }
     }
     if (sec < 0.8) out.push({ severity: 'warning', kind: 'short-shot', scene: sc.index, t: info.start / ir.fps, msg: `scene lasts ${sec.toFixed(2)} s — too short to read`, fix: 'make it at least 1 s, or merge it' });
@@ -160,9 +287,13 @@ export async function pixelChecks(
     for (const b of sc.layout.boxes) {
       if (b.layer.type !== 'text' || b.depth === 0 || b.remapped || technical(b)) continue;
       if (lf < b.abs0 || lf >= b.abs1) continue;
+      if (b.layer.blend && b.layer.blend !== 'normal') continue; // blended copies are effects (glitch, glow passes)
       const tc = b.layer.style.gradient ? null : textColor(b.layer);
       if (!tc) continue;
-      const r = b.rect;
+      // real position and visibility at this frame (motion paths, moving parents, clips, fades)
+      const at = boxAt(b, lf);
+      if (!at || at.opacity < 0.5) continue;
+      const r = at.rect;
       const bgCol = b.layer.style.bg ? parseColor(String(b.layer.style.bg)) : null;
       let bgLum: number;
       if (bgCol && bgCol[3] > 0.9) bgLum = luminance([bgCol[0], bgCol[1], bgCol[2]]);
