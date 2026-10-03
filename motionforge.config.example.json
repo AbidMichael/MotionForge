@@ -5,7 +5,7 @@
   "agents": [
     { "id": "claude-code", "projects": ["acme"] },
     { "id": "claude-desktop" },
-    { "id": "michael", "admin": true }
+    { "id": "admin", "admin": true }
   ],
   "defaultFormat": "1920x1080@30",
   "defaultTheme": "core:dark",

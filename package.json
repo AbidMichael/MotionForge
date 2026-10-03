@@ -3,6 +3,18 @@
   "version": "0.1.0",
   "private": true,
   "description": "Local motion design server for AI agents: compose videos from reusable presets and libraries, render with Remotion.",
+  "keywords": [
+    "motion-design",
+    "video",
+    "remotion",
+    "mcp",
+    "ai-agents",
+    "animation",
+    "model-context-protocol",
+    "three.js"
+  ],
+  "license": "MIT",
+  "author": "Michael",
   "type": "module",
   "engines": {
     "node": ">=20.11"
