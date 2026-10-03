@@ -1,0 +1,89 @@
+{
+  "slug": "network",
+  "kind": "scene",
+  "summary": "A network / architecture graph that builds itself, with packets travelling between nodes",
+  "tags": [
+    "data",
+    "network",
+    "graph",
+    "architecture",
+    "nodes",
+    "flow",
+    "system"
+  ],
+  "params": {
+    "title": "string=",
+    "nodes": "any=null",
+    "edges": "any=null",
+    "layout": "enum:force|circle|grid|tree|layers|manual=force",
+    "pulses": "any=null",
+    "highlight": "any=null",
+    "directed": "boolean=true",
+    "chain": "boolean=false"
+  },
+  "duration": {
+    "default": 6,
+    "min": 3,
+    "max": 20
+  },
+  "example": {
+    "p": "data:network",
+    "title": "How a request flows",
+    "nodes": [
+      "Browser",
+      "CDN",
+      "API",
+      "DB"
+    ],
+    "chain": true,
+    "layout": "layers",
+    "pulses": [
+      {
+        "path": [
+          "Browser",
+          "CDN",
+          "API",
+          "DB"
+        ],
+        "at": 1.5,
+        "repeat": 3
+      }
+    ]
+  },
+  "body": {
+    "layers": [
+      {
+        "use": "core:backdrop",
+        "style": "grid"
+      },
+      {
+        "if": "{{len(title) > 0}}",
+        "use": "core:heading",
+        "text": "{{title}}",
+        "size": "$size.h3",
+        "align": "left",
+        "anchor": [
+          0,
+          0
+        ],
+        "x": "{{$space.margin}}",
+        "y": "{{$space.margin * 0.7}}"
+      },
+      {
+        "type": "graph",
+        "nodes": "{{nodes}}",
+        "edges": "{{edges}}",
+        "layout": "{{layout}}",
+        "pulses": "{{pulses}}",
+        "highlight": "{{highlight}}",
+        "directed": "{{directed}}",
+        "chain": "{{chain}}",
+        "nodeShape": "pill",
+        "x": "{{W / 2}}",
+        "y": "{{H / 2 + 60}}",
+        "w": "{{W - $space.margin * 2}}",
+        "h": "{{H - 300}}"
+      }
+    ]
+  }
+}

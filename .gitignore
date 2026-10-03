@@ -2,14 +2,15 @@
 node_modules/
 
 # ---- Données d'exécution du serveur (base SQLite, assets, rendus, cache, captures, aperçus) ----
-data/
-renders/
-cache/
-out/
+/data/
+/renders/
+/cache/
+/out/
 *.sqlite
 *.db
 *.db-shm
 *.db-wal
+# (rules are anchored with "/" so libraries/@core/data/ is NOT ignored)
 
 # ---- Bibliothèques créées par les agents : seules les bibliothèques @core sont livrées ----
 libraries/*
@@ -29,11 +30,11 @@ motionforge.config.json
 .env.*
 
 # ---- Divers ----
-_to_delete/
+/_to_delete/
 *.tgz
 *.log
 npm-debug.log*
-coverage/
+/coverage/
 .vscode/
 .idea/
 .DS_Store

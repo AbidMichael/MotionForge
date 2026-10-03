@@ -1,0 +1,101 @@
+{
+  "slug": "map-story",
+  "kind": "scene",
+  "summary": "World map: values by country (choropleth), points, routes, zooms between regions",
+  "tags": [
+    "data",
+    "map",
+    "world",
+    "countries",
+    "geography",
+    "choropleth",
+    "routes"
+  ],
+  "params": {
+    "title": "string=",
+    "data": "any=null",
+    "points": "any=null",
+    "routes": "any=null",
+    "focus": "any=null",
+    "zoom": "any=null",
+    "time": "string=",
+    "projection": "enum:naturalEarth|mercator|equirect|orthographic=naturalEarth",
+    "suffix": "string=",
+    "highlight": "any=null"
+  },
+  "duration": {
+    "default": 6,
+    "min": 3,
+    "max": 20
+  },
+  "example": {
+    "p": "data:map-story",
+    "title": "Where our users are",
+    "data": [
+      {
+        "country": "France",
+        "users": 120
+      },
+      {
+        "country": "Germany",
+        "users": 80
+      },
+      {
+        "country": "USA",
+        "users": 200
+      },
+      {
+        "country": "Brazil",
+        "users": 60
+      },
+      {
+        "country": "Japan",
+        "users": 90
+      }
+    ],
+    "routes": [
+      {
+        "from": "France",
+        "to": "Japan",
+        "t": 1.5
+      }
+    ]
+  },
+  "body": {
+    "layers": [
+      {
+        "use": "core:backdrop",
+        "style": "solid"
+      },
+      {
+        "type": "map",
+        "data": "{{data}}",
+        "time": "{{time}}",
+        "points": "{{points}}",
+        "routes": "{{routes}}",
+        "focus": "{{focus}}",
+        "zoom": "{{zoom}}",
+        "projection": "{{projection}}",
+        "suffix": "{{suffix}}",
+        "highlight": "{{highlight}}",
+        "x": "{{W / 2}}",
+        "y": "{{H / 2 + 40}}",
+        "w": "{{W}}",
+        "h": "{{H - 120}}"
+      },
+      {
+        "if": "{{len(title) > 0}}",
+        "use": "core:heading",
+        "text": "{{title}}",
+        "size": "$size.h3",
+        "align": "left",
+        "anchor": [
+          0,
+          0
+        ],
+        "x": "{{$space.margin}}",
+        "y": "{{$space.margin * 0.6}}"
+      }
+    ]
+  }
+}

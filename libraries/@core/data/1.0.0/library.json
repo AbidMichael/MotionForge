@@ -1,0 +1,18 @@
+{
+  "name": "@core/data",
+  "alias": "data",
+  "summary": "Data-driven animation: charts, bar races, maps and networks from JSON/CSV.",
+  "guide": "Feed data inline, as CSV text, as \"asset:<id>\" (JSON or CSV upload) or from composition params (\"{{params.sales}}\"). Scenes: data:chart-story {title, data, kind, category, value, series, prefix, suffix, highlight, steps, caption}, data:race {title, data, time, top}, data:map-story {title, data, points, routes, focus, zoom, time, projection}, data:network {title, nodes, edges, layout, pulses, chain}.\nRaw layers: {\"type\":\"chart\", \"kind\":\"bar|hbar|stack|line|area|pie|donut|scatter|race\", \"data\", \"category\", \"value\", \"series\", \"time\" (one snapshot per value → morphs/race), \"steps\":[{\"at\",\"data\"}], \"fields\" (scatter x/y/r/label/group), \"highlight\", \"prefix\", \"suffix\", \"decimals\", \"compact\", \"grow\", \"stagger\"} · {\"type\":\"map\", \"data\":[{\"country\",\"value\"}], \"points\", \"routes\", \"focus\":\"Europe\"|[\"France\"], \"zoom\":[{\"t\",\"focus\"}], \"projection\", \"spin\"} · {\"type\":\"graph\", \"nodes\", \"edges\", \"layout\", \"pulses\":[{\"path\",\"at\",\"repeat\"}], \"highlight\":[{\"nodes\",\"at\",\"d\"}]}.\nCountries accept English or French names (\"Allemagne\", \"USA\") and ISO numeric ids.",
+  "depends": {
+    "@core/base": "^1.1.0"
+  },
+  "visibility": "public",
+  "owner": "system",
+  "tags": [
+    "core",
+    "data",
+    "chart",
+    "dataviz"
+  ],
+  "publishedAt": "2026-10-03T00:00:00.000Z"
+}

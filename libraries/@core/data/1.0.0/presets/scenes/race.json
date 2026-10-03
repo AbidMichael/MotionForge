@@ -1,0 +1,72 @@
+{
+  "slug": "race",
+  "kind": "scene",
+  "summary": "Bar chart race: rankings evolving over time (years, months…)",
+  "tags": [
+    "data",
+    "race",
+    "ranking",
+    "evolution",
+    "time",
+    "bar chart race"
+  ],
+  "params": {
+    "title": "string=",
+    "data": "any!",
+    "time": "string!",
+    "category": "string=",
+    "value": "string=",
+    "top": "integer=8",
+    "suffix": "string=",
+    "prefix": "string=",
+    "compact": "boolean=false"
+  },
+  "duration": {
+    "default": 9,
+    "min": 4,
+    "max": 40
+  },
+  "example": {
+    "p": "data:race",
+    "title": "Users (M)",
+    "time": "year",
+    "data": "year,app,users\n2018,Alpha,10\n2018,Beta,14\n2018,Gamma,6\n2020,Alpha,30\n2020,Beta,18\n2020,Gamma,22\n2022,Alpha,41\n2022,Beta,20\n2022,Gamma,52"
+  },
+  "body": {
+    "layers": [
+      {
+        "use": "core:backdrop",
+        "style": "solid"
+      },
+      {
+        "if": "{{len(title) > 0}}",
+        "use": "core:heading",
+        "text": "{{title}}",
+        "size": "$size.h3",
+        "align": "left",
+        "anchor": [
+          0,
+          0
+        ],
+        "x": "{{$space.margin}}",
+        "y": "{{$space.margin * 0.7}}"
+      },
+      {
+        "type": "chart",
+        "kind": "race",
+        "data": "{{data}}",
+        "time": "{{time}}",
+        "category": "{{category}}",
+        "value": "{{value}}",
+        "top": "{{top}}",
+        "suffix": "{{suffix}}",
+        "prefix": "{{prefix}}",
+        "compact": "{{compact}}",
+        "x": "{{W / 2}}",
+        "y": "{{H / 2 + 60}}",
+        "w": "{{W - $space.margin * 2}}",
+        "h": "{{H - 300}}"
+      }
+    ]
+  }
+}

@@ -1,0 +1,114 @@
+{
+  "slug": "chart-story",
+  "kind": "scene",
+  "summary": "Title + an animated chart (bar, hbar, stack, line, area, pie, donut, scatter) from JSON/CSV data",
+  "tags": [
+    "data",
+    "chart",
+    "graph",
+    "bar",
+    "line",
+    "pie",
+    "statistics",
+    "dataviz"
+  ],
+  "params": {
+    "title": "string=",
+    "data": "any!",
+    "kind": "enum:bar|hbar|stack|line|area|pie|donut|scatter=bar",
+    "category": "string=",
+    "value": "any=null",
+    "series": "string=",
+    "prefix": "string=",
+    "suffix": "string=",
+    "decimals": "any=null",
+    "highlight": "any=null",
+    "caption": "string=",
+    "steps": "any=null"
+  },
+  "duration": {
+    "default": 5,
+    "min": 3,
+    "max": 15
+  },
+  "example": {
+    "p": "data:chart-story",
+    "title": "Revenue by quarter",
+    "data": [
+      {
+        "q": "Q1",
+        "rev": 120
+      },
+      {
+        "q": "Q2",
+        "rev": 180
+      },
+      {
+        "q": "Q3",
+        "rev": 150
+      },
+      {
+        "q": "Q4",
+        "rev": 260
+      }
+    ],
+    "suffix": " k€",
+    "highlight": "Q4"
+  },
+  "body": {
+    "layers": [
+      {
+        "use": "core:backdrop",
+        "style": "solid"
+      },
+      {
+        "if": "{{len(title) > 0}}",
+        "use": "core:heading",
+        "text": "{{title}}",
+        "size": "$size.h3",
+        "align": "left",
+        "anchor": [
+          0,
+          0
+        ],
+        "x": "{{$space.margin}}",
+        "y": "{{$space.margin * 0.7}}",
+        "split": "words"
+      },
+      {
+        "type": "chart",
+        "kind": "{{kind}}",
+        "data": "{{data}}",
+        "steps": "{{steps}}",
+        "category": "{{category}}",
+        "value": "{{value}}",
+        "series": "{{series}}",
+        "prefix": "{{prefix}}",
+        "suffix": "{{suffix}}",
+        "decimals": "{{decimals}}",
+        "highlight": "{{highlight}}",
+        "x": "{{W / 2}}",
+        "y": "{{H / 2 + 60}}",
+        "w": "{{W - $space.margin * 2}}",
+        "h": "{{H - 330}}",
+        "grow": 1.2
+      },
+      {
+        "if": "{{len(caption) > 0}}",
+        "type": "text",
+        "text": "{{caption}}",
+        "size": "$size.small",
+        "color": "$color.muted",
+        "anchor": [
+          0,
+          1
+        ],
+        "x": "{{$space.margin}}",
+        "y": "{{H - 40}}",
+        "in": [
+          "core:fade-in"
+        ]
+      }
+    ]
+  }
+}
