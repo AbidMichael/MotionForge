@@ -22,6 +22,11 @@ export interface IRAnim {
   tracks: Record<string, Keyframe[]>;
   /** Source preset (for motion summaries; ignored by the player). */
   n?: string;
+  /**
+   * Motion path: the layer moves by (point(t) - point(from)) along this SVG path, at constant speed.
+   * orient: rotate along the tangent (degrees added to the tangent angle; the start angle is baked into the layer's rot).
+   */
+  path?: { d: string; ease?: Easing; from?: number; to?: number; orient?: number };
 }
 
 export interface IRCounter {

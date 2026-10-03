@@ -6,6 +6,8 @@ import { compile, type CompileResult } from '../dsl/compile';
 import { motionSummary } from '../dsl/summary';
 import { SCENE_KEYS } from '../dsl/schema';
 import type { AgentCtx } from '../registry/store';
+import { MFError } from './errors';
+import { hashText, readJsonFile, resolveFile, writeJsonFile } from './files';
 
 export interface RevisionOut {
   id: string;
@@ -18,6 +20,9 @@ export interface RevisionOut {
   warnings: Issue[];
   lock: Record<string, string>;
   summary?: string;
+  /** Source file of a file-backed composition, and what happened to it in this call. */
+  file?: string;
+  fileSync?: 'read' | 'written';
 }
 
 interface RevRow {
@@ -57,18 +62,66 @@ export class CompositionService {
     };
   }
 
-  /** Validate and store a composition (new, or a new revision of `id`). Invalid ones are stored too, so they can be patched. */
-  submit(input: { composition: unknown; id?: string; title?: string; relock?: boolean; summary?: boolean }, agent: AgentCtx): RevisionOut {
-    if (!isObj(input.composition)) throw badRequest('composition must be a JSON object');
+  /**
+   * Validate and store a composition (new, or a new revision of `id`). Invalid ones are stored too, so they can be patched.
+   * file: read the composition from a .json file; the composition stays linked to it (same file = same cmp id),
+   * and later changes made here (mf_patch ops, storyboard, editor) are written back to it.
+   */
+  submit(
+    input: { composition?: unknown; file?: string; id?: string; title?: string; relock?: boolean; summary?: boolean; writeBack?: boolean },
+    agent: AgentCtx,
+  ): RevisionOut {
+    let source: { abs: string; hash: string } | null = null;
+    if (input.file !== undefined) {
+      const abs = resolveFile(this.c.cfg, input.file, 'read');
+      const f = readJsonFile(abs);
+      input = { ...input, composition: f.json };
+      source = { abs, hash: f.hash };
+      if (!input.id) {
+        const prev = this.c.db.prepare('SELECT id FROM compositions WHERE source = ? AND agent = ? ORDER BY updated DESC LIMIT 1').get(abs, agent.id) as any;
+        if (prev) input.id = prev.id;
+      }
+    }
+    if (!isObj(input.composition)) throw badRequest('composition must be a JSON object (or pass "file": a path to a .json file)');
     let id = input.id;
     let prevLock: Record<string, string> | undefined;
+    let linked: { abs: string; hash: string | null } | null = null;
     if (id) {
       const head = this.headRow(id);
       this.assertOwner(id, agent);
       if (!input.relock) prevLock = JSON.parse(head.lock);
+      const row = this.c.db.prepare('SELECT source, source_hash FROM compositions WHERE id = ?').get(id) as any;
+      if (row?.source) linked = { abs: row.source, hash: row.source_hash };
+      // unchanged (e.g. the same file submitted twice): keep the head revision
+      if (!input.relock && head.json === JSON.stringify(input.composition)) {
+        if (source) this.c.db.prepare('UPDATE compositions SET source = ?, source_hash = ? WHERE id = ?').run(source.abs, source.hash, id);
+        const { r } = this.compiled(id, head.rev);
+        const out = this.out(id, head.rev, r, !!input.summary);
+        const file = source?.abs ?? linked?.abs;
+        if (file) Object.assign(out, { file, unchanged: true });
+        return out;
+      }
     } else {
       id = shortId('cmp');
       this.c.db.prepare('INSERT INTO compositions (id, agent, title) VALUES (?, ?, ?)').run(id, agent.id, input.title ?? (input.composition as any).title ?? null);
+    }
+    // a change made here to a file-backed composition goes back to its file — unless the file changed on disk meanwhile
+    let writeTo: { abs: string; previous: string } | null = null;
+    if (!source && linked && input.writeBack !== false) {
+      const abs = resolveFile(this.c.cfg, linked.abs, 'write');
+      let current: { text: string; hash: string } | null = null;
+      try {
+        current = readJsonFile(abs);
+      } catch {
+        current = null; // file deleted or broken: recreate it
+      }
+      if (current && linked.hash && current.hash !== linked.hash) {
+        throw new MFError(
+          409,
+          `${linked.abs} changed on disk since ${id} was last synced. Load it first with mf_patch {"id":"${id}"} (no ops), or pass "writeBack": false to change only the stored revision.`,
+        );
+      }
+      writeTo = { abs, previous: current?.text ?? '' };
     }
     const r = this.compileWith(input.composition, agent, prevLock);
     const rev = ((this.c.db.prepare('SELECT MAX(rev) AS m FROM revisions WHERE comp_id = ?').get(id) as any)?.m ?? 0) + 1;
@@ -76,6 +129,15 @@ export class CompositionService {
       .prepare('INSERT INTO revisions (comp_id, rev, json, lock, ok, errors, warnings, duration, agent) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)')
       .run(id, rev, JSON.stringify(input.composition), JSON.stringify(r.lock), r.ok ? 1 : 0, JSON.stringify(r.errors), JSON.stringify(r.warnings), r.duration, agent.id);
     this.c.db.prepare("UPDATE compositions SET head = ?, updated = datetime('now'), title = COALESCE(?, title) WHERE id = ?").run(rev, input.title ?? null, id);
+    let fileSync: RevisionOut['fileSync'];
+    if (source) {
+      this.c.db.prepare('UPDATE compositions SET source = ?, source_hash = ? WHERE id = ?').run(source.abs, source.hash, id);
+      fileSync = 'read';
+    } else if (writeTo) {
+      const text = writeJsonFile(writeTo.abs, input.composition, writeTo.previous || undefined);
+      this.c.db.prepare('UPDATE compositions SET source_hash = ? WHERE id = ?').run(hashText(text), id);
+      fileSync = 'written';
+    }
     if (r.ok) {
       this.cache.set(`${id}:${rev}`, r);
       this.c.registry.recordUsage(r.used, 'uses');
@@ -89,18 +151,41 @@ export class CompositionService {
       errors: r.errors.length,
       title: input.title ?? (input.composition as any).title,
     });
-    return this.out(id, rev, r, !!input.summary);
+    const out = this.out(id, rev, r, !!input.summary);
+    const file = source?.abs ?? linked?.abs;
+    if (file) Object.assign(out, { file, fileSync });
+    return out;
   }
 
-  patch(id: string, ops: unknown, agent: AgentCtx, opts: { relock?: boolean; summary?: boolean } = {}): RevisionOut {
-    if (!Array.isArray(ops) || ops.length === 0) throw badRequest('ops must be a non-empty JSON Patch array, e.g. [{"op":"replace","path":"/scenes/1/d","value":4}]');
+  /**
+   * JSON Patch on the stored head. No ops on a file-backed composition = reload it from its file;
+   * "file" = (re)link to that file and load it.
+   */
+  patch(
+    id: string,
+    ops: unknown,
+    agent: AgentCtx,
+    opts: { relock?: boolean; summary?: boolean; file?: string; writeBack?: boolean } = {},
+  ): RevisionOut {
+    const noOps = ops === undefined || ops === null || (Array.isArray(ops) && ops.length === 0);
+    if (opts.file !== undefined) {
+      if (!noOps) throw badRequest('pass either "file" (reload from disk) or "ops", not both');
+      return this.submit({ file: opts.file, id, relock: opts.relock, summary: opts.summary }, agent);
+    }
+    if (noOps) {
+      this.headRow(id);
+      const row = this.c.db.prepare('SELECT source FROM compositions WHERE id = ?').get(id) as any;
+      if (row?.source) return this.submit({ file: row.source, id, relock: opts.relock, summary: opts.summary }, agent);
+      throw badRequest('ops must be a non-empty JSON Patch array, e.g. [{"op":"replace","path":"/scenes/1/d","value":4}] (or pass "file")');
+    }
+    if (!Array.isArray(ops)) throw badRequest('ops must be a JSON Patch array');
     const head = this.headRow(id);
     this.assertOwner(id, agent);
     const doc = JSON.parse(head.json);
     const err = jsonpatch.validate(ops as any, doc);
     if (err) throw badRequest(`patch failed at op ${err.index}: ${err.message.split('\n')[0]}`, [{ path: (err.operation as any)?.path ?? '', msg: err.name }]);
     const next = jsonpatch.applyPatch(clone(doc), ops as any, false, false).newDocument;
-    return this.submit({ composition: next, id, relock: opts.relock, summary: opts.summary }, agent);
+    return this.submit({ composition: next, id, relock: opts.relock, summary: opts.summary, writeBack: opts.writeBack }, agent);
   }
 
   get(id: string, rev?: number) {
@@ -120,6 +205,7 @@ export class CompositionService {
       errors: JSON.parse(row.errors ?? '[]'),
       warnings: JSON.parse(row.warnings ?? '[]'),
       created: row.created,
+      file: comp.source ?? undefined,
     };
   }
 

@@ -7,13 +7,14 @@ import semver from 'semver';
 import { didYouMean, type Issue } from '../core/errors';
 import { clone, isObj } from '../core/util';
 import { parseEasing } from '../ir/easing';
+import { ellipsePath, flattenPath, pointAt, throughPath } from '../ir/motionpath';
 import { ALL_CHANNELS, parseColor } from '../ir/evaluate';
 import type { ClipDir, IRAnim, IRAudio, IRDoc, IRFont, IRLayer, IRLayout, IRMarker, IRSceneInfo, Keyframe } from '../ir/types';
 import { canSee, type AgentCtx, type LibraryStore, type LibVersion } from '../registry/store';
 import { bindValue, lookupToken, tokenScope, toPx, type Tokens } from './bind';
 import type { Scope } from './expr';
 import { LayoutMap } from './layoutmap';
-import { fitSize } from './metrics';
+import { baselineOffset, fitSize } from './metrics';
 import { textStyleOf } from './layoutmap';
 import { docPasses, hooks, layerHandlers, scenePasses, type SceneCtx } from './registry';
 import { ELEMENT_KEYS, LAYER_KEYS, normalizeParams, SCENE_KEYS, type DurationRule, type ParamDef, type PresetDef, type PresetKind } from './schema';
@@ -252,6 +253,10 @@ export class Session {
   names = new Map<string, IRLayer>();
   /** Scene-level gesture/state actions collected by pre-passes (by passes that need them). */
   scratch: Record<string, any> = {};
+  /** Named text styles: built-ins from the theme tokens, tokens.text, then the composition's "textStyles". */
+  textStyles: Record<string, Record<string, any>> = {};
+  /** The composition's "data" (data-driven videos), in scope as `data`. */
+  data: unknown = undefined;
   /** Sub-composition nesting depth. */
   depthLevel = 0;
   /** Format adaptation: the frame inline layers were written for. */
@@ -307,7 +312,7 @@ export class Session {
   }
 
   base(dur: number): Scope {
-    return { params: this.params, ...this.params, W: this.W, H: this.H, fps: this.fps, dur, U: Math.min(this.W, this.H) / 1080, portrait: this.H > this.W * 1.05, ...tokenScope(this.tokens) };
+    return { params: this.params, ...this.params, data: this.data, W: this.W, H: this.H, fps: this.fps, dur, U: Math.min(this.W, this.H) / 1080, portrait: this.H > this.W * 1.05, ...tokenScope(this.tokens) };
   }
 
   /** A preset body with format overrides applied (cached). */
@@ -730,6 +735,93 @@ export class Session {
     return { s: 0, e: lenFrames, tracks: t, n: 'keys' };
   }
 
+  /**
+   * "motionPath": {"path":"M… C…"} | {"through":[[x,y],…]} | {"ellipse":{"rx","ry","center","start","turns","dir"}} | {"circle":r},
+   * + "at", "d", "ease", "from"/"to" (fractions of the path), "orient" (true | degrees), "loop", "relative".
+   * A list of paths plays them one after the other (each one starts where the layer is).
+   */
+  motionPaths(layer: IRLayer, raw: unknown, path: string) {
+    const list = Array.isArray(raw) ? raw : [raw];
+    const lenF = layer.to - layer.from;
+    const lenSec = lenF / this.fps;
+    let first = true;
+    let cursorSec = 0;
+    list.forEach((mp: any, i: number) => {
+      const p = Array.isArray(raw) ? `${path}[${i}]` : path;
+      if (typeof mp === 'string') mp = { path: mp };
+      if (!isObj(mp)) {
+        this.err(p, 'motionPath is {"path":"M0 0 C…"} | {"through":[[x,y],…]} | {"ellipse":{"rx","ry"}} | {"circle":r}, with at, d, ease, orient');
+        return;
+      }
+      const lx = layer.x;
+      const ly = layer.y;
+      let d: string;
+      let relative = !!mp.relative;
+      try {
+        if (typeof mp.path === 'string') d = mp.path;
+        else if (Array.isArray(mp.through)) {
+          const pts = mp.through.map((q: any) => [Number(q?.[0]), Number(q?.[1])] as [number, number]);
+          if (pts.some((q: number[]) => q.some((n) => !Number.isFinite(n)))) throw new Error('"through" points are [x, y] numbers');
+          d = throughPath(pts, mp.tension !== undefined ? Number(mp.tension) : 0.5, !!mp.closed);
+        } else if (mp.ellipse !== undefined || mp.circle !== undefined) {
+          const e = isObj(mp.ellipse) ? mp.ellipse : {};
+          const r = Number(mp.circle ?? e.r ?? 200);
+          const rx = Number(e.rx ?? r);
+          const ry = Number(e.ry ?? r);
+          const start = Number(e.start ?? mp.start ?? 0);
+          const turns = Number(e.turns ?? mp.turns ?? 1);
+          const cw = (e.dir ?? mp.dir ?? 'cw') !== 'ccw';
+          const center = e.center ?? mp.center;
+          if (Array.isArray(center)) d = ellipsePath(Number(center[0]), Number(center[1]), rx, ry, start, turns, cw);
+          else {
+            // no centre: the layer starts on the ellipse where it already is
+            const a = (start * Math.PI) / 180;
+            d = ellipsePath(lx - rx * Math.cos(a), ly - ry * Math.sin(a), rx, ry, start, turns, cw);
+          }
+          relative = false;
+        } else throw new Error('give "path" (SVG path data), "through" (points), "ellipse" or "circle"');
+        flattenPath(d);
+      } catch (e: any) {
+        this.err(p, `motionPath: ${e.message}`);
+        return;
+      }
+      const from = Math.max(0, Math.min(1, Number(mp.from ?? 0)));
+      const to = Math.max(0, Math.min(1, Number(mp.to ?? 1)));
+      const atSec = this.parseTime(mp.at, lenSec, `${p}.at`) ?? cursorSec;
+      const dSec = mp.d !== undefined ? Number(mp.d) : Math.max(0.1, lenSec - atSec);
+      if (!(dSec > 0)) {
+        this.err(`${p}.d`, 'd must be > 0 (seconds)');
+        return;
+      }
+      cursorSec = atSec + dSec;
+      const ease = typeof mp.ease === 'string' ? mp.ease : 'inOutSine';
+      if (!parseEasing(ease)) this.warn(`${p}.ease`, `unknown easing "${ease}"`);
+      const orient = mp.orient === true ? 0 : typeof mp.orient === 'number' ? mp.orient : undefined;
+      const f = flattenPath(d);
+      const start = pointAt(f, from);
+      if (first) {
+        // absolute paths put the layer on the path; orient turns it along the path from the first frame
+        if (!relative) {
+          layer.x = +start.x.toFixed(2);
+          layer.y = +start.y.toFixed(2);
+        }
+        if (orient !== undefined) layer.rot = +((layer.rot ?? 0) + start.angle + orient).toFixed(2);
+      }
+      const s = this.frames(atSec);
+      if (!first && orient !== undefined) {
+        // a later oriented path: turn to its starting direction when it begins
+        layer.anims.push({ s, e: s + 1, tracks: { rotate: [[0, 0], [1, +(start.angle + orient - (layer.rot ?? 0)).toFixed(2), 'hold']] }, n: 'motionPath' });
+      }
+      first = false;
+      const anim: IRAnim = { s, e: s + Math.max(1, this.frames(dSec)), tracks: {}, n: 'motionPath', path: { d, ease } };
+      if (from !== 0) anim.path!.from = from;
+      if (to !== 1) anim.path!.to = to;
+      if (orient !== undefined) anim.path!.orient = orient;
+      if (mp.loop) anim.loop = true;
+      layer.anims.push(anim);
+    });
+  }
+
   /** Common finishing for every compiled layer: names, editor pointers, keys, sound and beat effects. */
   finishLayer(layer: IRLayer, node: Record<string, any>, raw: Record<string, any>, scope: Scope, path: string): IRLayer {
     const idp = scope.$idp as string | false | undefined;
@@ -745,6 +837,9 @@ export class Session {
     if (node.keys !== undefined) {
       const a = this.keysAnim(node.keys, layer.to - layer.from, scope, `${path}.keys`);
       if (a) layer.anims.push(a);
+    }
+    if (node.motionPath !== undefined && node.motionPath !== null && node.motionPath !== false) {
+      this.motionPaths(layer, this.bind(node.motionPath, scope, `${path}.motionPath`), `${path}.motionPath`);
     }
     if (node.sfx !== undefined && node.sfx !== null && node.sfx !== false) {
       const f = typeof node.sfx === 'string' ? { name: node.sfx } : isObj(node.sfx) ? node.sfx : null;
@@ -849,7 +944,19 @@ export class Session {
       return out;
     }
 
-    const node = this.bind(raw, scope, path, new Set(['children', 'layer', 'slots', 'if', 'item', 'states'])) as Record<string, any>;
+    let node = this.bind(raw, scope, path, new Set(['children', 'layer', 'slots', 'if', 'item', 'states'])) as Record<string, any>;
+    if (node.textStyle !== undefined && node.use === undefined) {
+      const names = String(node.textStyle).split(/[\s,+]+/).filter(Boolean);
+      const merged: Record<string, any> = {};
+      for (const n of names) {
+        const st = this.textStyles[n];
+        if (!st) this.err(`${path}.textStyle`, `unknown text style "${n}" (known: ${Object.keys(this.textStyles).join(', ')})`);
+        else Object.assign(merged, st);
+      }
+      // the layer's own values win over the style
+      node = { ...merged, ...node };
+      delete node.textStyle;
+    }
     const parentSec = parentFrames / this.fps;
     const at = Math.max(0, this.parseTime(node.at, parentSec, `${path}.at`) ?? 0);
     let end = parentSec;
@@ -875,10 +982,15 @@ export class Session {
       return [];
     }
     let anchor: [number, number] = [0.5, 0.5];
+    /** "baseline…" anchors: x fraction; y is resolved on the first line's baseline once the text is sized. */
+    let baselineX: number | undefined;
     if (Array.isArray(node.anchor) && node.anchor.length === 2) anchor = [Number(node.anchor[0]), Number(node.anchor[1])];
-    else if (typeof node.anchor === 'string') {
+    else if (typeof node.anchor === 'string' && /^baseline(-(left|center|right))?$/.test(node.anchor)) {
+      baselineX = node.anchor.endsWith('center') ? 0.5 : node.anchor.endsWith('right') ? 1 : 0;
+      anchor = [baselineX, 0];
+    } else if (typeof node.anchor === 'string') {
       if (ANCHORS[node.anchor]) anchor = ANCHORS[node.anchor];
-      else this.err(`${path}.anchor`, `anchor must be one of ${Object.keys(ANCHORS).join(', ')} or [ax, ay]`);
+      else this.err(`${path}.anchor`, `anchor must be one of ${Object.keys(ANCHORS).join(', ')}, baseline, baseline-center, baseline-right or [ax, ay]`);
     }
     const w = node.w !== undefined ? toPx(node.w, 'x', this.W, this.H) : undefined;
     const h = node.h !== undefined ? toPx(node.h, 'y', this.W, this.H) : undefined;
@@ -970,6 +1082,10 @@ export class Session {
       } else if (typeof v === 'boolean') style[k] = v ? 1 : 0;
     }
     const layer = { ...base, type, style } as IRLayer;
+    if (baselineX !== undefined && type !== 'text') {
+      this.warn(`${path}.anchor`, 'baseline anchors are for text layers; using the bottom edge');
+      layer.anchor = [baselineX, 1];
+    }
     let unitCount = 1;
     let split = false;
 
@@ -1013,6 +1129,12 @@ export class Session {
           });
           if (size < st.size) style.size = size;
           if (layer.w === undefined && node.fit) layer.w = boxW + pad;
+        }
+        if (baselineX !== undefined) {
+          // put the first line's baseline on y (text sits on the line like in a layout tool)
+          const pad = typeof style.padding === 'number' ? style.padding : 0;
+          layer.y = +(layer.y - baselineOffset(textStyleOf(layer)) - pad).toFixed(2);
+          layer.anchor = [baselineX, 0];
         }
         if (node.split !== undefined && node.split !== null && node.split !== false) {
           if (!['chars', 'words', 'lines'].includes(node.split)) this.err(`${path}.split`, 'split must be chars, words or lines');
@@ -1254,8 +1376,59 @@ interface Item {
 }
 
 const KNOWN_TOP = new Set([
-  'use', 'theme', 'format', 'tokens', 'bg', 'title', 'scenes', 'audio', 'fonts', 'note', 'params', 'direction', 'music', 'template', 'description', 'adapt', 'pace', 'framing', 'props',
+  'use', 'theme', 'format', 'tokens', 'bg', 'title', 'scenes', 'audio', 'fonts', 'note', 'params', 'direction', 'music', 'template', 'description', 'adapt', 'pace', 'framing', 'props', 'textStyles', 'data',
 ]);
+
+/** Built-in text styles, only with the token values the theme actually defines. */
+const BUILTIN_TEXT: Record<string, Record<string, unknown>> = {
+  display: { font: '$font.display', weight: '$weight.display', size: '$size.hero', lineHeight: 1, tracking: -0.02 },
+  h1: { font: '$font.display', weight: '$weight.display', size: '$size.h1', lineHeight: 1.05, tracking: -0.01 },
+  h2: { font: '$font.display', weight: '$weight.heading', size: '$size.h2', lineHeight: 1.1 },
+  h3: { font: '$font.display', weight: '$weight.heading', size: '$size.h3', lineHeight: 1.15 },
+  body: { font: '$font.body', weight: '$weight.body', size: '$size.body', lineHeight: 1.4 },
+  small: { font: '$font.body', weight: '$weight.body', size: '$size.small', lineHeight: 1.4 },
+  caption: { font: '$font.body', weight: '$weight.body', size: '$size.small', lineHeight: 1.35, color: '$color.muted' },
+  label: { font: '$font.body', weight: 600, size: '$size.label', tracking: 0.08, case: 'upper' },
+  kicker: { font: '$font.display', weight: 700, size: '$size.label', tracking: 0.18, case: 'upper', color: '$color.accent' },
+  mono: { font: '$font.mono', weight: 400, size: '$size.small', lineHeight: 1.4 },
+};
+
+function buildTextStyles(S: Session, own: unknown): Record<string, Record<string, any>> {
+  const out: Record<string, Record<string, any>> = {};
+  for (const [name, st] of Object.entries(BUILTIN_TEXT)) {
+    const keep: Record<string, any> = {};
+    for (const [k, v] of Object.entries(st)) {
+      if (typeof v === 'string' && v.startsWith('$')) {
+        const t = lookupToken(S.tokens, v.slice(1));
+        if (t !== undefined && typeof t !== 'object') keep[k] = t;
+      } else keep[k] = v;
+    }
+    out[name] = keep;
+  }
+  const add = (src: unknown, where: string) => {
+    if (src === undefined) return;
+    if (!isObj(src)) {
+      S.err(where, 'text styles are {"name": {"font","size","weight","tracking","lineHeight","color","case",…}}');
+      return;
+    }
+    for (const [name, st] of Object.entries(src)) {
+      if (!isObj(st)) {
+        S.err(`${where}.${name}`, 'a text style is an object of text properties, e.g. {"font":"$font.display","size":96,"weight":800}');
+        continue;
+      }
+      const { extends: base, ...rest } = st as Record<string, any>;
+      let parent: Record<string, any> = out[name] && base === undefined ? out[name] : {};
+      if (base !== undefined) {
+        if (typeof base !== 'string' || !out[base]) S.err(`${where}.${name}.extends`, `unknown text style "${base}" (known: ${Object.keys(out).join(', ')})`);
+        else parent = out[base];
+      }
+      out[name] = { ...parent, ...(S.bind(rest, S.base(0), `${where}.${name}`) as Record<string, any>) };
+    }
+  };
+  add(lookupToken(S.tokens, 'text'), 'tokens.text');
+  add(own, 'textStyles');
+  return out;
+}
 
 function compileInner(input: CompileInput, opts: CompileOptions, snapped?: number[]): CompileResult {
   const S = new Session(opts, input.agent, input.lock);
@@ -1300,6 +1473,12 @@ function compileInner(input: CompileInput, opts: CompileOptions, snapped?: numbe
     S.params = S.checkParams(defs, { ...(isObj(comp.props) ? comp.props : {}), ...(input.props ?? {}) } as Record<string, unknown>, 'props', 'this composition');
   } else if (input.props && Object.keys(input.props).length) {
     S.warn('props', 'props were given but the composition declares no "params"');
+  }
+
+  // data-driven compositions: "data" is in scope everywhere ({{data.title}}, "each": "{{data.items}}")
+  if (comp.data !== undefined) {
+    if (typeof comp.data === 'string') S.err('data', 'data is inline JSON (object or array); for CSV/asset rows use mf_template {"data": "asset:<id>"}');
+    else S.data = comp.data;
   }
 
   // imports
@@ -1373,6 +1552,7 @@ function compileInner(input: CompileInput, opts: CompileOptions, snapped?: numbe
     return true;
   });
   S.fonts = fonts;
+  S.textStyles = buildTextStyles(S, comp.textStyles);
 
   // scenes
   if (!Array.isArray(comp.scenes) || comp.scenes.length === 0) {
@@ -1416,28 +1596,52 @@ function compileInner(input: CompileInput, opts: CompileOptions, snapped?: numbe
       S.err(path, 'macro presets nested too deeply');
       return;
     }
-    entries.forEach((raw, i) => {
+    entries.forEach((raw: any, i) => {
       const p = `${path}[${i}]`;
       if (!isObj(raw)) {
         S.err(p, 'scene entry must be an object: {"p":"alias:slug", …params}, {"t":"alias:transition"} or {"repeat":…, "scene":{…}}');
         return;
       }
-      if (raw.repeat !== undefined) {
-        let arr = S.bind(raw.repeat, { ...S.base(0), ...extra }, `${p}.repeat`);
+      if (raw.if !== undefined) {
+        const cond = S.bind(raw.if, { ...S.base(0), ...extra }, `${p}.if`);
+        if (!cond || (Array.isArray(cond) && !cond.length)) return;
+      }
+      if (raw.repeat !== undefined || raw.each !== undefined) {
+        const key = raw.each !== undefined ? 'each' : 'repeat';
+        let arr = S.bind(raw[key], { ...S.base(0), ...extra }, `${p}.${key}`);
         if (typeof arr === 'number') arr = Array.from({ length: Math.max(0, Math.min(200, Math.floor(arr))) }, (_, k) => k);
-        if (!Array.isArray(arr)) return S.err(`${p}.repeat`, `expected an array or a count, got ${typeOf(arr)}`);
-        if (!isObj(raw.scene)) return S.err(`${p}.scene`, 'repeat needs a "scene" entry template');
+        if (isObj(arr)) arr = Object.entries(arr).map(([k, v]) => (isObj(v) ? { key: k, ...v } : { key: k, value: v }));
+        if (!Array.isArray(arr)) return S.err(`${p}.${key}`, `expected an array, an object or a count, got ${typeOf(arr)}`);
+        const group = Array.isArray(raw.scenes) ? raw.scenes : isObj(raw.scene) ? [raw.scene] : null;
+        if (!group || !group.length) return S.err(`${p}.scenes`, `${key} needs "scenes": [scene entries (and transitions) repeated for each item] or "scene": {…}`);
+        if (arr.length > 200) return S.err(`${p}.${key}`, `${arr.length} items: at most 200`);
         const as = typeof raw.as === 'string' ? raw.as : 'item';
-        arr.forEach((item, k) => {
-          const ex = { ...extra, [as]: item, index: k, count: arr.length };
+        const list = arr as unknown[];
+        list.forEach((item, k) => {
+          const ex = { ...extra, [as]: item, index: k, count: list.length, first: k === 0, last: k === list.length - 1 };
           if (k > 0 && isObj(raw.between)) {
             const b = S.bind(clone(raw.between), { ...S.base(0), ...ex }, `${p}.between`) as Record<string, any>;
             pushEntry({ ...b }, raw.between, actx, `${p}.between`, ex, depth, false);
           }
-          const bound = S.bind(clone(raw.scene), { ...S.base(0), ...ex }, `${p}.scene`, SKIP_BIND) as Record<string, any>;
-          pushEntry({ ...bound }, raw.scene, actx, `${p}.scene#${k}`, ex, depth, false);
+          group.forEach((g: unknown, j: number) => {
+            const gp = Array.isArray(raw.scenes) ? `${p}.scenes[${j}]#${k}` : `${p}.scene#${k}`;
+            if (!isObj(g)) return S.err(gp, 'scene entry must be an object');
+            if (g.if !== undefined) {
+              const cond = S.bind(g.if, { ...S.base(0), ...ex }, `${gp}.if`);
+              if (!cond || (Array.isArray(cond) && !cond.length)) return;
+            }
+            const { if: _if, ...rest } = g as Record<string, any>;
+            void _if;
+            const bound = S.bind(clone(rest), { ...S.base(0), ...ex }, gp, SKIP_BIND) as Record<string, any>;
+            pushEntry({ ...bound }, rest, actx, gp, ex, depth, false);
+          });
         });
         return;
+      }
+      if (raw.if !== undefined) {
+        const { if: _if, ...rest } = raw as Record<string, any>;
+        void _if;
+        raw = rest;
       }
       const bound = depth === 0 ? (S.bind(raw, { ...S.base(0), ...extra }, p, SKIP_BIND) as Record<string, any>) : { ...raw };
       pushEntry({ ...bound }, raw, actx, p, extra, depth, topLevel);

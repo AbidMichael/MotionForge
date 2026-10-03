@@ -169,13 +169,13 @@ export const LAYER_KEYS = new Set([
   'id', 'type', 'use', 'if', 'x', 'y', 'w', 'h', 'anchor', 'at', 'dur', 'until', 'in', 'out', 'anim', 'loop', 'z',
   'opacity', 'rot', 'scale', 'blend', 'style', 'text', 'split', 'stagger', 'counter', 'src', 'svg', 'd', 'viewBox',
   'x2', 'y2', 'children', 'layout', 'overflow', 'clipDir', 'slot', 'repeat', 'each', 'as', 'layer', 'note', 'slots',
-  'keys', 'maxLines', 'minSize', 'mask', 'sfx', 'beat',
+  'keys', 'maxLines', 'minSize', 'mask', 'sfx', 'beat', 'motionPath', 'textStyle',
 ]);
 
 /** Keys on an element usage ({"use": …}) that place/time the element; every other key is a param. */
 export const ELEMENT_KEYS = new Set([
   'id', 'use', 'if', 'x', 'y', 'w', 'h', 'anchor', 'at', 'dur', 'until', 'in', 'out', 'anim', 'loop', 'z', 'opacity',
-  'rot', 'scale', 'blend', 'slots', 'note', 'clipDir', 'keys', 'sfx', 'beat', 'mask',
+  'rot', 'scale', 'blend', 'slots', 'note', 'clipDir', 'keys', 'sfx', 'beat', 'mask', 'motionPath',
 ]);
 
 /** Names presets may not use for params (they would collide with placement/timing keys). */
@@ -184,5 +184,5 @@ export const RESERVED_PARAM_NAMES = new Set([...ELEMENT_KEYS, 'p', 'd', 't', 'pr
 /** Reserved keys on a scene entry in a composition. Everything else is a preset param. */
 export const SCENE_KEYS = new Set([
   'p', 'preset', 'd', 'duration', 'id', 'bg', 'layers', 'slots', 'note', 't', 'transition',
-  'intent', 'gestures', 'tweaks', 'cursor', 'sfx',
+  'intent', 'gestures', 'tweaks', 'cursor', 'sfx', 'if',
 ]);

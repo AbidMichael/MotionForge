@@ -1,4 +1,5 @@
 import { ease } from './easing';
+import { flattenPath, pointAt } from './motionpath';
 import type { IRAnim, IRCounter, Keyframe, ClipDir } from './types';
 
 /** Channels that multiply together (identity 1) and channels that add (identity 0). */
@@ -173,6 +174,25 @@ export function evaluateAnims(
       }
       if ((MUL_CHANNELS as readonly string[]).includes(ch)) (st as any)[ch] *= n;
       else if ((ADD_CHANNELS as readonly string[]).includes(ch)) (st as any)[ch] += n;
+    }
+    if (anim.path) {
+      try {
+        const f = flattenPath(anim.path.d);
+        const a = anim.path.from ?? 0;
+        const b = anim.path.to ?? 1;
+        const p0 = pointAt(f, a);
+        const p = pointAt(f, a + (b - a) * ease(anim.path.ease ?? 'linear', t));
+        st.dx += p.x - p0.x;
+        st.dy += p.y - p0.y;
+        if (anim.path.orient !== undefined) {
+          let da = p.angle - p0.angle;
+          while (da > 180) da -= 360;
+          while (da < -180) da += 360;
+          st.rotate += da;
+        }
+      } catch {
+        /* invalid paths are reported by the compiler */
+      }
     }
   }
   return st;

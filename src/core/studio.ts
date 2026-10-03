@@ -374,12 +374,17 @@ export function loadRows(ctx: Ctx, data: unknown): Record<string, unknown>[] {
 export function templateRun(ctx: Ctx, id: string, data: unknown, agent: AgentCtx, opts: { render?: boolean; quality?: string; titleField?: string; limit?: number } = {}) {
   const base = ctx.comps.get(id);
   const src = base.composition as Record<string, any>;
-  if (!isObj(src.params) || !Object.keys(src.params).length) throw badRequest(`${id} declares no "params" — a data template exposes what changes: "params": {"name": "string!", "sales": "array<object>!", …} and uses "{{params.name}}"`);
+  const hasParams = isObj(src.params) && Object.keys(src.params).length > 0;
+  if (!hasParams && src.data === undefined)
+    throw badRequest(
+      `${id} is not a template: give it a "data" field (default data, read as {{data.x}} and "each": "{{data.items}}") — each row then replaces "data" — or declare "params" (each row becomes props)`,
+    );
   const rows = loadRows(ctx, data).slice(0, Math.max(1, Math.min(500, opts.limit ?? 200)));
   const results: any[] = [];
   for (const [i, row] of rows.entries()) {
     const c = clone(src);
-    c.props = { ...(isObj(src.props) ? src.props : {}), ...row };
+    if (hasParams) c.props = { ...(isObj(src.props) ? src.props : {}), ...row };
+    else c.data = isObj(src.data) && isObj(row) ? { ...src.data, ...row } : row;
     const label = String(row[opts.titleField ?? 'title'] ?? row.name ?? `#${i + 1}`);
     c.title = `${src.title ?? id} · ${label}`;
     const res = ctx.comps.submit({ composition: c, title: c.title }, agent);

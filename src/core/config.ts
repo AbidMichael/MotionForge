@@ -31,6 +31,8 @@ export interface MotionForgeConfig {
     /** WebGL backend for 3D layers ("angle", "swangle", "egl", "swiftshader", "vulkan", or null for Chrome's default). */
     gl: string | null;
   };
+  /** Composition files read/written by mf_validate / mf_patch {"file"}. roots: allowed folders ([] = anywhere). */
+  files: { read: boolean; write: boolean; roots: string[] };
   promotion: {
     /** Automatic promotion to @shared happens when ALL of these are met (or a human promotes it). */
     minRatings: number;
@@ -50,6 +52,7 @@ const DEFAULTS: MotionForgeConfig = {
   defaultFormat: '1920x1080@30',
   defaultTheme: 'core:dark',
   render: { concurrency: null, jobs: 1, browserExecutable: null, segmentCache: true, gl: process.platform === 'linux' ? 'swangle' : 'angle' },
+  files: { read: true, write: true, roots: [] },
   promotion: { minRatings: 3, minAverage: 4, minRenders: 5, minSuccessRate: 0.9 },
 };
 

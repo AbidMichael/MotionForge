@@ -95,7 +95,26 @@ const NAMED: Record<string, EaseFn> = {
   snap: cubicBezier(0.2, 0.9, 0.1, 1),
   smooth: cubicBezier(0.45, 0, 0.2, 1),
   hold: (t) => (t >= 1 ? 1 : 0),
+  inSine: (t) => 1 - Math.cos((t * Math.PI) / 2),
+  outSine: (t) => Math.sin((t * Math.PI) / 2),
+  inOutSine: (t) => -(Math.cos(Math.PI * t) - 1) / 2,
+  inQuart: (t) => t * t * t * t,
+  outQuart: (t) => 1 - Math.pow(1 - t, 4),
+  inOutQuart: (t) => (t < 0.5 ? 8 * t * t * t * t : 1 - Math.pow(-2 * t + 2, 4) / 2),
+  inQuint: (t) => t * t * t * t * t,
+  outQuint: (t) => 1 - Math.pow(1 - t, 5),
+  inOutQuint: (t) => (t < 0.5 ? 16 * t * t * t * t * t : 1 - Math.pow(-2 * t + 2, 5) / 2),
+  inCirc: (t) => 1 - Math.sqrt(1 - t * t),
+  outCirc: (t) => Math.sqrt(1 - Math.pow(t - 1, 2)),
+  inOutCirc: (t) => (t < 0.5 ? (1 - Math.sqrt(1 - Math.pow(2 * t, 2))) / 2 : (Math.sqrt(1 - Math.pow(-2 * t + 2, 2)) + 1) / 2),
 };
+// common long names (CSS / GSAP / easings.net) for the cubic family
+NAMED.inCubic = NAMED.in;
+NAMED.outCubic = NAMED.out;
+NAMED.inOutCubic = NAMED.inOut;
+NAMED.easeIn = NAMED.in;
+NAMED.easeOut = NAMED.out;
+NAMED.easeInOut = NAMED.inOut;
 
 export const EASING_NAMES = Object.keys(NAMED);
 

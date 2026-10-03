@@ -7,15 +7,21 @@ COMPOSITION
  "tokens":{"color":{"accent":"#ff3d71"}},                 // override theme tokens
  "format":"1920x1080@30",                                  // default; also "16:9","9:16","1:1","4:5","4k","1280x720@60"
  "bg":"#000", "fonts":[{"family":"Bebas Neue","source":"google","weights":[400]}],
- "scenes":[ SCENE | TRANSITION, … ]}
-SCENE      {"p":"alias:slug", …params, "d":3, "layers":[overlay layers], "slots":{"name":[layers]}, "bg":"#111"}
+ "textStyles":{"title":{"extends":"h1","color":"$color.accent"}},   // named text styles (see TEXT STYLES)
+ "data":{"brand":"Nova","items":[…]},                      // data-driven video: {{data.brand}}, "each":"{{data.items}}"
+ "scenes":[ SCENE | TRANSITION | EACH, … ]}
+SCENE      {"p":"alias:slug", …params, "d":3, "layers":[overlay layers], "slots":{"name":[layers]}, "bg":"#111", "if":"{{expr}}"}
            {"d":2, "layers":[…]}                           // inline scene, no preset
 TRANSITION {"t":"core:crossfade", "d":0.6, …params}      // between two scenes (or first/last for an intro/outro)
+EACH       {"each":"{{data.items}}", "as":"item", "scenes":[SCENE | TRANSITION, …], "between":{"t":"core:slide-push"}}
+           // the block repeats per item (array, object → {key,…value}, or a count); scope: item, index, count, first, last; "if" skips a scene
 Macro presets (kind template, or scenes whose body has "scenes") expand into several entries.
+Files: keep the composition in a .json file and call mf_validate {"file":"/abs/path.json"} — edit the file, then mf_patch {"id"} reloads it;
+mf_patch ops are written back to the file. Same file = same cmp id.
 
 LAYER
 {"type":"text|rect|ellipse|line|path|image|video|svg|group|comp|states|list|connector|chart|map|graph|sim|three|capture",
- "x":960,"y":"50%","w":"40vw","h":200, "anchor":"center|left|right|top|bottom|top-left|…|[ax,ay]",
+ "x":960,"y":"50%","w":"40vw","h":200, "anchor":"center|left|right|top|bottom|top-left|…|baseline|baseline-center|baseline-right|[ax,ay]",
  "at":0.4, "dur":2 | "until":"end-0.5",                  // seconds within the parent; default: whole parent
  "in":["core:fade-up", {"p":"core:rise","d":0.8,"at":0.1,"stagger":0.03,"ease":"snap", …params}],
  "out":[…] (ends at the layer end), "anim":[{"p":"core:shake","at":1.2}], "loop":[{"p":"core:float","d":3}],
@@ -24,7 +30,8 @@ LAYER
 text:  "text", "size", "font", "weight", "color", "align", "lineHeight", "tracking"(em), "case":"upper|lower", "italic", "shadow",
        "glow":"#color", "stroke":"#color","strokeWidth", "gradient":"linear-gradient(…)" (gradient fill), "bg","padding","radius",
        "split":"chars|words|lines" (in/out anims then run per unit with "stagger" seconds),
-       "counter":{"from":0,"to":1250,"d":1.5,"at":0,"ease":"outExpo","decimals":0,"prefix":"$","suffix":"+","sep":","}
+       "counter":{"from":0,"to":1250,"d":1.5,"at":0,"ease":"outExpo","decimals":0,"prefix":"$","suffix":"+","sep":","},
+       "textStyle":"h1" (named style; the layer's own keys win; "h2 caption" combines), "anchor":"baseline" (y = first line's baseline)
 rect/ellipse: "w","h","fill" (colour or CSS gradient),"radius","stroke","strokeWidth","shadow","glow"
 line:  "x","y","x2","y2","stroke","strokeWidth","cap"           path: "d","viewBox","w","h","stroke","fill"
 image/video: "src":"asset:<id>"|https URL, "w","h","fit":"cover|contain","radius"     svg: "svg":"<svg…>","w","h"
@@ -58,10 +65,26 @@ Bodies by kind:
  direction: {"theme","tokens","fonts","pace","animScale","transition"|"transitions","sceneDefaults","overlays":[layers],"sfx":{"transitions":"whoosh"}}
  choreography: {"steps":[gestures using {{params}}]}
 Channels: opacity scale scaleX scaleY clip draw chars brightness (multiply) · dx dy rotate blur skewX letterSpacing hue il it ir ib rad rotX rotY (add) · color bw bh (override)
-Easings: linear in out inOut inQuad outQuad inExpo outExpo inBack outBack inOutBack outElastic outBounce snap smooth hold cubic(a,b,c,d) spring(0.4) steps(4)
+Easings: linear in out inOut (= inCubic outCubic inOutCubic) inQuad outQuad inOutQuad inQuart… inQuint… inSine outSine inOutSine inCirc… inExpo outExpo inOutExpo
+         inBack outBack inOutBack outElastic outBounce snap smooth hold cubic(a,b,c,d) spring(0.4) steps(4)
+
+TEXT STYLES
+Built in (from the theme tokens): display h1 h2 h3 body small caption label kicker mono. Define or override them in the theme ("tokens":{"text":{…}})
+or the composition ("textStyles":{"name":{"font","size","weight","tracking","lineHeight","color","case","italic",…, "extends":"h1"}}).
+Use: {"type":"text","text":"Q3 results","textStyle":"h2","anchor":"baseline","x":140,"y":420}
+
+MOTION PATHS (layer key "motionPath"; any layer or element)
+{"path":"M200 800 C 600 100 1300 1000 1700 300"}          // SVG path data in parent coordinates: the layer is placed on it
+{"through":[[200,800],[700,300],[1200,700]], "tension":0.5, "closed":false}   // smooth curve through points
+{"ellipse":{"center":[960,540],"rx":420,"ry":160,"start":0,"turns":1,"dir":"cw|ccw"}} | {"circle":300}   // no center: orbit from where the layer is
++ "at":0.5,"d":2 (seconds; default: to the layer's end), "ease":"inOutSine", "from":0,"to":1 (part of the path), "orient":true|degrees
+  (turn along the tangent), "loop":true, "relative":true (path offsets from the layer, e.g. "M0 0 l 300 -120").
+A list plays one after the other: "motionPath":[{…},{…}]. Combines with in/out/keys (they add).
 
 COMPOSITION EXTRAS
-"params":{"client":"string!","sales":"array<object>!"}, "props":{…defaults}  // exposed params → "{{client}}" / "{{params.sales}}"; data templates (mf_template), sub-compositions
+"data":{…} — data-driven videos: scenes read {{data.x}}, EACH blocks repeat scenes per item; mf_template {"id","data":[rows]} makes one video per row
+  (each row replaces/merges into "data"; rows can be JSON, CSV or asset:<id>). Scenes that don't depend on data are reused from the render cache.
+"params":{"client":"string!","sales":"array<object>!"}, "props":{…defaults}  // exposed params → "{{client}}" / "{{params.sales}}"; sub-compositions, typed templates
 "direction":"dir:cinematic" | {"p":"dir:tech","accent":"#0ff"}           // art direction: theme, pace, transitions, overlays, sounds (library @core/directions)
 "pace":0.85 (×scene durations) · "framing":1.1 (×scale of every scene) · "adapt":{"from":"16:9","text":1.1} (inline layers written for another format)
 "@portrait"/"@landscape"/"@square"/"@wide"/"@tall": {…overrides} on any object (composition, scene, layer, preset body).

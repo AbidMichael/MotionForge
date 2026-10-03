@@ -190,7 +190,7 @@ export async function buildApp(ctx: Ctx): Promise<FastifyInstance> {
   app.post('/v1/compositions', async (req, reply) => {
     const b = (req.body ?? {}) as Record<string, any>;
     const composition = b.composition ?? (b.scenes ? b : undefined);
-    const out = ctx.comps.submit({ composition, id: b.id, title: b.title, relock: b.relock, summary: b.summary }, req.agent);
+    const out = ctx.comps.submit({ composition, file: b.file, id: b.id, title: b.title, relock: b.relock, summary: b.summary }, req.agent);
     reply.status(out.ok ? 200 : 422);
     return out;
   });
@@ -213,7 +213,7 @@ export async function buildApp(ctx: Ctx): Promise<FastifyInstance> {
   });
   app.post<{ Params: { id: string } }>('/v1/compositions/:id/patch', async (req, reply) => {
     const b = (req.body ?? {}) as Record<string, any>;
-    const out = ctx.comps.patch(req.params.id, b.ops, req.agent, { relock: b.relock, summary: b.summary });
+    const out = ctx.comps.patch(req.params.id, b.ops, req.agent, { relock: b.relock, summary: b.summary, file: b.file, writeBack: b.writeBack });
     reply.status(out.ok ? 200 : 422);
     return out;
   });

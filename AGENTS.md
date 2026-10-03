@@ -5,8 +5,8 @@ You make videos by **composing presets**, not by writing animation code. Every t
 ## The loop
 
 1. `mf_search {"query":"what you need"}` — always search before building. Read `mf_library {"name":"@core/base"}` once if you are new.
-2. `mf_validate {"composition":{…}}` → `cmp_x r1`. It is stored even when it has errors.
-3. Fix with `mf_patch {"id":"cmp_x","ops":[{"op":"replace","path":"/scenes/2/d","value":4}]}`. Never resend the whole composition.
+2. Write the composition to a `.json` file, then `mf_validate {"file":"/abs/path/video.json"}` → `cmp_x r1`. It is stored even when it has errors, and the same file always maps to the same `cmp_x`.
+3. Fix it by editing the file with your own file tools, then `mf_patch {"id":"cmp_x"}` (no ops) to reload it. Or send JSON Patch ops (`mf_patch {"id":"cmp_x","ops":[{"op":"replace","path":"/scenes/2/d","value":4}]}`): they are written back to the file. Never paste the whole composition into a call.
 4. Check with `mf_preview {"id":"cmp_x"}` (one frame per scene) and `mf_validate`/`mf_patch` with `"summary":true` (what moves when).
 5. `mf_render {"id":"cmp_x","quality":"draft"}`, then `mf_job {"id":"job_…","wait":60}`. Use `hq` for delivery.
 6. Keep what worked: `mf_save_as_preset`, or write presets with `mf_preset_put` into `@<your-agent-id>/<name>` (create it with `mf_library_create`). Publish with `mf_library_publish`. Rate presets you used with `mf_rate`.
@@ -35,6 +35,9 @@ You make videos by **composing presets**, not by writing animation code. Every t
 - **Check before rendering**: `mf_check` (visual QA) and `mf_storyboard` (intent, rhythm, repetition). Give scenes an `"intent"`: hook, demonstration, explanation, breathing, conclusion.
 - **Targeted previews**: `mf_preview {"id","scene":2}`, `{"transition":1}`, `{"focus":"#chart"}`, `{"clip":"mp4"}` (with sound).
 - **Product demos**: build the UI with `@core/ui` elements (give them ids), then a scene's `"gestures"` (`click`, `type`, `scroll`, `drag`…) or a choreography `{"p":"ui:fill-form",…}`; add `"cursor":{"style":"arrow"}`. For a real site: `mf_capture` then `{"type":"capture","src":"cap_…"}`.
+- **Data-driven videos**: put the varying content in `"data":{…}`, read it with `{{data.x}}`, and repeat a block of scenes per item with `{"each":"{{data.items}}","as":"item","scenes":[…],"between":{"t":"core:crossfade"}}` (`"if"` skips a scene). `mf_template {"id","data":[rows]}` makes one video per row (each row replaces/merges into `data`).
+- **Motion paths**: `"motionPath":{"path":"M… C…","orient":true}`, `{"through":[[x,y],…]}` or `{"ellipse":{"center":[x,y],"rx","ry","turns"}}` on any layer — never sample a curve into keyframes.
+- **Text styles**: `"textStyle":"h1|h2|h3|body|caption|label|kicker|mono|display"` (from the theme) or your own in `"textStyles":{"name":{"extends":"h2","color":"…"}}`; `"anchor":"baseline"` puts the first line's baseline on `y`.
 - **Data**: `data:chart-story`, `data:race`, `data:map-story`, `data:network`, or raw `chart`/`map`/`graph` layers. For many videos from one design: declare `"params"`, use `{{params.x}}`, then `mf_template {"id","data":[rows],"render":true}`.
 - **Explain**: `explain:sort|pathfinding|physics|pipeline`; physics parameters accept keyframes `[[0, 9.8], [3, 1.6]]`.
 - **3D**: `three:product-spin {image}`, `three:exploded {items}`, `three:depth-cards`, `three:hero-object`.

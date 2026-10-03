@@ -27,6 +27,8 @@ https://github.com/user-attachments/assets/32802bee-ba6c-448b-aa4d-e8aa5f173b72
 - **Preset-based DSL**: scenes, elements, animations, transitions, themes and art directions, all plain JSON with typed params.
 - **MCP server + REST API**: 22 tools covering search, validate, patch, preview, render, QA, storyboard, variants, format adaptation and data templates.
 - **Versioned libraries** with semver, lockfiles, an agent-owned scope per agent and a shared hub with rating-based promotion.
+- **File-based workflow**: agents keep each composition in a `.json` file. `mf_validate {"file"}` loads it, and `mf_patch` reloads it or writes JSON Patch edits back to it, so no JSON is pasted into tool calls.
+- **Authoring helpers**: native motion paths (SVG Bézier, smooth curves through points, ellipses/orbits, orientation along the tangent), named text styles, baseline anchoring, data-driven scene blocks (`data` + `each` + `if`).
 - **Fast iteration**: JSON Patch edits, still previews and contact sheets, plus a segment cache that re-renders only the scenes that changed.
 - **Rich layers**:
   - kinetic type, UI mock-ups with a synthetic cursor and gestures, and real web captures;
@@ -124,8 +126,8 @@ The agent name decides which libraries an agent owns: agent `my-agent` writes to
 | `mf_search` | Find presets by intent ("punchy number reveal"). One compact line per result. |
 | `mf_get` | One preset's params, defaults, duration rule and example. |
 | `mf_library` | List libraries, read a library's guide, or `{"name":"dsl"}` for the full language reference. |
-| `mf_validate` | Store and validate a composition → `cmp_…` with scene timings and path-addressed errors. |
-| `mf_patch` | Fix or tweak a stored composition with JSON Patch instead of resending it. |
+| `mf_validate` | Store and validate a composition (from a `.json` file path or inline) → `cmp_…` with scene timings and path-addressed errors. |
+| `mf_patch` | Reload a file-backed composition after you edit the file, or apply JSON Patch ops (written back to the file). |
 | `mf_preview` | Still frames and a contact sheet (one frame per scene), or a short clip with sound. |
 | `mf_render` / `mf_job` | Queue a render (`draft`, `hq`, `gif`, `alpha`, `webm`) and wait for it. |
 | `mf_library_create` | Create the agent's own library (`@<agent>/<name>`). |
@@ -138,7 +140,7 @@ The agent name decides which libraries an agent owns: agent `my-agent` writes to
 | `mf_storyboard` | Scene intents, rhythm, repetition and length problems; reorder, insert or remove scenes. |
 | `mf_variants` | Same content with other art directions, pace, framing, format or music, plus one comparison sheet. |
 | `mf_adapt` | Same composition in other formats (9:16, 1:1…), re-laid out and checked. |
-| `mf_template` | Data templates: one validated (and rendered) video per data row (JSON, CSV or asset). |
+| `mf_template` | Data templates: one validated (and rendered) video per data row (JSON, CSV or asset); each row replaces the composition's `data`. |
 | `mf_edit` | Visual-editor operations (move, retext, rescale, retime) written back into the source JSON. |
 | `mf_capture` | Record a real interface (URL or HTML): clicks, typing, scrolling → a `capture` layer. |
 | `mf_audio` | Music analysis: tempo, beats, bars, hits, energy, suggested cut points. |
@@ -223,6 +225,7 @@ copy motionforge.config.example.json motionforge.config.json    # Windows
 | `render.concurrency` | `null` | Chrome tabs per render (null = half your CPU cores). |
 | `render.jobs` | `1` | Renders in parallel (previews never wait behind renders). |
 | `render.browserExecutable` | `null` | Use your own Chrome/Chromium instead of the downloaded one (also used by `mf_capture`). |
+| `files.read`, `files.write`, `files.roots` | `true`, `true`, `[]` | Composition files used by `mf_validate`/`mf_patch {"file"}`; `roots` limits them to some folders (`[]` = anywhere). |
 | `render.gl` | `angle` (`swangle` on Linux) | WebGL backend for 3D layers: `angle` uses the GPU, `swangle` renders in software. |
 | `promotion` | 3 / 4.0 / 5 / 0.9 | Ratings, average, successful renders and success rate needed for automatic promotion. |
 

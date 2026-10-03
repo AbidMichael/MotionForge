@@ -29,7 +29,13 @@ function revisionText(r: any): string {
   if (r.ok && r.scenes.length) lines.push(r.scenes.map((s: any) => `  S${s.i + 1} ${s.start}s ${s.preset ?? 'inline'} ${s.d}s`).join('\n'));
   if (r.errors?.length) lines.push(issues(r.errors, '✗'));
   if (r.warnings?.length) lines.push(issues(r.warnings, '!'));
-  if (!r.ok) lines.push(`fix with mf_patch {"id":"${r.id}","ops":[…]} — no need to resend the whole composition`);
+  if (r.file) lines.push(`file: ${r.file}${r.unchanged ? ' (unchanged — same revision)' : r.fileSync === 'written' ? ' (updated)' : r.fileSync === 'read' ? ' (loaded)' : ''}`);
+  if (!r.ok)
+    lines.push(
+      r.file
+        ? `fix the file, then mf_patch {"id":"${r.id}"} to reload it (or mf_patch with ops: they are written back to the file)`
+        : `fix with mf_patch {"id":"${r.id}","ops":[…]} — no need to resend the whole composition`,
+    );
   if (r.summary) lines.push('motion:\n' + r.summary);
   return lines.join('\n');
 }
@@ -55,7 +61,7 @@ function jobText(j: any): string {
 }
 
 export const SERVER_INSTRUCTIONS = `MotionForge renders motion-design videos from short JSON compositions built from reusable presets. Compose with presets; don't write animation code.
-Workflow: mf_search → (mf_get if unsure of params) → mf_validate (stores cmp_x, even with errors) → fix with mf_patch (JSON Patch) → mf_preview (contact sheet, one frame per scene) → mf_render {quality:"draft"|"hq"} → mf_job {wait:60}.
+Workflow: mf_search → (mf_get if unsure of params) → write the composition to a .json file and mf_validate {"file"} (stores cmp_x, even with errors) → edit the file and mf_patch {"id"} to reload, or mf_patch with JSON Patch ops (written back to the file) → mf_preview (contact sheet, one frame per scene) → mf_render {quality:"draft"|"hq"} → mf_job {wait:60}.
 Composition: {"use":["@scope/lib@^1"],"theme":"core:dark"|{"p":"core:neon","accent":"#ff3d71"},"format":"1920x1080@30" (default; "9:16","1:1"),"scenes":[{"p":"core:title-card","title":"Hi"},{"t":"core:crossfade"},{"p":"core:stat","value":98,"suffix":"%","label":"Uptime","d":3},{"d":2,"layers":[…]}]}
 Scene entry = "p" + the preset's params (+ optional "d" seconds, "layers" overlay, "bg"). Transition entry {"t":…} goes between scenes. Values may use tokens "$color.accent" and expressions "{{W/2}}".
 Reuse instead of rebuilding: save what worked with mf_save_as_preset; write presets with mf_preset_put into your own library (@<agent-id>/<name>, created with mf_library_create); version with mf_library_publish; rate presets you used with mf_rate.
@@ -252,9 +258,16 @@ export function registerTools(server: McpServer, api: Api, record?: Recorder) {
 
   tool(
     'mf_validate',
-    'Validate and store a composition. Returns cmp_<id> rN with scene timings, errors (path: message) and warnings. Pass id to store a new revision of an existing composition. summary:true adds a text motion summary (what moves when).',
-    { composition: z.record(z.any()), id: z.string().optional(), title: z.string().optional(), summary: z.boolean().optional() },
+    'Validate and store a composition. Returns cmp_<id> rN with scene timings, errors (path: message) and warnings. Prefer "file": an absolute path to a .json file you keep on disk and edit with your own file tools — no JSON in the call, the same file always maps to the same cmp id, and later mf_patch ops are written back to it. Or pass "composition" inline. Pass id to store a new revision of an existing composition. summary:true adds a text motion summary (what moves when).',
+    {
+      composition: z.record(z.any()).optional(),
+      file: z.string().optional().describe('absolute path to the composition .json on the machine running MotionForge'),
+      id: z.string().optional(),
+      title: z.string().optional(),
+      summary: z.boolean().optional(),
+    },
     async (a) => {
+      if (!a.composition && !a.file) return { content: [{ type: 'text', text: 'pass "file" (path to a .json) or "composition"' }], isError: true };
       const r = await call('POST', '/v1/compositions', a, [422]);
       return { content: [{ type: 'text', text: revisionText(r) }], isError: !r.ok };
     },
@@ -262,15 +275,19 @@ export function registerTools(server: McpServer, api: Api, record?: Recorder) {
 
   tool(
     'mf_patch',
-    'Edit a stored composition with JSON Patch ops instead of resending it: [{"op":"replace","path":"/scenes/2/d","value":4}], add/remove/move/copy also work. Returns the new revision, validated.',
+    'Edit a stored composition with JSON Patch ops instead of resending it: [{"op":"replace","path":"/scenes/2/d","value":4}], add/remove/move/copy also work. File-backed compositions: call with only {"id"} after editing the file yourself to reload it; ops are applied and written back to the file. "file" links a composition to a (new) file. Returns the new revision, validated.',
     {
       id: z.string(),
-      ops: z.array(z.object({ op: z.enum(['add', 'remove', 'replace', 'move', 'copy', 'test']), path: z.string(), value: z.any().optional(), from: z.string().optional() })),
+      file: z.string().optional().describe('load this .json file as the new revision (and keep the composition linked to it)'),
+      writeBack: z.boolean().optional().describe('false: apply ops to the stored revision only, leave the file alone'),
+      ops: z
+        .array(z.object({ op: z.enum(['add', 'remove', 'replace', 'move', 'copy', 'test']), path: z.string(), value: z.any().optional(), from: z.string().optional() }))
+        .optional(),
       relock: z.boolean().optional().describe('re-resolve library versions (pick up newly published versions)'),
       summary: z.boolean().optional(),
     },
     async (a) => {
-      const r = await call('POST', `/v1/compositions/${enc(a.id)}/patch`, { ops: a.ops, relock: a.relock, summary: a.summary }, [422]);
+      const r = await call('POST', `/v1/compositions/${enc(a.id)}/patch`, { ops: a.ops, file: a.file, writeBack: a.writeBack, relock: a.relock, summary: a.summary }, [422]);
       return { content: [{ type: 'text', text: revisionText(r) }], isError: !r.ok };
     },
   );

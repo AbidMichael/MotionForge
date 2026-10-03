@@ -180,3 +180,16 @@ export function fitSize(text: string, st: TextStyle, box: { w: number; h?: numbe
   }
   return Math.floor(lo * 2) / 2;
 }
+
+/**
+ * Distance in px from the top of a text box to the baseline of its first line,
+ * with the browser's line box model (half-leading above the ascent).
+ */
+export function baselineOffset(st: TextStyle): number {
+  const { font } = resolveFont(st);
+  const upm = font.unitsPerEm || 1000;
+  const asc = font.ascent / upm;
+  const desc = Math.abs(font.descent) / upm;
+  const lh = (st.lineHeight ?? 1.1) * st.size;
+  return (lh - (asc + desc) * st.size) / 2 + asc * st.size;
+}

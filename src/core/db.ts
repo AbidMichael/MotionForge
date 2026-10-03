@@ -141,5 +141,9 @@ CREATE INDEX IF NOT EXISTS calls_agent ON calls(agent, ts);
 export function openDb(file: string): DB {
   const db = new Database(file);
   db.exec(SCHEMA);
+  // migrations (columns added after the first release)
+  const cols = new Set((db.prepare('PRAGMA table_info(compositions)').all() as { name: string }[]).map((c) => c.name));
+  if (!cols.has('source')) db.exec('ALTER TABLE compositions ADD COLUMN source TEXT');
+  if (!cols.has('source_hash')) db.exec('ALTER TABLE compositions ADD COLUMN source_hash TEXT');
   return db;
 }
