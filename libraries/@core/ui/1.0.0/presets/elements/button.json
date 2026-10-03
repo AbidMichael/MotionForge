@@ -1,0 +1,51 @@
+{
+  "slug": "button",
+  "kind": "element",
+  "summary": "Button (click it with gestures: click on #id)",
+  "tags": [
+    "ui",
+    "button",
+    "cta",
+    "submit"
+  ],
+  "params": {
+    "text": "string!",
+    "width": "number=0",
+    "height": "number=84",
+    "variant": "enum:primary|secondary|ghost=primary"
+  },
+  "example": {
+    "use": "ui:button",
+    "text": "Continue"
+  },
+  "body": {
+    "layers": [
+      {
+        "type": "group",
+        "w": "{{width > 0 ? width : len(text) * height * 0.3 + height}}",
+        "h": "{{height}}",
+        "children": [
+          {
+            "type": "rect",
+            "x": "{{(width > 0 ? width : len(text) * height * 0.3 + height) / 2}}",
+            "y": "{{height / 2}}",
+            "w": "{{width > 0 ? width : len(text) * height * 0.3 + height}}",
+            "h": "{{height}}",
+            "radius": 14,
+            "fill": "{{variant == 'primary' ? $color.accent : variant == 'secondary' ? $color.bg2 : 'transparent'}}",
+            "border": "{{variant == 'ghost' ? '2px solid ' + $color.line : 'none'}}"
+          },
+          {
+            "type": "text",
+            "text": "{{text}}",
+            "x": "{{(width > 0 ? width : len(text) * height * 0.3 + height) / 2}}",
+            "y": "{{height / 2}}",
+            "size": "{{height * 0.38}}",
+            "weight": 700,
+            "color": "{{variant == 'primary' ? $color.bg : $color.fg}}"
+          }
+        ]
+      }
+    ]
+  }
+}

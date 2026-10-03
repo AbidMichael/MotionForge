@@ -1,0 +1,62 @@
+{
+  "slug": "sort",
+  "kind": "scene",
+  "summary": "Sorting algorithm visualised step by step (bubble, insertion, selection, quick, merge)",
+  "tags": [
+    "algorithm",
+    "sort",
+    "explain",
+    "education",
+    "computer science"
+  ],
+  "params": {
+    "title": "string=",
+    "algorithm": "enum:bubble|insertion|selection|quick|merge=quick",
+    "n": "integer=14",
+    "values": "any=null",
+    "words": "any=null"
+  },
+  "duration": {
+    "default": 7,
+    "min": 3,
+    "max": 30
+  },
+  "example": {
+    "p": "explain:sort",
+    "title": "Quicksort",
+    "algorithm": "quick"
+  },
+  "body": {
+    "layers": [
+      {
+        "use": "core:backdrop",
+        "style": "solid"
+      },
+      {
+        "if": "{{len(title) > 0}}",
+        "use": "core:heading",
+        "text": "{{title}}",
+        "size": "$size.h3",
+        "align": "left",
+        "anchor": [
+          0,
+          0
+        ],
+        "x": "{{$space.margin}}",
+        "y": "{{$space.margin * 0.6}}"
+      },
+      {
+        "type": "sim",
+        "kind": "sort",
+        "algorithm": "{{algorithm}}",
+        "n": "{{n}}",
+        "values": "{{values}}",
+        "words": "{{words}}",
+        "x": "{{W / 2}}",
+        "y": "{{H / 2 + 60}}",
+        "w": "{{W - $space.margin * 2}}",
+        "h": "{{H - 320}}"
+      }
+    ]
+  }
+}

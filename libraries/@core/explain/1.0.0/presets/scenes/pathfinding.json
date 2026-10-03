@@ -1,0 +1,60 @@
+{
+  "slug": "pathfinding",
+  "kind": "scene",
+  "summary": "Path-finding on a grid (A*, Dijkstra, BFS, DFS) exploring then drawing the path",
+  "tags": [
+    "algorithm",
+    "pathfinding",
+    "astar",
+    "graph",
+    "explain",
+    "maze"
+  ],
+  "params": {
+    "title": "string=",
+    "algorithm": "enum:astar|dijkstra|bfs|dfs=astar",
+    "grid": "any=null",
+    "words": "any=null"
+  },
+  "duration": {
+    "default": 6,
+    "min": 3,
+    "max": 30
+  },
+  "example": {
+    "p": "explain:pathfinding",
+    "title": "A* search"
+  },
+  "body": {
+    "layers": [
+      {
+        "use": "core:backdrop",
+        "style": "solid"
+      },
+      {
+        "if": "{{len(title) > 0}}",
+        "use": "core:heading",
+        "text": "{{title}}",
+        "size": "$size.h3",
+        "align": "left",
+        "anchor": [
+          0,
+          0
+        ],
+        "x": "{{$space.margin}}",
+        "y": "{{$space.margin * 0.6}}"
+      },
+      {
+        "type": "sim",
+        "kind": "pathfind",
+        "algorithm": "{{algorithm}}",
+        "grid": "{{grid}}",
+        "words": "{{words}}",
+        "x": "{{W / 2}}",
+        "y": "{{H / 2 + 60}}",
+        "w": "{{W - $space.margin * 2}}",
+        "h": "{{H - 300}}"
+      }
+    ]
+  }
+}

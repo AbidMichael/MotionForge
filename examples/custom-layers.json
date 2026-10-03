@@ -1,0 +1,16 @@
+{
+  "title": "Custom layers (no presets)",
+  "theme": "core:neon",
+  "scenes": [
+    {
+      "d": 4,
+      "layers": [
+        { "use": "core:backdrop", "style": "grid" },
+        { "type": "path", "d": "M 0 200 C 300 0, 600 400, 900 200", "w": 900, "h": 400, "viewBox": "0 0 900 400", "stroke": "$color.accent", "strokeWidth": 6, "fill": "none", "glow": "$color.accent", "in": [{ "p": "core:draw", "d": 1.4 }] },
+        { "type": "text", "text": "Draw anything", "y": "72%", "size": 96, "font": "$font.display", "weight": 800, "color": "$color.fg", "split": "chars", "stagger": 0.03, "in": [{ "p": "core:rise", "at": 0.6 }], "loop": [{ "p": "kinetic:wave", "at": 1.6, "d": 1.4 }] },
+        { "repeat": 5, "layer": { "type": "ellipse", "x": "{{W / 2 - 400 + index * 200}}", "y": "22%", "w": 28, "h": 28, "fill": "$color.accent2", "in": [{ "p": "core:pop", "at": "{{1 + index * 0.12}}" }] } }
+      ]
+    }
+  ],
+  "use": ["@core/kinetic@^1"]
+}

@@ -1,0 +1,28 @@
+{
+  "slug": "scanlines",
+  "kind": "element",
+  "summary": "CRT scanlines texture",
+  "tags": [
+    "scanlines",
+    "crt",
+    "retro",
+    "tech",
+    "overlay"
+  ],
+  "params": {
+    "amount": "number=0.16"
+  },
+  "example": {
+    "use": "dir:scanlines"
+  },
+  "body": {
+    "layers": [
+      {
+        "type": "rect",
+        "w": "{{W}}",
+        "h": "{{H}}",
+        "fill": "{{'repeating-linear-gradient(0deg, rgba(0,0,0,' + amount + ') 0px, rgba(0,0,0,' + amount + ') 2px, transparent 2px, transparent 5px)'}}"
+      }
+    ]
+  }
+}

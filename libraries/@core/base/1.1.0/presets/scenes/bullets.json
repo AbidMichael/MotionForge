@@ -1,0 +1,75 @@
+{
+  "slug": "bullets",
+  "kind": "scene",
+  "summary": "Title plus a list of points revealed one by one",
+  "tags": [
+    "list",
+    "bullets",
+    "features",
+    "agenda",
+    "points",
+    "steps"
+  ],
+  "params": {
+    "title": "string!",
+    "items": "array<string>!",
+    "backdrop": "enum:solid|gradient|grid|dots|spotlight=solid",
+    "interval": "number=0.45",
+    "exit": "enum:none|fade=none"
+  },
+  "duration": {
+    "default": 2,
+    "perWord": 0.22,
+    "wordsFrom": "items",
+    "min": 3.5,
+    "max": 14
+  },
+  "example": {
+    "p": "core:bullets",
+    "title": "Why it matters",
+    "items": [
+      "Fewer tokens",
+      "Reusable presets",
+      "Deterministic renders"
+    ]
+  },
+  "body": {
+    "layers": [
+      {
+        "use": "core:backdrop",
+        "style": "{{backdrop}}"
+      },
+      {
+        "type": "group",
+        "x": "{{$space.margin}}",
+        "y": "{{H / 2}}",
+        "out": "{{exit == 'fade' ? {p: 'core:fade-out', d: 0.4} : null}}",
+        "children": [
+          {
+            "use": "core:heading",
+            "text": "{{title}}",
+            "size": "$size.h2",
+            "align": "left",
+            "split": "words",
+            "y": "{{-(len(items) * 50) - 120}}"
+          },
+          {
+            "use": "core:underline",
+            "x": 110,
+            "y": "{{-(len(items) * 50) - 50}}",
+            "delay": 0.4
+          },
+          {
+            "use": "core:bullet-list",
+            "items": "{{items}}",
+            "interval": "{{interval}}",
+            "x": 650,
+            "y": 70,
+            "width": 1200,
+            "at": 0.4
+          }
+        ]
+      }
+    ]
+  }
+}

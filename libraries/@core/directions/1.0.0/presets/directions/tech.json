@@ -1,0 +1,56 @@
+{
+  "slug": "tech",
+  "kind": "direction",
+  "summary": "Tech / neon: glitch cuts, scanlines, fast pace",
+  "tags": [
+    "direction",
+    "look",
+    "style",
+    "tech",
+    "neon",
+    "cyber",
+    "gaming",
+    "developer"
+  ],
+  "params": {
+    "accent": {
+      "type": "color",
+      "default": "#00e5ff"
+    }
+  },
+  "example": {
+    "p": "dir:tech"
+  },
+  "body": {
+    "theme": {
+      "p": "core:neon",
+      "accent": "{{accent}}"
+    },
+    "pace": 0.85,
+    "animScale": 0.8,
+    "transitions": [
+      {
+        "t": "core:glitch-cut",
+        "d": 0.35
+      },
+      {
+        "t": "core:wipe",
+        "d": 0.45
+      }
+    ],
+    "sceneDefaults": {
+      "backdrop": "grid"
+    },
+    "overlays": [
+      {
+        "use": "dir:scanlines",
+        "amount": 0.12
+      }
+    ],
+    "sfx": {
+      "transitions": "glitch",
+      "clicks": "tick",
+      "typing": "typing"
+    }
+  }
+}

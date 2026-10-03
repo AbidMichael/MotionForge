@@ -1,0 +1,61 @@
+{
+  "slug": "playful",
+  "kind": "direction",
+  "summary": "Playful pop: bouncy easing, punchy zooms, pops",
+  "tags": [
+    "direction",
+    "look",
+    "style",
+    "playful",
+    "fun",
+    "pop",
+    "social",
+    "kids"
+  ],
+  "params": {
+    "accent": {
+      "type": "color",
+      "default": "#ff4fa3"
+    }
+  },
+  "example": {
+    "p": "dir:playful"
+  },
+  "body": {
+    "theme": {
+      "p": "core:light",
+      "accent": "{{accent}}"
+    },
+    "pace": 0.9,
+    "animScale": 0.9,
+    "tokens": {
+      "ease": {
+        "out": "outBack",
+        "snap": "outBack"
+      },
+      "radius": {
+        "s": 18,
+        "m": 28,
+        "l": 44
+      }
+    },
+    "transitions": [
+      {
+        "t": "core:zoom-through",
+        "d": 0.5
+      },
+      {
+        "t": "core:whip-pan",
+        "d": 0.45
+      }
+    ],
+    "sceneDefaults": {
+      "backdrop": "dots"
+    },
+    "sfx": {
+      "transitions": "pop",
+      "clicks": "pop",
+      "states": "ding"
+    }
+  }
+}

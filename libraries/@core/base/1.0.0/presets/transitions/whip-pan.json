@@ -1,0 +1,75 @@
+{
+  "slug": "whip-pan",
+  "kind": "transition",
+  "summary": "Fast motion-blurred camera whip",
+  "tags": [
+    "transition",
+    "whip",
+    "pan",
+    "fast",
+    "blur",
+    "energetic"
+  ],
+  "params": {
+    "dir": "enum:left|right=left"
+  },
+  "duration": {
+    "default": 0.45
+  },
+  "body": {
+    "out": {
+      "tracks": {
+        "dx": [
+          0,
+          "{{dir == 'left' ? -W * 0.7 : W * 0.7}}"
+        ],
+        "blur": [
+          0,
+          48
+        ],
+        "opacity": [
+          [
+            0,
+            1
+          ],
+          [
+            0.7,
+            1
+          ],
+          [
+            1,
+            0
+          ]
+        ]
+      },
+      "ease": "in"
+    },
+    "in": {
+      "tracks": {
+        "dx": [
+          "{{dir == 'left' ? W * 0.7 : -W * 0.7}}",
+          0
+        ],
+        "blur": [
+          48,
+          0
+        ],
+        "opacity": [
+          [
+            0,
+            0
+          ],
+          [
+            0.3,
+            1
+          ],
+          [
+            1,
+            1
+          ]
+        ]
+      },
+      "ease": "out"
+    }
+  }
+}

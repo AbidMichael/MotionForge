@@ -1,0 +1,78 @@
+{
+  "slug": "toast",
+  "kind": "element",
+  "summary": "Notification toast sliding in (success, error, info)",
+  "tags": [
+    "ui",
+    "toast",
+    "notification",
+    "alert",
+    "snackbar"
+  ],
+  "params": {
+    "text": "string!",
+    "kind": "enum:success|error|info=success",
+    "width": "number=640"
+  },
+  "example": {
+    "use": "ui:toast",
+    "text": "Saved!"
+  },
+  "body": {
+    "layers": [
+      {
+        "type": "group",
+        "w": "{{width}}",
+        "h": 96,
+        "in": [
+          {
+            "p": "core:slide-in",
+            "from": "up"
+          }
+        ],
+        "children": [
+          {
+            "type": "rect",
+            "x": "{{width / 2}}",
+            "y": 48,
+            "w": "{{width}}",
+            "h": 96,
+            "fill": "$color.surface",
+            "radius": 18,
+            "boxShadow": "0 20px 60px rgba(0,0,0,0.35)"
+          },
+          {
+            "type": "ellipse",
+            "x": 52,
+            "y": 48,
+            "w": 44,
+            "h": 44,
+            "fill": "{{kind == 'success' ? '#22c55e' : kind == 'error' ? '#ef4444' : $color.accent}}"
+          },
+          {
+            "type": "text",
+            "x": 52,
+            "y": 48,
+            "text": "{{kind == 'success' ? '✓' : kind == 'error' ? '!' : 'i'}}",
+            "size": 28,
+            "weight": 800,
+            "color": "#ffffff"
+          },
+          {
+            "type": "text",
+            "text": "{{text}}",
+            "anchor": [
+              0,
+              0.5
+            ],
+            "x": 96,
+            "y": 48,
+            "size": 30,
+            "weight": 600,
+            "color": "$color.fg"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,88 @@
+{
+  "slug": "title-card",
+  "kind": "scene",
+  "summary": "Opening title: optional kicker, big title revealed per char, subtitle, accent underline, soft gradient",
+  "tags": [
+    "title",
+    "intro",
+    "opening",
+    "hero",
+    "headline"
+  ],
+  "params": {
+    "title": "string!",
+    "subtitle": "string=",
+    "kicker": "string=",
+    "align": "enum:center|left=center",
+    "backdrop": "enum:solid|gradient|grid|dots|spotlight=gradient",
+    "titleSize": {
+      "type": "number",
+      "default": "$size.h1"
+    },
+    "exit": "enum:none|fade=none"
+  },
+  "duration": {
+    "default": 3.5,
+    "min": 2
+  },
+  "example": {
+    "p": "core:title-card",
+    "title": "MotionForge",
+    "subtitle": "Motion design for agents",
+    "kicker": "Introducing"
+  },
+  "body": {
+    "layers": [
+      {
+        "use": "core:backdrop",
+        "style": "{{backdrop}}"
+      },
+      {
+        "type": "group",
+        "x": "{{align == 'left' ? $space.margin : W / 2}}",
+        "y": "{{H / 2}}",
+        "out": "{{exit == 'fade' ? {p: 'core:fade-out', d: 0.4} : null}}",
+        "children": [
+          {
+            "if": "{{kicker}}",
+            "use": "core:kicker",
+            "text": "{{kicker}}",
+            "align": "{{align}}",
+            "y": "{{-titleSize * 0.95 - (subtitle ? 40 : 0)}}"
+          },
+          {
+            "use": "core:heading",
+            "text": "{{title}}",
+            "size": "{{titleSize}}",
+            "split": "chars",
+            "stagger": 0.028,
+            "align": "{{align}}",
+            "y": "{{subtitle ? -40 : 0}}",
+            "maxWidth": 1640
+          },
+          {
+            "if": "{{subtitle}}",
+            "use": "core:heading",
+            "text": "{{subtitle}}",
+            "size": "$size.h3",
+            "weight": "$weight.body",
+            "font": "$font.body",
+            "color": "$color.muted",
+            "split": "none",
+            "enter": "core:fade-up",
+            "align": "{{align}}",
+            "y": "{{titleSize * 0.62}}",
+            "at": 0.55,
+            "maxWidth": 1400
+          },
+          {
+            "use": "core:underline",
+            "x": "{{align == 'left' ? 110 : 0}}",
+            "y": "{{subtitle ? titleSize * 1.15 : titleSize * 0.72}}",
+            "delay": 0.7
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "slug": "minimal",
+  "kind": "direction",
+  "summary": "Minimal: no ornament, calm cuts, generous space",
+  "tags": [
+    "direction",
+    "look",
+    "style",
+    "minimal",
+    "clean",
+    "simple",
+    "apple"
+  ],
+  "params": {
+    "accent": {
+      "type": "color",
+      "default": "#111111"
+    }
+  },
+  "example": {
+    "p": "dir:minimal"
+  },
+  "body": {
+    "theme": {
+      "p": "core:light",
+      "accent": "{{accent}}"
+    },
+    "pace": 1.05,
+    "transition": {
+      "t": "core:crossfade",
+      "d": 0.5
+    },
+    "sceneDefaults": {
+      "backdrop": "solid"
+    }
+  }
+}

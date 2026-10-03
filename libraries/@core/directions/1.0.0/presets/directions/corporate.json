@@ -1,0 +1,41 @@
+{
+  "slug": "corporate",
+  "kind": "direction",
+  "summary": "Clean corporate: light theme, measured pace, slide pushes, soft clicks",
+  "tags": [
+    "direction",
+    "look",
+    "style",
+    "corporate",
+    "business",
+    "clean",
+    "b2b"
+  ],
+  "params": {
+    "accent": {
+      "type": "color",
+      "default": "#2f6bff"
+    }
+  },
+  "example": {
+    "p": "dir:corporate"
+  },
+  "body": {
+    "theme": {
+      "p": "core:light",
+      "accent": "{{accent}}"
+    },
+    "pace": 1,
+    "transition": {
+      "t": "core:slide-push",
+      "d": 0.6
+    },
+    "sceneDefaults": {
+      "backdrop": "gradient"
+    },
+    "sfx": {
+      "transitions": "swoosh",
+      "clicks": "click"
+    }
+  }
+}

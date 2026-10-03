@@ -1,0 +1,33 @@
+{
+  "slug": "frame",
+  "kind": "element",
+  "summary": "Thin editorial frame inset from the edges",
+  "tags": [
+    "frame",
+    "border",
+    "editorial",
+    "overlay"
+  ],
+  "params": {
+    "inset": "number=36",
+    "color": {
+      "type": "color",
+      "default": "$color.fg"
+    },
+    "strength": "number=0.35"
+  },
+  "example": {
+    "use": "dir:frame"
+  },
+  "body": {
+    "layers": [
+      {
+        "type": "rect",
+        "w": "{{W - inset * 2}}",
+        "h": "{{H - inset * 2}}",
+        "fill": "transparent",
+        "border": "{{'2px solid ' + alpha(color, strength)}}"
+      }
+    ]
+  }
+}

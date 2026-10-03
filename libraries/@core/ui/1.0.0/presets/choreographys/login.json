@@ -1,0 +1,43 @@
+{
+  "slug": "login",
+  "kind": "choreography",
+  "summary": "Type an email and a (masked) password, then press the button",
+  "tags": [
+    "ui",
+    "login",
+    "sign in",
+    "form",
+    "auth"
+  ],
+  "params": {
+    "email": "string!",
+    "password": "string!",
+    "button": "string!",
+    "value": "string=ada@lovelace.dev"
+  },
+  "example": {
+    "p": "ui:login",
+    "email": "#field",
+    "password": "#field",
+    "button": "#button"
+  },
+  "body": {
+    "steps": [
+      {
+        "do": "type",
+        "into": "{{email}}",
+        "text": "{{value}}"
+      },
+      {
+        "do": "type",
+        "into": "{{password}}",
+        "text": "••••••••",
+        "cps": 10
+      },
+      {
+        "do": "click",
+        "on": "{{button}}"
+      }
+    ]
+  }
+}

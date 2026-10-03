@@ -1,0 +1,98 @@
+{
+  "slug": "progress-bar",
+  "kind": "element",
+  "summary": "Track + fill bar animating to a value (0..1) with optional label",
+  "tags": [
+    "progress",
+    "bar",
+    "loading",
+    "percent",
+    "data"
+  ],
+  "params": {
+    "value": "number!",
+    "width": "number=900",
+    "height": "number=22",
+    "label": "string=",
+    "fill": {
+      "type": "color",
+      "default": "$color.accent"
+    },
+    "track": {
+      "type": "color",
+      "default": "$color.line"
+    },
+    "fillD": "number=1.4"
+  },
+  "example": {
+    "use": "core:progress-bar",
+    "value": 0.72,
+    "label": "Rendering"
+  },
+  "body": {
+    "layers": [
+      {
+        "type": "rect",
+        "w": "{{width}}",
+        "h": "{{height}}",
+        "fill": "{{track}}",
+        "radius": "{{height / 2}}",
+        "in": [
+          "core:fade-in"
+        ]
+      },
+      {
+        "type": "rect",
+        "x": "{{-width / 2}}",
+        "anchor": "left",
+        "w": "{{width * clamp(value, 0, 1)}}",
+        "h": "{{height}}",
+        "fill": "{{fill}}",
+        "radius": "{{height / 2}}",
+        "in": [
+          {
+            "p": "core:grow-x",
+            "d": "{{fillD}}",
+            "at": 0.2,
+            "ease": "cubic(0.2,0.9,0.1,1)"
+          }
+        ]
+      },
+      {
+        "if": "{{label}}",
+        "type": "text",
+        "text": "{{label}}",
+        "x": "{{-width / 2}}",
+        "y": "{{-height - 30}}",
+        "anchor": "left",
+        "size": "$size.small",
+        "font": "$font.body",
+        "weight": 600,
+        "color": "$color.fg",
+        "in": [
+          "core:fade-in"
+        ]
+      },
+      {
+        "type": "text",
+        "counter": {
+          "to": "{{value * 100}}",
+          "d": "{{fillD}}",
+          "at": 0.2,
+          "suffix": "%",
+          "ease": "cubic(0.2,0.9,0.1,1)"
+        },
+        "x": "{{width / 2}}",
+        "y": "{{-height - 30}}",
+        "anchor": "right",
+        "size": "$size.small",
+        "font": "$font.mono",
+        "weight": 600,
+        "color": "$color.muted",
+        "in": [
+          "core:fade-in"
+        ]
+      }
+    ]
+  }
+}

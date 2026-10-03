@@ -1,0 +1,24 @@
+{
+  "slug": "typewriter",
+  "kind": "animation",
+  "summary": "Characters appear one by one",
+  "tags": [
+    "animation",
+    "typewriter",
+    "type",
+    "text",
+    "in"
+  ],
+  "duration": {
+    "default": 1.2
+  },
+  "body": {
+    "tracks": {
+      "chars": [
+        0,
+        1
+      ]
+    },
+    "unit": false
+  }
+}

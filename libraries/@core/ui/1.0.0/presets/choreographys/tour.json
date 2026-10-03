@@ -1,0 +1,42 @@
+{
+  "slug": "tour",
+  "kind": "choreography",
+  "summary": "Point at a few elements one after another (product tour)",
+  "tags": [
+    "ui",
+    "tour",
+    "onboarding",
+    "highlight",
+    "walkthrough"
+  ],
+  "params": {
+    "a": "string!",
+    "b": "string!",
+    "c": "string="
+  },
+  "example": {
+    "p": "ui:tour",
+    "a": "#field",
+    "b": "#button"
+  },
+  "body": {
+    "steps": [
+      {
+        "do": "highlight",
+        "on": "{{a}}"
+      },
+      {
+        "do": "hover",
+        "on": "{{a}}"
+      },
+      {
+        "do": "highlight",
+        "on": "{{b}}"
+      },
+      {
+        "do": "hover",
+        "on": "{{b}}"
+      }
+    ]
+  }
+}

@@ -1,0 +1,61 @@
+{
+  "slug": "logo-reveal",
+  "kind": "scene",
+  "summary": "Logo pops in over a spotlight, tagline fades up",
+  "tags": [
+    "logo",
+    "brand",
+    "reveal",
+    "intro",
+    "outro",
+    "sting"
+  ],
+  "params": {
+    "src": "asset!",
+    "tagline": "string=",
+    "width": "number=420",
+    "height": "number=420",
+    "exit": "enum:none|fade=none"
+  },
+  "duration": {
+    "default": 3,
+    "min": 2
+  },
+  "example": {
+    "p": "core:logo-reveal",
+    "tagline": "Made locally"
+  },
+  "body": {
+    "layers": [
+      {
+        "use": "core:backdrop",
+        "style": "spotlight",
+        "intensity": 0.3
+      },
+      {
+        "use": "core:logo",
+        "src": "{{src}}",
+        "width": "{{width}}",
+        "height": "{{height}}",
+        "x": "{{W / 2}}",
+        "y": "{{tagline ? H / 2 - 60 : H / 2}}",
+        "out": "{{exit == 'fade' ? {p: 'core:fade-out', d: 0.4} : null}}"
+      },
+      {
+        "if": "{{tagline}}",
+        "use": "core:heading",
+        "text": "{{tagline}}",
+        "size": "$size.h3",
+        "font": "$font.body",
+        "weight": 500,
+        "color": "$color.muted",
+        "split": "none",
+        "enter": "core:tracking-in",
+        "enterD": 1.2,
+        "y": "{{H / 2 + height / 2 + 30}}",
+        "at": 0.6,
+        "out": "{{exit == 'fade' ? {p: 'core:fade-out', d: 0.4} : null}}"
+      }
+    ]
+  }
+}

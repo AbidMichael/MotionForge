@@ -1,0 +1,100 @@
+{
+  "slug": "backdrop",
+  "kind": "element",
+  "summary": "Full-frame background: solid, soft gradient glow, grid, dots or vignette",
+  "tags": [
+    "background",
+    "backdrop",
+    "bg",
+    "gradient",
+    "grid"
+  ],
+  "params": {
+    "style": "enum:solid|gradient|grid|dots|spotlight=gradient",
+    "base": {
+      "type": "color",
+      "default": "$color.bg"
+    },
+    "tint": {
+      "type": "color",
+      "default": "$color.accent"
+    },
+    "tint2": {
+      "type": "color",
+      "default": "$color.accent2"
+    },
+    "intensity": "number=0.22"
+  },
+  "example": {
+    "use": "core:backdrop",
+    "style": "grid"
+  },
+  "body": {
+    "layers": [
+      {
+        "type": "rect",
+        "w": "{{W}}",
+        "h": "{{H}}",
+        "fill": "{{base}}"
+      },
+      {
+        "if": "{{style == 'gradient'}}",
+        "type": "rect",
+        "w": "{{W * 1.2}}",
+        "h": "{{H * 1.2}}",
+        "fill": "{{'radial-gradient(ellipse at 25% 20%, ' + alpha(tint, intensity) + ' 0%, transparent 55%), radial-gradient(ellipse at 85% 85%, ' + alpha(tint2, intensity * 0.8) + ' 0%, transparent 50%)'}}",
+        "loop": [
+          {
+            "p": "core:breathe",
+            "d": 9
+          }
+        ],
+        "in": [
+          {
+            "p": "core:fade-in",
+            "d": 1.2
+          }
+        ]
+      },
+      {
+        "if": "{{style == 'spotlight'}}",
+        "type": "rect",
+        "w": "{{W}}",
+        "h": "{{H}}",
+        "fill": "{{'radial-gradient(ellipse at 50% 45%, ' + alpha(tint, intensity) + ' 0%, transparent 60%)'}}",
+        "in": [
+          {
+            "p": "core:fade-in",
+            "d": 1.2
+          }
+        ]
+      },
+      {
+        "if": "{{style == 'grid'}}",
+        "type": "rect",
+        "w": "{{W}}",
+        "h": "{{H}}",
+        "fill": "{{'linear-gradient(' + $color.line + ' 1px, transparent 1px) 0 0 / 80px 80px, linear-gradient(90deg, ' + $color.line + ' 1px, transparent 1px) 0 0 / 80px 80px'}}",
+        "WebkitMaskImage": "radial-gradient(ellipse at 50% 50%, black 30%, transparent 75%)",
+        "in": [
+          {
+            "p": "core:fade-in",
+            "d": 1
+          }
+        ]
+      },
+      {
+        "if": "{{style == 'grid'}}",
+        "type": "rect",
+        "w": "{{W}}",
+        "h": "{{H}}",
+        "fill": "{{'radial-gradient(ellipse at 50% 40%, ' + alpha(tint, intensity * 0.6) + ' 0%, transparent 55%)'}}"
+      },
+      {
+        "if": "{{style == 'dots'}}",
+        "use": "core:dots-field",
+        "color": "{{tint}}"
+      }
+    ]
+  }
+}

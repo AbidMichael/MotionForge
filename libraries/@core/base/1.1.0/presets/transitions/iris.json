@@ -1,0 +1,26 @@
+{
+  "slug": "iris",
+  "kind": "transition",
+  "summary": "Circular iris opening onto the next scene",
+  "tags": [
+    "transition",
+    "iris",
+    "circle",
+    "reveal"
+  ],
+  "duration": {
+    "default": 0.8
+  },
+  "body": {
+    "in": {
+      "tracks": {
+        "clip": [
+          0,
+          1
+        ]
+      },
+      "ease": "cubic(0.65,0,0.35,1)",
+      "clipDir": "circle"
+    }
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "slug": "elastic-in",
+  "kind": "animation",
+  "summary": "Elastic scale bounce",
+  "tags": [
+    "animation",
+    "kinetic",
+    "elastic",
+    "bounce",
+    "in",
+    "fun"
+  ],
+  "duration": {
+    "default": 0.9
+  },
+  "body": {
+    "tracks": {
+      "scale": [
+        0,
+        1
+      ],
+      "opacity": [
+        [
+          0,
+          0
+        ],
+        [
+          0.15,
+          1
+        ],
+        [
+          1,
+          1
+        ]
+      ]
+    },
+    "ease": "outElastic"
+  }
+}

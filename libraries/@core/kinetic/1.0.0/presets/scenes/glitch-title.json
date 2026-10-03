@@ -1,0 +1,190 @@
+{
+  "slug": "glitch-title",
+  "kind": "scene",
+  "summary": "Title with RGB-split copies that glitch periodically",
+  "tags": [
+    "glitch",
+    "rgb",
+    "cyber",
+    "title",
+    "digital",
+    "kinetic",
+    "gaming"
+  ],
+  "params": {
+    "text": "string!",
+    "size": {
+      "type": "number",
+      "default": "$size.h1"
+    },
+    "every": "number=1.4"
+  },
+  "duration": {
+    "default": 3,
+    "min": 1.5
+  },
+  "example": {
+    "p": "kinetic:glitch-title",
+    "text": "System online"
+  },
+  "body": {
+    "layers": [
+      {
+        "use": "core:backdrop",
+        "style": "grid"
+      },
+      {
+        "type": "group",
+        "x": "{{W / 2}}",
+        "y": "{{H / 2}}",
+        "in": [
+          "core:glitch-in"
+        ],
+        "children": [
+          {
+            "type": "text",
+            "text": "{{text}}",
+            "x": -5,
+            "size": "{{size}}",
+            "color": "$color.accent2",
+            "blend": "screen",
+            "case": "upper",
+            "font": "$font.display",
+            "weight": "$weight.display",
+            "opacity": 0.9,
+            "loop": [
+              {
+                "tracks": {
+                  "dx": [
+                    [
+                      0,
+                      0
+                    ],
+                    [
+                      0.82,
+                      0,
+                      "hold"
+                    ],
+                    [
+                      0.86,
+                      -22,
+                      "hold"
+                    ],
+                    [
+                      0.9,
+                      10,
+                      "hold"
+                    ],
+                    [
+                      0.94,
+                      -4,
+                      "hold"
+                    ],
+                    [
+                      1,
+                      0,
+                      "hold"
+                    ]
+                  ]
+                },
+                "d": "{{every}}"
+              }
+            ]
+          },
+          {
+            "type": "text",
+            "text": "{{text}}",
+            "x": 5,
+            "size": "{{size}}",
+            "color": "$color.accent",
+            "blend": "screen",
+            "case": "upper",
+            "font": "$font.display",
+            "weight": "$weight.display",
+            "opacity": 0.9,
+            "loop": [
+              {
+                "tracks": {
+                  "dx": [
+                    [
+                      0,
+                      0
+                    ],
+                    [
+                      0.82,
+                      0,
+                      "hold"
+                    ],
+                    [
+                      0.86,
+                      24,
+                      "hold"
+                    ],
+                    [
+                      0.9,
+                      -12,
+                      "hold"
+                    ],
+                    [
+                      0.94,
+                      6,
+                      "hold"
+                    ],
+                    [
+                      1,
+                      0,
+                      "hold"
+                    ]
+                  ]
+                },
+                "d": "{{every}}"
+              }
+            ]
+          },
+          {
+            "type": "text",
+            "text": "{{text}}",
+            "size": "{{size}}",
+            "color": "$color.fg",
+            "case": "upper",
+            "font": "$font.display",
+            "weight": "$weight.display",
+            "loop": [
+              {
+                "tracks": {
+                  "skewX": [
+                    [
+                      0,
+                      0
+                    ],
+                    [
+                      0.84,
+                      0,
+                      "hold"
+                    ],
+                    [
+                      0.88,
+                      12,
+                      "hold"
+                    ],
+                    [
+                      0.92,
+                      -6,
+                      "hold"
+                    ],
+                    [
+                      1,
+                      0,
+                      "hold"
+                    ]
+                  ]
+                },
+                "d": "{{every}}"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

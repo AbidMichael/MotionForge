@@ -1,0 +1,45 @@
+{
+  "slug": "slide-push",
+  "kind": "transition",
+  "summary": "Next scene pushes the current one off screen",
+  "tags": [
+    "transition",
+    "slide",
+    "push",
+    "swipe"
+  ],
+  "params": {
+    "dir": "enum:left|right|up|down=left"
+  },
+  "duration": {
+    "default": 0.7
+  },
+  "body": {
+    "out": {
+      "tracks": {
+        "dx": [
+          0,
+          "{{dir == 'left' ? -W : dir == 'right' ? W : 0}}"
+        ],
+        "dy": [
+          0,
+          "{{dir == 'up' ? -H : dir == 'down' ? H : 0}}"
+        ]
+      },
+      "ease": "cubic(0.76,0,0.24,1)"
+    },
+    "in": {
+      "tracks": {
+        "dx": [
+          "{{dir == 'left' ? W : dir == 'right' ? -W : 0}}",
+          0
+        ],
+        "dy": [
+          "{{dir == 'up' ? H : dir == 'down' ? -H : 0}}",
+          0
+        ]
+      },
+      "ease": "cubic(0.76,0,0.24,1)"
+    }
+  }
+}

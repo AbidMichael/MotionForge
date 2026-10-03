@@ -1,0 +1,124 @@
+{
+  "slug": "bar-chart",
+  "kind": "element",
+  "summary": "Animated vertical bar chart from [{label, value}] data",
+  "tags": [
+    "chart",
+    "bar",
+    "graph",
+    "data",
+    "stats"
+  ],
+  "params": {
+    "data": "array<object>!",
+    "width": "number=1400",
+    "height": "number=560",
+    "color": {
+      "type": "color",
+      "default": "$color.accent"
+    },
+    "highlight": "integer=-1",
+    "highlightColor": {
+      "type": "color",
+      "default": "$color.accent2"
+    },
+    "suffix": "string=",
+    "decimals": "integer=0"
+  },
+  "duration": {
+    "default": 4.5
+  },
+  "example": {
+    "use": "core:bar-chart",
+    "data": [
+      {
+        "label": "Q1",
+        "value": 12
+      },
+      {
+        "label": "Q2",
+        "value": 19
+      },
+      {
+        "label": "Q3",
+        "value": 31
+      }
+    ]
+  },
+  "body": {
+    "layers": [
+      {
+        "type": "rect",
+        "y": "{{height / 2}}",
+        "w": "{{width}}",
+        "h": 2,
+        "fill": "$color.line",
+        "in": [
+          "core:grow-x"
+        ]
+      },
+      {
+        "repeat": "{{data}}",
+        "as": "bar",
+        "layer": {
+          "type": "group",
+          "x": "{{-width / 2 + (index + 0.5) * width / count}}",
+          "y": "{{height / 2}}",
+          "children": [
+            {
+              "type": "rect",
+              "anchor": "bottom",
+              "w": "{{width / count * 0.62}}",
+              "h": "{{max(4, height * 0.82 * bar.value / maxOf(data, 'value'))}}",
+              "fill": "{{index == highlight ? highlightColor : color}}",
+              "radius": 10,
+              "in": [
+                {
+                  "p": "core:grow-y",
+                  "at": "{{0.2 + index * 0.12}}",
+                  "d": 0.8
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "counter": {
+                "to": "{{bar.value}}",
+                "at": "{{0.2 + index * 0.12}}",
+                "d": 0.8,
+                "suffix": "{{suffix}}",
+                "decimals": "{{decimals}}"
+              },
+              "y": "{{-max(4, height * 0.82 * bar.value / maxOf(data, 'value')) - 34}}",
+              "size": 34,
+              "font": "$font.display",
+              "weight": 700,
+              "color": "$color.fg",
+              "in": [
+                {
+                  "p": "core:fade-in",
+                  "at": "{{0.4 + index * 0.12}}"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "text": "{{bar.label}}",
+              "y": 40,
+              "size": 28,
+              "font": "$font.body",
+              "weight": 500,
+              "color": "$color.muted",
+              "in": [
+                {
+                  "p": "core:fade-in",
+                  "at": "{{0.2 + index * 0.12}}"
+                }
+              ]
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

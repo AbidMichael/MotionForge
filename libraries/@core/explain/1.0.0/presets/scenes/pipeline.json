@@ -1,0 +1,79 @@
+{
+  "slug": "pipeline",
+  "kind": "scene",
+  "summary": "A workflow / pipeline: steps appear in order, then packets flow through them",
+  "tags": [
+    "workflow",
+    "pipeline",
+    "process",
+    "flow",
+    "steps",
+    "explain",
+    "system"
+  ],
+  "params": {
+    "title": "string=",
+    "steps": "array<string>!",
+    "packets": "integer=3",
+    "layout": "enum:layers|circle=layers"
+  },
+  "duration": {
+    "default": 6,
+    "min": 3,
+    "max": 20
+  },
+  "example": {
+    "p": "explain:pipeline",
+    "title": "From idea to video",
+    "steps": [
+      "Brief",
+      "Storyboard",
+      "Compose",
+      "Render",
+      "Ship"
+    ]
+  },
+  "body": {
+    "layers": [
+      {
+        "use": "core:backdrop",
+        "style": "dots"
+      },
+      {
+        "if": "{{len(title) > 0}}",
+        "use": "core:heading",
+        "text": "{{title}}",
+        "size": "$size.h3",
+        "align": "left",
+        "anchor": [
+          0,
+          0
+        ],
+        "x": "{{$space.margin}}",
+        "y": "{{$space.margin * 0.6}}"
+      },
+      {
+        "type": "graph",
+        "nodes": "{{steps}}",
+        "chain": true,
+        "directed": true,
+        "layout": "{{layout}}",
+        "nodeShape": "pill",
+        "nodeSize": 40,
+        "stagger": 0.25,
+        "pulses": [
+          {
+            "path": "{{steps}}",
+            "at": "{{len(steps) * 0.25 + 0.8}}",
+            "repeat": "{{packets}}",
+            "every": 0.7
+          }
+        ],
+        "x": "{{W / 2}}",
+        "y": "{{H / 2 + 60}}",
+        "w": "{{W - $space.margin * 2}}",
+        "h": "{{H * 0.5}}"
+      }
+    ]
+  }
+}

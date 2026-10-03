@@ -1,0 +1,75 @@
+{
+  "slug": "chart-bars",
+  "kind": "scene",
+  "summary": "Title + animated bar chart",
+  "tags": [
+    "chart",
+    "bars",
+    "graph",
+    "data",
+    "growth",
+    "comparison"
+  ],
+  "params": {
+    "title": "string!",
+    "data": "array<object>!",
+    "suffix": "string=",
+    "decimals": "integer=0",
+    "highlight": "integer=-1",
+    "backdrop": "enum:solid|gradient|grid|dots|spotlight=solid",
+    "exit": "enum:none|fade=none"
+  },
+  "duration": {
+    "default": 5,
+    "min": 3.5
+  },
+  "example": {
+    "p": "core:chart-bars",
+    "title": "Renders per day",
+    "data": [
+      {
+        "label": "Mon",
+        "value": 12
+      },
+      {
+        "label": "Tue",
+        "value": 18
+      },
+      {
+        "label": "Wed",
+        "value": 27
+      }
+    ],
+    "highlight": 2
+  },
+  "body": {
+    "layers": [
+      {
+        "use": "core:backdrop",
+        "style": "{{backdrop}}"
+      },
+      {
+        "use": "core:heading",
+        "text": "{{title}}",
+        "size": "$size.h3",
+        "align": "left",
+        "x": "{{$space.margin}}",
+        "y": 150,
+        "split": "words",
+        "out": "{{exit == 'fade' ? {p: 'core:fade-out', d: 0.4} : null}}"
+      },
+      {
+        "use": "core:bar-chart",
+        "data": "{{data}}",
+        "suffix": "{{suffix}}",
+        "decimals": "{{decimals}}",
+        "highlight": "{{highlight}}",
+        "x": "{{W / 2}}",
+        "y": "{{H / 2 + 40}}",
+        "width": "{{W - 2 * $space.margin - 100}}",
+        "height": 560,
+        "out": "{{exit == 'fade' ? {p: 'core:fade-out', d: 0.4} : null}}"
+      }
+    ]
+  }
+}

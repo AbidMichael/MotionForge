@@ -1,0 +1,16 @@
+{
+  "title": "Launch promo (kinetic)",
+  "use": ["@core/kinetic@^1"],
+  "theme": "kinetic:impact",
+  "scenes": [
+    { "p": "kinetic:title-slam", "text": "Stop rebuilding", "sub": "Motion design for AI agents" },
+    { "t": "core:flash" },
+    { "p": "kinetic:word-stack", "lines": ["Presets", "Libraries", "One render"], "highlight": 2 },
+    { "t": "core:whip-pan" },
+    { "p": "kinetic:big-number", "value": 90, "suffix": "%", "label": "fewer tokens per video" },
+    { "t": "core:slide-push", "dir": "up" },
+    { "p": "kinetic:word-swap", "prefix": "Built for", "words": ["Claude", "your agents", "you"] },
+    { "t": "core:crossfade" },
+    { "p": "kinetic:split-reveal", "text": "MotionForge", "sub": "runs on your machine", "exit": "fade" }
+  ]
+}

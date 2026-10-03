@@ -1,0 +1,97 @@
+{
+  "slug": "hero-object",
+  "kind": "scene",
+  "summary": "A sculptural 3D object (knot, torus, gem) slowly orbited, with a title",
+  "tags": [
+    "3d",
+    "hero",
+    "abstract",
+    "object",
+    "intro",
+    "logo"
+  ],
+  "params": {
+    "title": "string=",
+    "shape": "enum:knot|torus|sphere|icosahedron|octahedron=knot",
+    "material": "enum:metal|glass|plastic|matte|toon=metal",
+    "color": {
+      "type": "color",
+      "default": "$color.accent"
+    },
+    "lights": "enum:studio|soft|dramatic|neon=studio"
+  },
+  "duration": {
+    "default": 4.5,
+    "min": 2.5,
+    "max": 12
+  },
+  "example": {
+    "p": "three:hero-object",
+    "title": "Built different"
+  },
+  "body": {
+    "layers": [
+      {
+        "use": "core:backdrop",
+        "style": "spotlight"
+      },
+      {
+        "type": "three",
+        "w": "{{W}}",
+        "h": "{{H}}",
+        "lights": "{{lights}}",
+        "ground": {
+          "opacity": 0.3,
+          "y": -1.5
+        },
+        "camera": {
+          "fov": 35,
+          "orbit": {
+            "speed": 22,
+            "radius": 6.4,
+            "height": 1.1
+          },
+          "target": [
+            0,
+            0.1,
+            0
+          ]
+        },
+        "objects": [
+          {
+            "shape": "{{shape}}",
+            "material": "{{material}}",
+            "color": "{{color}}",
+            "float": 0.12,
+            "keys": {
+              "scale": [
+                [
+                  0,
+                  0.6
+                ],
+                [
+                  1.2,
+                  1,
+                  "outBack"
+                ]
+              ]
+            },
+            "spin": [
+              0,
+              0,
+              8
+            ]
+          }
+        ]
+      },
+      {
+        "if": "{{len(title) > 0}}",
+        "use": "core:heading",
+        "text": "{{title}}",
+        "size": "$size.h1",
+        "y": "{{H * 0.84}}",
+        "split": "chars"
+      }
+    ]
+  }
+}

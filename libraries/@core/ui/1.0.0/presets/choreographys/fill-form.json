@@ -1,0 +1,43 @@
+{
+  "slug": "fill-form",
+  "kind": "choreography",
+  "summary": "Click a field, type a value, click the submit button",
+  "tags": [
+    "ui",
+    "form",
+    "type",
+    "submit",
+    "demo",
+    "signup"
+  ],
+  "params": {
+    "field": "string!",
+    "text": "string!",
+    "button": "string!",
+    "cps": "number=14"
+  },
+  "example": {
+    "p": "ui:fill-form",
+    "field": "#field",
+    "text": "ada@lovelace.dev",
+    "button": "#button"
+  },
+  "body": {
+    "steps": [
+      {
+        "do": "type",
+        "into": "{{field}}",
+        "text": "{{text}}",
+        "cps": "{{cps}}"
+      },
+      {
+        "do": "wait",
+        "d": 0.3
+      },
+      {
+        "do": "click",
+        "on": "{{button}}"
+      }
+    ]
+  }
+}

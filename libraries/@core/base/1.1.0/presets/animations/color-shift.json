@@ -1,0 +1,33 @@
+{
+  "slug": "color-shift",
+  "kind": "animation",
+  "summary": "Animate colour (text colour or shape fill)",
+  "tags": [
+    "animation",
+    "color",
+    "colour",
+    "tint"
+  ],
+  "params": {
+    "from": {
+      "type": "color",
+      "default": "$color.fg"
+    },
+    "to": {
+      "type": "color",
+      "default": "$color.accent"
+    }
+  },
+  "duration": {
+    "default": 0.6
+  },
+  "body": {
+    "tracks": {
+      "color": [
+        "{{from}}",
+        "{{to}}"
+      ]
+    },
+    "ease": "inOut"
+  }
+}

@@ -1,0 +1,67 @@
+{
+  "slug": "kicker",
+  "kind": "element",
+  "summary": "Small uppercase label with an accent line (eyebrow above a title)",
+  "tags": [
+    "label",
+    "eyebrow",
+    "kicker",
+    "overline",
+    "text"
+  ],
+  "params": {
+    "text": "string!",
+    "color": {
+      "type": "color",
+      "default": "$color.accent"
+    },
+    "align": "enum:left|center|right=center",
+    "line": "boolean=true"
+  },
+  "example": {
+    "use": "core:kicker",
+    "text": "New release"
+  },
+  "body": {
+    "layers": [
+      {
+        "type": "group",
+        "anchor": "{{align == 'left' ? 'left' : align == 'right' ? 'right' : 'center'}}",
+        "layout": {
+          "dir": "row",
+          "gap": 18,
+          "align": "center"
+        },
+        "children": [
+          {
+            "if": "{{line}}",
+            "type": "rect",
+            "w": 56,
+            "h": 4,
+            "fill": "{{color}}",
+            "anchor": "left",
+            "in": [
+              "core:grow-x"
+            ]
+          },
+          {
+            "type": "text",
+            "text": "{{text}}",
+            "size": "$size.label",
+            "font": "$font.body",
+            "weight": 700,
+            "tracking": 0.22,
+            "case": "upper",
+            "color": "{{color}}",
+            "in": [
+              {
+                "p": "core:fade-in",
+                "at": 0.15
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

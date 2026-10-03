@@ -1,0 +1,73 @@
+{
+  "slug": "jitter",
+  "kind": "animation",
+  "summary": "Nervous jitter — loop",
+  "tags": [
+    "animation",
+    "kinetic",
+    "jitter",
+    "loop",
+    "shake",
+    "nervous"
+  ],
+  "duration": {
+    "default": 0.4
+  },
+  "body": {
+    "tracks": {
+      "dx": [
+        [
+          0,
+          0
+        ],
+        [
+          0.25,
+          3,
+          "hold"
+        ],
+        [
+          0.5,
+          -2,
+          "hold"
+        ],
+        [
+          0.75,
+          2,
+          "hold"
+        ],
+        [
+          1,
+          0,
+          "hold"
+        ]
+      ],
+      "dy": [
+        [
+          0,
+          0
+        ],
+        [
+          0.25,
+          -2,
+          "hold"
+        ],
+        [
+          0.5,
+          3,
+          "hold"
+        ],
+        [
+          0.75,
+          -1,
+          "hold"
+        ],
+        [
+          1,
+          0,
+          "hold"
+        ]
+      ]
+    },
+    "unit": false
+  }
+}

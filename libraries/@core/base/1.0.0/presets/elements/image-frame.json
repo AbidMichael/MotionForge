@@ -1,0 +1,54 @@
+{
+  "slug": "image-frame",
+  "kind": "element",
+  "summary": "Image or video in a rounded frame with slow push-in",
+  "tags": [
+    "image",
+    "photo",
+    "frame",
+    "media",
+    "screenshot"
+  ],
+  "params": {
+    "src": "asset!",
+    "width": "number=1100",
+    "height": "number=640",
+    "radius": {
+      "type": "number",
+      "default": "$radius.l"
+    },
+    "kind": "enum:image|video=image",
+    "push": "boolean=true"
+  },
+  "example": {
+    "use": "core:image-frame"
+  },
+  "body": {
+    "layers": [
+      {
+        "type": "group",
+        "w": "{{width}}",
+        "h": "{{height}}",
+        "overflow": "hidden",
+        "radius": "{{radius}}",
+        "boxShadow": "0 30px 80px rgba(0,0,0,0.45)",
+        "in": [
+          {
+            "p": "core:fade-up",
+            "distance": 50,
+            "d": 0.8
+          }
+        ],
+        "children": [
+          {
+            "type": "{{kind}}",
+            "src": "{{src}}",
+            "w": "{{width}}",
+            "h": "{{height}}",
+            "anim": "{{push ? {p: 'core:ken-burns', d: dur, to: 1.08} : null}}"
+          }
+        ]
+      }
+    ]
+  }
+}

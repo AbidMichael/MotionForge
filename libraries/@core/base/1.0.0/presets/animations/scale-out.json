@@ -1,0 +1,29 @@
+{
+  "slug": "scale-out",
+  "kind": "animation",
+  "summary": "Scale down and fade",
+  "tags": [
+    "animation",
+    "scale",
+    "out"
+  ],
+  "params": {
+    "to": "number=0.8"
+  },
+  "duration": {
+    "default": 0.45
+  },
+  "body": {
+    "tracks": {
+      "opacity": [
+        1,
+        0
+      ],
+      "scale": [
+        1,
+        "{{to}}"
+      ]
+    },
+    "ease": "in"
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "slug": "search-pick",
+  "kind": "choreography",
+  "summary": "Type a query in a search field, wait for results, click one",
+  "tags": [
+    "ui",
+    "search",
+    "select",
+    "pick",
+    "autocomplete"
+  ],
+  "params": {
+    "field": "string!",
+    "query": "string!",
+    "result": "string!",
+    "wait": "number=0.6"
+  },
+  "example": {
+    "p": "ui:search-pick",
+    "field": "#field",
+    "query": "motion",
+    "result": "#button"
+  },
+  "body": {
+    "steps": [
+      {
+        "do": "type",
+        "into": "{{field}}",
+        "text": "{{query}}"
+      },
+      {
+        "do": "wait",
+        "d": "{{wait}}"
+      },
+      {
+        "do": "hover",
+        "on": "{{result}}"
+      },
+      {
+        "do": "click",
+        "on": "{{result}}"
+      }
+    ]
+  }
+}

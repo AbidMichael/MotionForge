@@ -1,0 +1,175 @@
+{
+  "slug": "product-spin",
+  "kind": "scene",
+  "summary": "A device or card with your screenshot turning in 3D, soft shadow, title on the side",
+  "tags": [
+    "3d",
+    "product",
+    "device",
+    "phone",
+    "mockup",
+    "spin",
+    "showcase",
+    "app"
+  ],
+  "params": {
+    "image": "asset=",
+    "device": "enum:phone|tablet|card|box=phone",
+    "title": "string=",
+    "subtitle": "string=",
+    "color": {
+      "type": "color",
+      "default": "#16181d"
+    },
+    "side": "enum:left|right=right",
+    "turn": "number=50"
+  },
+  "duration": {
+    "default": 5,
+    "min": 3,
+    "max": 12
+  },
+  "example": {
+    "p": "three:product-spin",
+    "title": "Your app, in 3D",
+    "subtitle": "Drop a screenshot in image"
+  },
+  "body": {
+    "layers": [
+      {
+        "use": "core:backdrop",
+        "style": "spotlight"
+      },
+      {
+        "type": "three",
+        "x": "{{side == 'right' ? W * 0.66 : W * 0.34}}",
+        "y": "{{H / 2}}",
+        "w": "{{W * 0.62}}",
+        "h": "{{H}}",
+        "@portrait": {
+          "x": "{{W / 2}}",
+          "y": "{{H * 0.4}}",
+          "w": "{{W}}",
+          "h": "{{H * 0.72}}"
+        },
+        "lights": "studio",
+        "ground": {
+          "opacity": 0.35,
+          "y": "{{device == 'card' ? -1.0 : -1.75}}"
+        },
+        "camera": {
+          "fov": 32,
+          "position": [
+            0,
+            0.35,
+            7.2
+          ],
+          "target": [
+            0,
+            0,
+            0
+          ]
+        },
+        "objects": [
+          {
+            "shape": "{{device == 'phone' || device == 'tablet' ? 'device' : device == 'card' ? 'card' : 'roundedBox'}}",
+            "size": "{{device == 'phone' ? [1.55, 3.2, 0.16] : device == 'tablet' ? [2.5, 3.3, 0.14] : device == 'card' ? [3.2, 2.0, 0.05] : [1.8, 1.8, 1.8, 0.2]}}",
+            "image": "{{image}}",
+            "color": "{{color}}",
+            "material": "plastic",
+            "float": 0.06,
+            "keys": {
+              "rotation": [
+                [
+                  0,
+                  [
+                    "{{-turn * 0.6}}",
+                    "{{-turn}}",
+                    4
+                  ]
+                ],
+                [
+                  "{{dur}}",
+                  [
+                    -4,
+                    "{{turn * 0.55}}",
+                    -2
+                  ],
+                  "inOutSine"
+                ]
+              ],
+              "position": [
+                [
+                  0,
+                  [
+                    0,
+                    -0.5,
+                    -1.5
+                  ]
+                ],
+                [
+                  1.0,
+                  [
+                    0,
+                    0,
+                    0
+                  ],
+                  "outCubic"
+                ]
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "if": "{{len(title) > 0}}",
+        "use": "core:heading",
+        "text": "{{title}}",
+        "size": "$size.h2",
+        "align": "left",
+        "anchor": [
+          0,
+          0.5
+        ],
+        "x": "{{side == 'right' ? $space.margin : W * 0.6}}",
+        "y": "{{H / 2 - 40}}",
+        "maxWidth": "{{W * 0.36}}",
+        "split": "words",
+        "@portrait": {
+          "anchor": [
+            0.5,
+            0.5
+          ],
+          "align": "center",
+          "x": "{{W / 2}}",
+          "y": "{{H * 0.8}}",
+          "maxWidth": "{{W * 0.86}}"
+        }
+      },
+      {
+        "if": "{{len(subtitle) > 0}}",
+        "use": "core:paragraph",
+        "text": "{{subtitle}}",
+        "align": "left",
+        "anchor": [
+          0,
+          0
+        ],
+        "x": "{{side == 'right' ? $space.margin : W * 0.6}}",
+        "y": "{{H / 2 + 30}}",
+        "maxWidth": "{{W * 0.34}}",
+        "at": 0.5,
+        "@portrait": {
+          "anchor": [
+            0.5,
+            0
+          ],
+          "align": "center",
+          "x": "{{W / 2}}",
+          "y": "{{H * 0.86}}",
+          "maxWidth": "{{W * 0.8}}"
+        }
+      }
+    ]
+  }
+}

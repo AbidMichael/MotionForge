@@ -1,0 +1,38 @@
+{
+  "slug": "brutal",
+  "kind": "direction",
+  "summary": "Brutalist poster: hard cuts, fast, heavy type",
+  "tags": [
+    "direction",
+    "look",
+    "style",
+    "brutal",
+    "poster",
+    "bold",
+    "punchy"
+  ],
+  "params": {
+    "accent": {
+      "type": "color",
+      "default": "#ff4d00"
+    }
+  },
+  "example": {
+    "p": "dir:brutal"
+  },
+  "body": {
+    "theme": {
+      "p": "core:brutal",
+      "accent": "{{accent}}"
+    },
+    "pace": 0.8,
+    "animScale": 0.65,
+    "transition": null,
+    "sceneDefaults": {
+      "backdrop": "solid"
+    },
+    "sfx": {
+      "scenes": "impact"
+    }
+  }
+}

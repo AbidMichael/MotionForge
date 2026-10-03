@@ -1,0 +1,41 @@
+{
+  "slug": "underline",
+  "kind": "element",
+  "summary": "Accent bar that grows from the left (put under a title)",
+  "tags": [
+    "underline",
+    "bar",
+    "line",
+    "accent"
+  ],
+  "params": {
+    "width": "number=220",
+    "thickness": "number=8",
+    "color": {
+      "type": "color",
+      "default": "$color.accent"
+    },
+    "delay": "number=0.3"
+  },
+  "example": {
+    "use": "core:underline"
+  },
+  "body": {
+    "layers": [
+      {
+        "type": "rect",
+        "w": "{{width}}",
+        "h": "{{thickness}}",
+        "fill": "{{color}}",
+        "radius": "{{thickness / 2}}",
+        "anchor": "center",
+        "in": [
+          {
+            "p": "core:grow-x",
+            "at": "{{delay}}"
+          }
+        ]
+      }
+    ]
+  }
+}

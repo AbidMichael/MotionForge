@@ -1,0 +1,48 @@
+{
+  "slug": "documentary",
+  "kind": "direction",
+  "summary": "Documentary: muted palette, slow dissolves, grain",
+  "tags": [
+    "direction",
+    "look",
+    "style",
+    "documentary",
+    "story",
+    "calm",
+    "report"
+  ],
+  "params": {
+    "accent": {
+      "type": "color",
+      "default": "#9fb4c7"
+    }
+  },
+  "example": {
+    "p": "dir:documentary"
+  },
+  "body": {
+    "theme": {
+      "p": "core:dark",
+      "accent": "{{accent}}"
+    },
+    "pace": 1.2,
+    "animScale": 1.3,
+    "transition": {
+      "t": "core:crossfade",
+      "d": 1.0
+    },
+    "sceneDefaults": {
+      "backdrop": "solid"
+    },
+    "overlays": [
+      {
+        "use": "dir:grain",
+        "amount": 0.08
+      },
+      {
+        "use": "dir:vignette",
+        "amount": 0.4
+      }
+    ]
+  }
+}

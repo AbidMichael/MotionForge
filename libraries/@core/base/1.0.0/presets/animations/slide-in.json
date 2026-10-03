@@ -1,0 +1,45 @@
+{
+  "slug": "slide-in",
+  "kind": "animation",
+  "summary": "Slide in from a side",
+  "tags": [
+    "animation",
+    "slide",
+    "in"
+  ],
+  "params": {
+    "from": "enum:left|right|up|down=left",
+    "distance": "number=240"
+  },
+  "duration": {
+    "default": 0.7
+  },
+  "body": {
+    "tracks": {
+      "opacity": [
+        [
+          0,
+          0
+        ],
+        [
+          0.4,
+          1,
+          "out"
+        ],
+        [
+          1,
+          1
+        ]
+      ],
+      "dx": [
+        "{{from == 'left' ? -distance : from == 'right' ? distance : 0}}",
+        0
+      ],
+      "dy": [
+        "{{from == 'up' ? -distance : from == 'down' ? distance : 0}}",
+        0
+      ]
+    },
+    "ease": "cubic(0.2,0.9,0.1,1)"
+  }
+}

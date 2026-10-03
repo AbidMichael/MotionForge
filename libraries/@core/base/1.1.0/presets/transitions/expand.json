@@ -1,0 +1,10 @@
+{
+  "slug": "expand",
+  "kind": "transition",
+  "summary": "A card in the current scene grows into the whole next scene (app-open style), keeping continuity",
+  "tags": ["transition", "expand", "grow", "card", "continuity", "zoom", "open"],
+  "params": {"from": "string!", "ease": "string=cubic(0.7,0,0.2,1)"},
+  "duration": {"default": 0.9},
+  "body": {"continuity": "expand"},
+  "example": {"from": "#card"}
+}

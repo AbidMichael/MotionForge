@@ -1,0 +1,12 @@
+{
+  "name": "@core/base",
+  "alias": "core",
+  "summary": "Core themes, animations, transitions, elements and scenes (16:9 first).",
+  "guide": "Core building blocks. Every other library builds on these.\nTOKENS (use \"$group.name\" in any value, or {{$color.accent}} in expressions): color.bg bg2 surface fg muted accent accent2 accent3 line · font.display body mono · weight.display heading body · size.hero h1 h2 h3 body small label · space.margin xs s m l · radius.s m l · ease.in out inOut snap smooth spring bounce · dur.fast base slow · fx.glow\nTHEMES: core:dark (default) core:light core:neon core:editorial core:brutal — all take {accent}.\nSCENES: title-card, statement, stat, quote, bullets, section, chart-bars, compare, split-media, logo-reveal, end-card, media-full. Scenes take exit:\"fade\" to fade out without a transition.\nTRANSITIONS: crossfade, fade-through, slide-push{dir}, zoom-through, whip-pan{dir}, wipe{dir}, iris, flash, glitch-cut, bars.\nANIMATIONS for in/out/anim/loop: fade-in fade-out fade-up fade-down slide-in{from} slide-out{to} scale-in scale-out pop blur-in blur-out rise drop-in wipe-in{dir} wipe-out{dir} typewriter spin-in tracking-in grow-x grow-y draw glitch-in shake pulse float breathe ken-burns color-shift.\nELEMENTS: heading, kicker, paragraph, counter, pill, bullet-list, underline, progress-bar, lower-third, logo, quote-block, backdrop, cta-button, bar-chart, dots-field, image-frame.\nTIPS: split text (split:\"chars\"|\"words\") makes in/out anims stagger per unit. Positions accept px, \"50%\", \"10vw\". Times accept seconds, \"end\", \"end-0.5\".",
+  "depends": {},
+  "visibility": "public",
+  "owner": "system",
+  "tags": [
+    "core"
+  ]
+}

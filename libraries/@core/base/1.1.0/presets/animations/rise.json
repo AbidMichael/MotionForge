@@ -1,0 +1,47 @@
+{
+  "slug": "rise",
+  "kind": "animation",
+  "summary": "Units rise into place from below (great with split chars/words)",
+  "tags": [
+    "animation",
+    "rise",
+    "in",
+    "text",
+    "kinetic"
+  ],
+  "params": {
+    "distance": "number=90",
+    "tilt": "number=0"
+  },
+  "duration": {
+    "default": 0.6
+  },
+  "body": {
+    "tracks": {
+      "opacity": [
+        [
+          0,
+          0
+        ],
+        [
+          0.5,
+          1,
+          "out"
+        ],
+        [
+          1,
+          1
+        ]
+      ],
+      "dy": [
+        "{{distance}}",
+        0
+      ],
+      "rotate": [
+        "{{tilt}}",
+        0
+      ]
+    },
+    "ease": "cubic(0.2,0.9,0.1,1)"
+  }
+}

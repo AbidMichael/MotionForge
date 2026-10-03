@@ -1,0 +1,17 @@
+{
+  "title": "Product explainer (core)",
+  "theme": { "p": "core:dark", "accent": "#7c8cff" },
+  "scenes": [
+    { "p": "core:title-card", "kicker": "Introducing", "title": "MotionForge", "subtitle": "A local render server your agents can drive" },
+    { "t": "core:crossfade" },
+    { "p": "core:statement", "text": "Every prompt was rebuilding the same animations." },
+    { "t": "core:wipe", "dir": "left" },
+    { "p": "core:bullets", "title": "What changes", "items": ["Agents compose from presets", "Good work becomes a library", "Edits re-render only what changed"] },
+    { "t": "core:slide-push" },
+    { "p": "core:chart-bars", "title": "Tokens per video", "data": [{ "label": "Hand-written", "value": 12000 }, { "label": "Presets", "value": 600 }], "highlight": 1 },
+    { "t": "core:zoom-through" },
+    { "p": "core:quote", "quote": "The second video cost a tenth of the first.", "author": "An agent", "role": "after one session" },
+    { "t": "core:fade-through" },
+    { "p": "core:end-card", "headline": "Compose, don't rebuild", "cta": "npm start", "url": "http://127.0.0.1:7420", "exit": "fade" }
+  ]
+}

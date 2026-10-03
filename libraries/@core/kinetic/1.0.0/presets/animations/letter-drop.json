@@ -1,0 +1,47 @@
+{
+  "slug": "letter-drop",
+  "kind": "animation",
+  "summary": "Letters fall and rotate into place (use with split chars)",
+  "tags": [
+    "animation",
+    "kinetic",
+    "drop",
+    "letters",
+    "in",
+    "playful"
+  ],
+  "params": {
+    "distance": "number=200",
+    "angle": "number=-25"
+  },
+  "duration": {
+    "default": 0.6
+  },
+  "body": {
+    "tracks": {
+      "dy": [
+        "{{-distance}}",
+        0
+      ],
+      "rotate": [
+        "{{angle}}",
+        0
+      ],
+      "opacity": [
+        [
+          0,
+          0
+        ],
+        [
+          0.3,
+          1
+        ],
+        [
+          1,
+          1
+        ]
+      ]
+    },
+    "ease": "outBack"
+  }
+}

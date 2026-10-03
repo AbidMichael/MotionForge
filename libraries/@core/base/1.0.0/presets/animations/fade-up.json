@@ -1,0 +1,31 @@
+{
+  "slug": "fade-up",
+  "kind": "animation",
+  "summary": "Fade in while rising from below",
+  "tags": [
+    "animation",
+    "fade",
+    "in",
+    "rise",
+    "up"
+  ],
+  "params": {
+    "distance": "number=60"
+  },
+  "duration": {
+    "default": 0.7
+  },
+  "body": {
+    "tracks": {
+      "opacity": [
+        0,
+        1
+      ],
+      "dy": [
+        "{{distance}}",
+        0
+      ]
+    },
+    "ease": "cubic(0.2,0.9,0.1,1)"
+  }
+}

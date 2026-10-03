@@ -1,0 +1,27 @@
+{
+  "slug": "wipe-out",
+  "kind": "animation",
+  "summary": "Hide with a moving edge (clip)",
+  "tags": [
+    "animation",
+    "wipe",
+    "out",
+    "mask"
+  ],
+  "params": {
+    "dir": "enum:left|right|top|bottom|center|circle=right"
+  },
+  "duration": {
+    "default": 0.5
+  },
+  "body": {
+    "tracks": {
+      "clip": [
+        1,
+        0
+      ]
+    },
+    "ease": "cubic(0.65,0,0.35,1)",
+    "clipDir": "{{dir}}"
+  }
+}

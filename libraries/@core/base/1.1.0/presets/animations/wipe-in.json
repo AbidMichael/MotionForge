@@ -1,0 +1,28 @@
+{
+  "slug": "wipe-in",
+  "kind": "animation",
+  "summary": "Reveal with a moving edge (clip)",
+  "tags": [
+    "animation",
+    "wipe",
+    "reveal",
+    "in",
+    "mask"
+  ],
+  "params": {
+    "dir": "enum:left|right|top|bottom|center|circle=left"
+  },
+  "duration": {
+    "default": 0.6
+  },
+  "body": {
+    "tracks": {
+      "clip": [
+        0,
+        1
+      ]
+    },
+    "ease": "cubic(0.65,0,0.35,1)",
+    "clipDir": "{{dir}}"
+  }
+}

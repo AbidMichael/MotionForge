@@ -1,0 +1,50 @@
+{
+  "slug": "pop",
+  "kind": "animation",
+  "summary": "Punchy pop: tiny → overshoot → settle",
+  "tags": [
+    "animation",
+    "pop",
+    "scale",
+    "in",
+    "punchy",
+    "bounce"
+  ],
+  "duration": {
+    "default": 0.5
+  },
+  "body": {
+    "tracks": {
+      "opacity": [
+        [
+          0,
+          0
+        ],
+        [
+          0.2,
+          1
+        ],
+        [
+          1,
+          1
+        ]
+      ],
+      "scale": [
+        [
+          0,
+          0.2
+        ],
+        [
+          0.55,
+          1.12,
+          "out"
+        ],
+        [
+          1,
+          1,
+          "smooth"
+        ]
+      ]
+    }
+  }
+}

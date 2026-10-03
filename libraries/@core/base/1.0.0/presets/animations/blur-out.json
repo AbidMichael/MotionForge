@@ -1,0 +1,29 @@
+{
+  "slug": "blur-out",
+  "kind": "animation",
+  "summary": "Defocus and fade",
+  "tags": [
+    "animation",
+    "blur",
+    "out"
+  ],
+  "params": {
+    "amount": "number=24"
+  },
+  "duration": {
+    "default": 0.6
+  },
+  "body": {
+    "tracks": {
+      "opacity": [
+        1,
+        0
+      ],
+      "blur": [
+        0,
+        "{{amount}}"
+      ]
+    },
+    "ease": "in"
+  }
+}

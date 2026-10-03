@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MotionForge Editor</title>
+<style>
+@font-face { font-family: 'Bebas Neue'; src: url(/v1/fonts/bebas-neue/bebas-neue-latin-400-normal.woff2) format('woff2'); font-weight: 400; }
+@font-face { font-family: 'Inter'; src: url(/v1/fonts/inter/inter-latin-400-normal.woff2) format('woff2'); font-weight: 400; }
+@font-face { font-family: 'Inter'; src: url(/v1/fonts/inter/inter-latin-600-normal.woff2) format('woff2'); font-weight: 600; }
+@font-face { font-family: 'JetBrains Mono'; src: url(/v1/fonts/jetbrains-mono/jetbrains-mono-latin-400-normal.woff2) format('woff2'); font-weight: 400; }
+:root {
+  --booth: #12151c; --panel: #181c25; --rule: #283040; --paper: #e8e4da; --dim: #8a909c;
+  --tungsten: #f2a93b; --cyan: #5fd3c6; --fault: #ef5b5b;
+  --display: 'Bebas Neue', 'Arial Narrow', sans-serif; --text: 'Inter', 'Segoe UI', sans-serif; --mono: 'JetBrains Mono', Consolas, monospace;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--booth); color: var(--paper); font: 400 14px/1.45 var(--text); height: 100%; }
+a { color: var(--cyan); }
+button { font: 600 13px var(--text); color: var(--booth); background: var(--paper); border: 0; border-radius: 3px; padding: 6px 12px; cursor: pointer; }
+button.ghost { background: transparent; color: var(--paper); box-shadow: inset 0 0 0 1px var(--rule); }
+button:disabled { opacity: .5; cursor: default; }
+button:focus-visible, input:focus-visible, select:focus-visible, [tabindex]:focus-visible { outline: 2px solid var(--tungsten); outline-offset: 2px; }
+input, select, textarea { font: 14px var(--text); background: #0e1117; color: var(--paper); border: 1px solid var(--rule); border-radius: 3px; padding: 6px 8px; width: 100%; }
+textarea { resize: vertical; min-height: 64px; }
+.id { font: 12px var(--mono); color: var(--dim); }
+header { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; padding: 14px 24px; border-bottom: 1px solid var(--rule); }
+header h1 { font: 400 32px/1 var(--display); letter-spacing: .02em; margin: 0; }
+header h1 span { color: var(--tungsten); }
+header .grow { flex: 1; }
+.app { display: grid; grid-template-columns: minmax(0, 1fr) 320px; min-height: calc(100% - 64px); }
+.stagewrap { padding: 18px 24px; min-width: 0; display: flex; flex-direction: column; gap: 14px; }
+.stage { position: relative; background: #000; align-self: center; width: 100%; max-width: 1280px; box-shadow: 0 0 0 1px var(--rule); user-select: none; }
+.stage img { display: block; width: 100%; height: 100%; }
+.stage .loading { position: absolute; right: 10px; top: 10px; font-size: 12px; color: var(--dim); background: #000a; padding: 2px 8px; border-radius: 3px; display: none; }
+.stage.busy .loading { display: block; }
+.box { position: absolute; border: 1px dashed #ffffff40; cursor: pointer; }
+.box:hover { border-color: var(--cyan); background: #5fd3c611; }
+.box.sel { border: 2px solid var(--tungsten); background: #f2a93b14; cursor: move; z-index: 5; }
+.box.ghost { border-color: var(--tungsten); border-style: solid; background: #f2a93b22; pointer-events: none; }
+.box .tag { position: absolute; left: -2px; top: -20px; font: 11px var(--mono); background: var(--tungsten); color: var(--booth); padding: 1px 5px; border-radius: 2px; white-space: nowrap; display: none; }
+.box.sel .tag { display: block; }
+.timeline { position: relative; height: 54px; background: var(--panel); border-radius: 3px; }
+.timeline .scene { position: absolute; top: 0; bottom: 0; border-right: 1px solid var(--rule); padding: 4px 8px; font-size: 12px; color: var(--dim); overflow: hidden; white-space: nowrap; cursor: pointer; }
+.timeline .scene.cur { background: #f2a93b14; color: var(--paper); }
+.timeline .head { position: absolute; top: -4px; bottom: -4px; width: 2px; background: var(--tungsten); pointer-events: none; }
+.timeline .span { position: absolute; bottom: 4px; height: 6px; background: var(--cyan); border-radius: 3px; opacity: .8; pointer-events: none; }
+.controls { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.controls input[type=range] { flex: 1; min-width: 160px; padding: 0; }
+.controls .tc { font: 400 26px/1 var(--display); min-width: 96px; }
+aside { border-left: 1px solid var(--rule); padding: 18px; display: flex; flex-direction: column; gap: 16px; overflow: auto; }
+aside h2 { font: 400 22px/1 var(--display); letter-spacing: .03em; margin: 0; }
+.field { display: flex; flex-direction: column; gap: 4px; }
+.field label { font-size: 12px; color: var(--dim); }
+.row { display: flex; gap: 8px; align-items: center; }
+.row > * { flex: 1; }
+.hint { color: var(--dim); font-size: 12px; }
+.layers { list-style: none; margin: 0; padding: 0; max-height: 260px; overflow: auto; border-top: 1px solid var(--rule); }
+.layers li { padding: 5px 0; border-bottom: 1px solid #ffffff08; cursor: pointer; display: flex; justify-content: space-between; gap: 8px; font-size: 13px; }
+.layers li.sel { color: var(--tungsten); }
+.layers li span:last-child { color: var(--dim); font-size: 11px; }
+.toast { position: fixed; right: 24px; bottom: 24px; background: var(--paper); color: var(--booth); padding: 10px 14px; border-radius: 3px; font-weight: 600; opacity: 0; transition: opacity .2s; max-width: 60ch; }
+.toast.show { opacity: 1; }
+.toast.err { background: var(--fault); color: #fff; }
+@media (max-width: 960px) { .app { grid-template-columns: 1fr; } aside { border-left: 0; border-top: 1px solid var(--rule); } .stagewrap { padding: 12px 16px; } header { padding: 12px 16px; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>Motion<span>Forge</span> editor</h1>
+  <div class="id" id="who">—</div>
+  <div class="grow"></div>
+  <button class="ghost" id="undo" disabled>Undo</button>
+  <a href="/">Dashboard</a>
+</header>
+<div class="app">
+  <div class="stagewrap">
+    <div class="stage" id="stage"><img id="frame" alt="Frame at the playhead"><div class="loading">rendering…</div></div>
+    <div class="controls">
+      <button class="ghost" id="prev" aria-label="Previous frame">◀</button>
+      <input type="range" id="scrub" min="0" max="1" step="0.0333" value="0" aria-label="Time">
+      <button class="ghost" id="next" aria-label="Next frame">▶</button>
+      <div class="tc" id="tc">00:00.00</div>
+    </div>
+    <div class="timeline" id="timeline"></div>
+    <p class="hint">Click a box to select it, drag it to move it, edit its text or timing on the right. Every change is written back into the composition JSON as a new revision (direct values when the layer is yours, scene "tweaks" when a preset made it).</p>
+  </div>
+  <aside>
+    <div class="field"><label for="comp">Composition</label><select id="comp"></select></div>
+    <div id="inspector"><p class="hint">Nothing selected.</p></div>
+    <div><h2>Scene</h2>
+      <div class="field"><label for="sceneD">Duration (s)</label><div class="row"><input id="sceneD" type="number" step="0.1" min="0.3"><button id="applyD">Apply</button></div></div>
+    </div>
+    <div><h2>Visible layers</h2><ul class="layers" id="layers"></ul></div>
+  </aside>
+</div>
+<div class="toast" id="toast" role="status"></div>
+<script>
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+const api = async (url, opts = {}) => {
+  const r = await fetch(url, { ...opts, headers: { 'content-type': 'application/json', 'x-mf-client': 'dashboard', ...(opts.headers || {}) } });
+  const body = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(body.error || r.status);
+  return body;
+};
+const toast = (msg, err) => { const t = $('toast'); t.textContent = msg; t.className = 'toast show' + (err ? ' err' : ''); setTimeout(() => (t.className = 'toast'), 3200); };
+const tcf = (sec) => { const m = Math.floor(sec / 60), s = sec - m * 60; return `${String(m).padStart(2, '0')}:${s.toFixed(2).padStart(5, '0')}`; };
+
+let id = new URLSearchParams(location.search).get('id');
+let L = null;          // layout at t
+let t = 1.2;
+let sel = null;        // selected box id
+const undoStack = [];  // previous revisions for undo
+let frameReq = 0;
+
+async function loadComps() {
+  const { compositions } = await api('/v1/compositions?limit=40');
+  $('comp').innerHTML = compositions.filter((c) => c.ok).map((c) => `<option value="${esc(c.id)}">${esc(c.title || c.id)} · ${esc(c.id)} r${c.rev}</option>`).join('');
+  if (!id && compositions.length) id = compositions.find((c) => c.ok)?.id;
+  if (id) $('comp').value = id;
+}
+
+async function refresh(keepSel = true) {
+  if (!id) return;
+  L = await api(`/v1/compositions/${id}/layout?t=${t}`);
+  $('who').textContent = `${id} r${L.rev} · ${L.width}×${L.height} · ${L.duration.toFixed(2)}s`;
+  $('scrub').max = Math.max(0, L.duration - 1 / L.fps).toFixed(3);
+  $('scrub').step = (1 / L.fps).toFixed(4);
+  $('stage').style.aspectRatio = `${L.width} / ${L.height}`;
+  if (!keepSel || !L.boxes.find((b) => b.id === sel)) sel = null;
+  drawTimeline(); drawBoxes(); drawInspector(); drawFrame();
+  $('sceneD').value = (L.sceneEnd - L.sceneStart).toFixed(2);
+}
+
+async function drawFrame() {
+  const my = ++frameReq;
+  $('stage').classList.add('busy');
+  try {
+    const r = await api(`/v1/compositions/${id}/preview`, { method: 'POST', body: JSON.stringify({ at: [t], scale: 0.5, sheet: false }) });
+    if (my !== frameReq) return;
+    $('frame').src = r.frames[0].url;
+  } catch (e) { toast(e.message, true); }
+  finally { if (my === frameReq) $('stage').classList.remove('busy'); }
+}
+
+function drawTimeline() {
+  const tl = $('timeline');
+  const d = L.duration;
+  let html = L.scenes.map((s) => `<div class="scene${s.i === L.scene ? ' cur' : ''}" data-t="${s.start}" style="left:${(s.start / d) * 100}%;width:${((s.end - s.start) / d) * 100}%">S${s.i + 1} ${esc(s.preset || 'inline')}</div>`).join('');
+  const b = L.boxes.find((x) => x.id === sel);
+  if (b) html += `<div class="span" style="left:${(b.from / d) * 100}%;width:${((b.to - b.from) / d) * 100}%"></div>`;
+  html += `<div class="head" style="left:${(t / d) * 100}%"></div>`;
+  tl.innerHTML = html;
+  $('tc').textContent = tcf(t);
+  $('scrub').value = t;
+}
+
+function drawBoxes() {
+  const st = $('stage');
+  st.querySelectorAll('.box').forEach((n) => n.remove());
+  const sx = 100 / L.width, sy = 100 / L.height;
+  const sorted = [...L.boxes].sort((a, b) => b.rect.w * b.rect.h - a.rect.w * a.rect.h);
+  for (const b of sorted) {
+    const el = document.createElement('div');
+    el.className = 'box' + (b.id === sel ? ' sel' : '');
+    el.dataset.id = b.id;
+    el.tabIndex = 0;
+    el.setAttribute('aria-label', `${b.name || b.type} ${b.text || ''}`);
+    Object.assign(el.style, { left: `${b.rect.x * sx}%`, top: `${b.rect.y * sy}%`, width: `${b.rect.w * sx}%`, height: `${b.rect.h * sy}%` });
+    el.innerHTML = `<span class="tag">${esc(b.name || b.type)}</span>`;
+    st.appendChild(el);
+  }
+  $('layers').innerHTML = L.boxes.map((b) => `<li data-id="${esc(b.id)}" class="${b.id === sel ? 'sel' : ''}"><span>${esc(b.name || b.text?.slice(0, 28) || b.type)}</span><span>${esc(b.preset || b.type)}</span></li>`).join('') || '<li class="hint">Nothing visible at this time.</li>';
+}
+
+function drawInspector() {
+  const b = L.boxes.find((x) => x.id === sel);
+  if (!b) { $('inspector').innerHTML = '<p class="hint">Nothing selected. Click a box on the frame.</p>'; return; }
+  $('inspector').innerHTML = `<h2>${esc(b.name || b.type)}</h2>
+    <div class="id">${esc(b.id)}${b.preset ? ' · ' + esc(b.preset) : ''}</div>
+    ${b.text !== undefined ? `<div class="field"><label for="txt">Text${b.textPtr ? '' : ' (generated — edit the preset param)'}</label><textarea id="txt" ${b.textPtr ? '' : 'disabled'}>${esc(b.text)}</textarea>${b.textPtr ? '<button id="applyTxt">Apply text</button>' : ''}</div>` : ''}
+    <div class="field"><label>Position (px) — or drag on the frame</label><div class="row"><input id="dx" type="number" value="0" aria-label="Move x by"><input id="dy" type="number" value="0" aria-label="Move y by"><button id="applyMove">Move</button></div></div>
+    <div class="field"><label>Scale</label><div class="row"><button class="ghost" data-scale="0.9">−10%</button><button class="ghost" data-scale="1.1">+10%</button></div></div>
+    <div class="field"><label>Timing (${b.from.toFixed(2)}–${b.to.toFixed(2)}s)</label><div class="row"><button class="ghost" data-shift="-0.2">Earlier 0.2s</button><button class="ghost" data-shift="0.2">Later 0.2s</button></div></div>`;
+}
+
+async function edit(edits, msg) {
+  try {
+    const before = L.rev;
+    const r = await api(`/v1/compositions/${id}/edit`, { method: 'POST', body: JSON.stringify({ edits }) });
+    if (!r.result.ok) { toast(`Rejected: ${r.result.errors?.[0]?.msg ?? 'error'}`, true); return; }
+    undoStack.push(before);
+    $('undo').disabled = false;
+    toast(`${msg} → r${r.result.rev}`);
+    await refresh();
+  } catch (e) { toast(e.message, true); }
+}
+
+// selection + dragging
+let drag = null;
+$('stage').addEventListener('pointerdown', (e) => {
+  const el = e.target.closest('.box');
+  if (!el) return;
+  const id0 = el.dataset.id;
+  if (sel !== id0) { sel = id0; drawBoxes(); drawInspector(); drawTimeline(); return; }
+  const r = $('stage').getBoundingClientRect();
+  drag = { el, x0: e.clientX, y0: e.clientY, k: L.width / r.width, left: parseFloat(el.style.left), top: parseFloat(el.style.top), w: r.width, h: r.height };
+  el.setPointerCapture(e.pointerId);
+});
+$('stage').addEventListener('pointermove', (e) => {
+  if (!drag) return;
+  drag.el.style.left = `${drag.left + ((e.clientX - drag.x0) / drag.w) * 100}%`;
+  drag.el.style.top = `${drag.top + ((e.clientY - drag.y0) / drag.h) * 100}%`;
+});
+$('stage').addEventListener('pointerup', (e) => {
+  if (!drag) return;
+  const dx = Math.round((e.clientX - drag.x0) * drag.k), dy = Math.round((e.clientY - drag.y0) * drag.k);
+  drag = null;
+  if (Math.abs(dx) + Math.abs(dy) > 2) edit([{ layer: sel, dx, dy }], `Moved ${dx}, ${dy}`);
+});
+document.addEventListener('keydown', (e) => {
+  if (!sel || ['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName)) return;
+  const step = e.shiftKey ? 20 : 4;
+  const k = { ArrowLeft: [-step, 0], ArrowRight: [step, 0], ArrowUp: [0, -step], ArrowDown: [0, step] }[e.key];
+  if (k) { e.preventDefault(); edit([{ layer: sel, dx: k[0], dy: k[1] }], 'Nudged'); }
+});
+document.addEventListener('click', async (e) => {
+  const li = e.target.closest('.layers li[data-id]');
+  if (li) { sel = li.dataset.id; drawBoxes(); drawInspector(); drawTimeline(); return; }
+  const sc = e.target.closest('.timeline .scene');
+  if (sc) { t = Number(sc.dataset.t) + 0.5; await refresh(false); return; }
+  const b = e.target.closest('button');
+  if (!b) return;
+  if (b.id === 'applyTxt') edit([{ layer: sel, text: $('txt').value }], 'Text updated');
+  if (b.id === 'applyMove') edit([{ layer: sel, dx: Number($('dx').value) || 0, dy: Number($('dy').value) || 0 }], 'Moved');
+  if (b.dataset.scale) edit([{ layer: sel, scale: Number(b.dataset.scale) }], 'Scaled');
+  if (b.dataset.shift) edit([{ layer: sel, shift: Number(b.dataset.shift) }], 'Retimed');
+  if (b.id === 'applyD') edit([{ scene: L.scene, d: Number($('sceneD').value) }], 'Scene duration');
+  if (b.id === 'undo' && undoStack.length) {
+    try {
+      const rev = undoStack.pop();
+      const c = await api(`/v1/compositions/${id}?rev=${rev}`);
+      await api('/v1/compositions', { method: 'POST', body: JSON.stringify({ composition: c.composition, id }) });
+      toast(`Back to the state of r${rev}`);
+      $('undo').disabled = !undoStack.length;
+      await refresh();
+    } catch (err) { toast(err.message, true); }
+  }
+  if (b.id === 'prev' || b.id === 'next') { t = Math.max(0, Math.min(L.duration - 1 / L.fps, t + (b.id === 'next' ? 1 : -1) / L.fps)); await refresh(); }
+});
+let scrubTimer = null;
+$('scrub').addEventListener('input', () => {
+  t = Number($('scrub').value);
+  $('tc').textContent = tcf(t);
+  clearTimeout(scrubTimer);
+  scrubTimer = setTimeout(() => refresh(), 160);
+});
+$('comp').addEventListener('change', () => { id = $('comp').value; undoStack.length = 0; $('undo').disabled = true; t = 1.2; window.history.replaceState(null, '', `?id=${id}`); refresh(false); });
+
+loadComps().then(() => refresh(false)).catch((e) => toast(e.message, true));
+</script>
+</body>
+</html>

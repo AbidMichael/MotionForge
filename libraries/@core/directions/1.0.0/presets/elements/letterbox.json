@@ -1,0 +1,41 @@
+{
+  "slug": "letterbox",
+  "kind": "element",
+  "summary": "Cinema letterbox bars (2.39:1 look)",
+  "tags": [
+    "letterbox",
+    "cinema",
+    "bars",
+    "overlay"
+  ],
+  "params": {
+    "size": "number=0.09",
+    "color": {
+      "type": "color",
+      "default": "#000000"
+    }
+  },
+  "example": {
+    "use": "dir:letterbox"
+  },
+  "body": {
+    "layers": [
+      {
+        "type": "rect",
+        "x": 0,
+        "y": "{{-H / 2 + H * size / 2}}",
+        "w": "{{W}}",
+        "h": "{{H * size}}",
+        "fill": "{{color}}"
+      },
+      {
+        "type": "rect",
+        "x": 0,
+        "y": "{{H / 2 - H * size / 2}}",
+        "w": "{{W}}",
+        "h": "{{H * size}}",
+        "fill": "{{color}}"
+      }
+    ]
+  }
+}

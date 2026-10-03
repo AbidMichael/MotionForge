@@ -1,0 +1,41 @@
+# ---- Dépendances ----
+node_modules/
+
+# ---- Données d'exécution du serveur (base SQLite, assets, rendus, cache, captures, aperçus) ----
+data/
+renders/
+cache/
+out/
+*.sqlite
+*.db
+*.db-shm
+*.db-wal
+
+# ---- Bibliothèques créées par les agents : seules les bibliothèques @core sont livrées ----
+libraries/*
+!libraries/@core/
+
+# ---- Exemples : on garde les compositions JSON, pas les médias rendus ----
+examples/forge-pitch/
+examples/**/*.mp4
+examples/**/*.webm
+examples/**/*.mov
+examples/**/*.wav
+examples/**/*.mp3
+
+# ---- Config locale et secrets (le modèle motionforge.config.example.json reste versionné) ----
+motionforge.config.json
+.env
+.env.*
+
+# ---- Divers ----
+_to_delete/
+*.tgz
+*.log
+npm-debug.log*
+coverage/
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini

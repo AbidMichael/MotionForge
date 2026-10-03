@@ -1,0 +1,51 @@
+{
+  "slug": "flash",
+  "kind": "transition",
+  "summary": "White flash cut (impact)",
+  "tags": [
+    "transition",
+    "flash",
+    "cut",
+    "impact"
+  ],
+  "params": {
+    "color": "color=#ffffff"
+  },
+  "duration": {
+    "default": 0.35
+  },
+  "body": {
+    "overlap": false,
+    "overlay": [
+      {
+        "type": "rect",
+        "w": "{{W}}",
+        "h": "{{H}}",
+        "fill": "{{color}}",
+        "anim": [
+          {
+            "tracks": {
+              "opacity": [
+                [
+                  0,
+                  0
+                ],
+                [
+                  0.45,
+                  1,
+                  "in"
+                ],
+                [
+                  1,
+                  0,
+                  "out"
+                ]
+              ]
+            },
+            "d": "{{dur}}"
+          }
+        ]
+      }
+    ]
+  }
+}

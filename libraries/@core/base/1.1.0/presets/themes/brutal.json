@@ -1,0 +1,108 @@
+{
+  "slug": "brutal",
+  "kind": "theme",
+  "summary": "Brutalist poster: paper white, black heavy type, signal orange",
+  "tags": [
+    "theme",
+    "poster",
+    "bold",
+    "brutalist"
+  ],
+  "params": {
+    "accent": {
+      "type": "color",
+      "default": "#ff4d00"
+    }
+  },
+  "body": {
+    "tokens": {
+      "color": {
+        "bg": "#efede6",
+        "bg2": "#e2dfd5",
+        "surface": "#ffffff",
+        "fg": "#0a0a0a",
+        "muted": "#4a4a4a",
+        "accent": "{{accent}}",
+        "accent2": "#0047ff",
+        "accent3": "#00a86b",
+        "line": "#0a0a0a33"
+      },
+      "font": {
+        "display": "'Archivo Black', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
+        "body": "'Inter', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
+        "mono": "'JetBrains Mono', Consolas, 'Courier New', monospace"
+      },
+      "weight": {
+        "display": 400,
+        "heading": 400,
+        "body": 400
+      },
+      "size": {
+        "hero": 200,
+        "h1": 128,
+        "h2": 88,
+        "h3": 60,
+        "body": 40,
+        "small": 30,
+        "label": 24
+      },
+      "space": {
+        "margin": 140,
+        "xs": 12,
+        "s": 24,
+        "m": 48,
+        "l": 96
+      },
+      "radius": {
+        "s": 0,
+        "m": 0,
+        "l": 0
+      },
+      "ease": {
+        "in": "in",
+        "out": "out",
+        "inOut": "inOut",
+        "snap": "cubic(0.2,0.9,0.1,1)",
+        "smooth": "cubic(0.45,0,0.2,1)",
+        "spring": "spring(0.35)",
+        "bounce": "outBack"
+      },
+      "dur": {
+        "fast": 0.3,
+        "base": 0.6,
+        "slow": 1.0
+      },
+      "fx": {
+        "glow": "transparent"
+      }
+    },
+    "fonts": [
+      {
+        "family": "Archivo Black",
+        "source": "google",
+        "weights": [
+          400,
+          700,
+          800
+        ]
+      },
+      {
+        "family": "Inter",
+        "source": "google",
+        "weights": [
+          400,
+          500,
+          700
+        ]
+      },
+      {
+        "family": "JetBrains Mono",
+        "source": "google",
+        "weights": [
+          400,
+          700
+        ]
+      }
+    ]
+  }
+}

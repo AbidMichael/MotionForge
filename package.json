@@ -1,0 +1,66 @@
+{
+  "name": "motionforge",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Local motion design server for AI agents: compose videos from reusable presets and libraries, render with Remotion.",
+  "type": "module",
+  "engines": {
+    "node": ">=20.11"
+  },
+  "bin": {
+    "motionforge": "bin/motionforge.mjs"
+  },
+  "scripts": {
+    "start": "tsx src/server/main.ts",
+    "dev": "tsx watch src/server/main.ts",
+    "mcp": "tsx src/mcp/stdio.ts",
+    "reindex": "tsx src/cli.ts reindex",
+    "render": "tsx src/cli.ts render",
+    "studio": "remotion studio src/remotion/index.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@fastify/static": "^10.1.5",
+    "@fontsource/archivo-black": "^5.3.0",
+    "@fontsource/bebas-neue": "^5.3.0",
+    "@fontsource/inter": "^5.3.0",
+    "@fontsource/jetbrains-mono": "^5.3.0",
+    "@fontsource/playfair-display": "^5.3.0",
+    "@fontsource/sora": "^5.3.0",
+    "@fontsource/space-grotesk": "^5.3.0",
+    "@modelcontextprotocol/sdk": "1.31.0",
+    "@react-three/fiber": "^9.8.1",
+    "@remotion/bundler": "4.0.532",
+    "@remotion/renderer": "4.0.532",
+    "@remotion/three": "^4.0.532",
+    "@types/d3-geo": "^3.1.1",
+    "better-sqlite3": "^12.4.1",
+    "d3-geo": "^3.1.1",
+    "fast-json-patch": "^3.1.1",
+    "fastify": "^5.6.0",
+    "fontkit": "^2.0.4",
+    "puppeteer-core": "^25.12.0",
+    "react": "19.1.1",
+    "react-dom": "19.1.1",
+    "remotion": "4.0.532",
+    "semver": "^7.7.2",
+    "sharp": "^0.35.5",
+    "three": "^0.180.0",
+    "topojson-client": "^3.1.0",
+    "tsx": "^4.20.5",
+    "world-atlas": "^2.0.2",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@remotion/cli": "4.0.532",
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/node": "^22.18.0",
+    "@types/react": "19.1.12",
+    "@types/semver": "^7.7.1",
+    "@types/three": "^0.186.0",
+    "@types/topojson-client": "^3.1.5",
+    "typescript": "^5.9.2",
+    "vitest": "^5.0.3"
+  }
+}

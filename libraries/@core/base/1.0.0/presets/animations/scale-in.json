@@ -1,0 +1,41 @@
+{
+  "slug": "scale-in",
+  "kind": "animation",
+  "summary": "Scale up from small with a soft overshoot",
+  "tags": [
+    "animation",
+    "scale",
+    "in",
+    "zoom"
+  ],
+  "params": {
+    "from": "number=0.6"
+  },
+  "duration": {
+    "default": 0.6
+  },
+  "body": {
+    "tracks": {
+      "opacity": [
+        [
+          0,
+          0
+        ],
+        [
+          0.5,
+          1,
+          "out"
+        ],
+        [
+          1,
+          1
+        ]
+      ],
+      "scale": [
+        "{{from}}",
+        1
+      ]
+    },
+    "ease": "outBack"
+  }
+}

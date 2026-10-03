@@ -1,0 +1,33 @@
+{
+  "slug": "ken-burns",
+  "kind": "animation",
+  "summary": "Slow push-in for photos and video (use with anim at 0 and d = scene length)",
+  "tags": [
+    "animation",
+    "ken-burns",
+    "zoom",
+    "photo",
+    "camera",
+    "push"
+  ],
+  "params": {
+    "to": "number=1.12",
+    "drift": "number=-30"
+  },
+  "duration": {
+    "default": 6.0
+  },
+  "body": {
+    "tracks": {
+      "scale": [
+        1,
+        "{{to}}"
+      ],
+      "dx": [
+        0,
+        "{{drift}}"
+      ]
+    },
+    "unit": false
+  }
+}

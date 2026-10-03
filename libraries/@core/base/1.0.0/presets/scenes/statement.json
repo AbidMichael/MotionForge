@@ -1,0 +1,58 @@
+{
+  "slug": "statement",
+  "kind": "scene",
+  "summary": "One bold sentence revealed word by word; duration scales with word count",
+  "tags": [
+    "statement",
+    "text",
+    "message",
+    "headline",
+    "kinetic"
+  ],
+  "params": {
+    "text": "string!",
+    "highlight": {
+      "type": "color",
+      "default": "$color.accent"
+    },
+    "size": {
+      "type": "number",
+      "default": "$size.h1"
+    },
+    "backdrop": "enum:solid|gradient|grid|dots|spotlight=solid",
+    "align": "enum:center|left=center",
+    "exit": "enum:none|fade=none"
+  },
+  "duration": {
+    "default": 1.4,
+    "perWord": 0.32,
+    "wordsFrom": "text",
+    "min": 2,
+    "max": 9
+  },
+  "example": {
+    "p": "core:statement",
+    "text": "Stop reinventing the wheel."
+  },
+  "body": {
+    "layers": [
+      {
+        "use": "core:backdrop",
+        "style": "{{backdrop}}"
+      },
+      {
+        "use": "core:heading",
+        "text": "{{text}}",
+        "size": "{{size}}",
+        "split": "words",
+        "stagger": 0.12,
+        "enter": "core:rise",
+        "align": "{{align}}",
+        "x": "{{align == 'left' ? $space.margin : W / 2}}",
+        "y": "{{H / 2}}",
+        "maxWidth": 1600,
+        "out": "{{exit == 'fade' ? {p: 'core:fade-out', d: 0.4} : null}}"
+      }
+    ]
+  }
+}

@@ -1,0 +1,66 @@
+{
+  "slug": "stretch-in",
+  "kind": "animation",
+  "summary": "Squash-and-stretch entrance",
+  "tags": [
+    "animation",
+    "kinetic",
+    "stretch",
+    "squash",
+    "in",
+    "elastic"
+  ],
+  "duration": {
+    "default": 0.55
+  },
+  "body": {
+    "tracks": {
+      "scaleY": [
+        [
+          0,
+          2.2
+        ],
+        [
+          0.55,
+          0.85,
+          "out"
+        ],
+        [
+          1,
+          1,
+          "smooth"
+        ]
+      ],
+      "scaleX": [
+        [
+          0,
+          0.4
+        ],
+        [
+          0.55,
+          1.1,
+          "out"
+        ],
+        [
+          1,
+          1,
+          "smooth"
+        ]
+      ],
+      "opacity": [
+        [
+          0,
+          0
+        ],
+        [
+          0.2,
+          1
+        ],
+        [
+          1,
+          1
+        ]
+      ]
+    }
+  }
+}

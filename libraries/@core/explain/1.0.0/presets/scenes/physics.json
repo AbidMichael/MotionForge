@@ -1,0 +1,78 @@
+{
+  "slug": "physics",
+  "kind": "scene",
+  "summary": "Physics demo with live parameters: pendulum, spring, projectile, orbit, gas particles, waves",
+  "tags": [
+    "physics",
+    "simulation",
+    "science",
+    "explain",
+    "education",
+    "pendulum",
+    "orbit"
+  ],
+  "params": {
+    "title": "string=",
+    "kind": "enum:pendulum|spring|projectile|orbit|particles|wave=pendulum",
+    "settings": {
+      "type": "object",
+      "default": {}
+    },
+    "caption": "string="
+  },
+  "duration": {
+    "default": 6,
+    "min": 3,
+    "max": 30
+  },
+  "example": {
+    "p": "explain:physics",
+    "title": "Pendulum wave",
+    "kind": "pendulum",
+    "settings": {
+      "count": 10,
+      "angle": 30
+    }
+  },
+  "body": {
+    "layers": [
+      {
+        "use": "core:backdrop",
+        "style": "grid"
+      },
+      {
+        "if": "{{len(title) > 0}}",
+        "use": "core:heading",
+        "text": "{{title}}",
+        "size": "$size.h3",
+        "align": "left",
+        "anchor": [
+          0,
+          0
+        ],
+        "x": "{{$space.margin}}",
+        "y": "{{$space.margin * 0.6}}"
+      },
+      {
+        "type": "sim",
+        "kind": "{{kind}}",
+        "settings": "{{settings}}",
+        "x": "{{W / 2}}",
+        "y": "{{H / 2 + 50}}",
+        "w": "{{W * 0.7}}",
+        "h": "{{H - 300}}"
+      },
+      {
+        "if": "{{len(caption) > 0}}",
+        "type": "text",
+        "text": "{{caption}}",
+        "size": "$size.small",
+        "color": "$color.muted",
+        "y": "{{H - 50}}",
+        "in": [
+          "core:fade-in"
+        ]
+      }
+    ]
+  }
+}

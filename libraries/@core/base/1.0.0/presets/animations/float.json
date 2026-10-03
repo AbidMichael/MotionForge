@@ -1,0 +1,39 @@
+{
+  "slug": "float",
+  "kind": "animation",
+  "summary": "Slow up-and-down float — use as loop",
+  "tags": [
+    "animation",
+    "float",
+    "loop",
+    "idle",
+    "hover"
+  ],
+  "params": {
+    "distance": "number=14"
+  },
+  "duration": {
+    "default": 3.0
+  },
+  "body": {
+    "tracks": {
+      "dy": [
+        [
+          0,
+          0
+        ],
+        [
+          0.5,
+          "{{-distance}}",
+          "inOut"
+        ],
+        [
+          1,
+          0,
+          "inOut"
+        ]
+      ]
+    },
+    "unit": false
+  }
+}

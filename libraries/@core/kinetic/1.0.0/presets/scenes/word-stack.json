@@ -1,0 +1,85 @@
+{
+  "slug": "word-stack",
+  "kind": "scene",
+  "summary": "Lines of big type fly in from alternating sides and stack; one line can be highlighted",
+  "tags": [
+    "stack",
+    "lines",
+    "words",
+    "kinetic",
+    "list",
+    "manifesto"
+  ],
+  "params": {
+    "lines": "array<string>!",
+    "highlight": "integer=-1",
+    "size": {
+      "type": "number",
+      "default": "$size.h1"
+    },
+    "interval": "number=0.22",
+    "align": "enum:center|left=center",
+    "backdrop": "enum:solid|gradient|grid|dots|spotlight=solid",
+    "exit": "enum:none|fade=none"
+  },
+  "duration": {
+    "default": 1.2,
+    "perWord": 0.3,
+    "wordsFrom": "lines",
+    "min": 2.5,
+    "max": 8
+  },
+  "example": {
+    "p": "kinetic:word-stack",
+    "lines": [
+      "Think",
+      "Less",
+      "Ship more"
+    ],
+    "highlight": 2
+  },
+  "body": {
+    "layers": [
+      {
+        "use": "core:backdrop",
+        "style": "{{backdrop}}"
+      },
+      {
+        "type": "group",
+        "x": "{{align == 'left' ? $space.margin : W / 2}}",
+        "y": "{{H / 2}}",
+        "anchor": "{{align == 'left' ? 'left' : 'center'}}",
+        "layout": {
+          "dir": "column",
+          "gap": "{{size * 0.02}}",
+          "align": "{{align == 'left' ? 'start' : 'center'}}"
+        },
+        "out": "{{exit == 'fade' ? {p: 'core:fade-out', d: 0.4} : null}}",
+        "children": [
+          {
+            "repeat": "{{lines}}",
+            "layer": {
+              "type": "text",
+              "text": "{{item}}",
+              "size": "{{index == highlight ? size * 1.12 : size}}",
+              "case": "upper",
+              "lineHeight": 0.92,
+              "color": "{{index == highlight ? $color.accent : $color.fg}}",
+              "font": "$font.display",
+              "weight": "$weight.display",
+              "in": [
+                {
+                  "p": "core:slide-in",
+                  "from": "{{index % 2 == 0 ? 'left' : 'right'}}",
+                  "distance": 420,
+                  "at": "{{index * interval}}",
+                  "d": 0.5
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

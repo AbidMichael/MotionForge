@@ -1,0 +1,81 @@
+{
+  "slug": "input",
+  "kind": "element",
+  "summary": "Text field with placeholder (target it with gestures: type into #id)",
+  "tags": [
+    "ui",
+    "input",
+    "field",
+    "form",
+    "text field",
+    "search"
+  ],
+  "params": {
+    "placeholder": "string=Type here…",
+    "width": "number=560",
+    "height": "number=84",
+    "label": "string=",
+    "icon": "string="
+  },
+  "example": {
+    "use": "ui:input",
+    "placeholder": "you@example.com",
+    "label": "Email"
+  },
+  "body": {
+    "layers": [
+      {
+        "type": "group",
+        "w": "{{width}}",
+        "h": "{{height}}",
+        "children": [
+          {
+            "type": "rect",
+            "x": "{{width / 2}}",
+            "y": "{{height / 2}}",
+            "w": "{{width}}",
+            "h": "{{height}}",
+            "fill": "$color.bg",
+            "radius": 14,
+            "border": "2px solid $color.line"
+          },
+          {
+            "type": "text",
+            "text": "{{placeholder}}",
+            "anchor": [
+              0,
+              0.5
+            ],
+            "x": "{{len(icon) > 0 ? 70 : 26}}",
+            "y": "{{height / 2}}",
+            "size": "{{height * 0.38}}",
+            "color": "$color.muted"
+          },
+          {
+            "if": "{{len(label) > 0}}",
+            "type": "text",
+            "text": "{{label}}",
+            "anchor": [
+              0,
+              1
+            ],
+            "x": 4,
+            "y": -12,
+            "size": 24,
+            "weight": 600,
+            "color": "$color.muted"
+          },
+          {
+            "if": "{{len(icon) > 0}}",
+            "type": "text",
+            "text": "{{icon}}",
+            "x": 38,
+            "y": "{{height / 2}}",
+            "size": 30,
+            "color": "$color.muted"
+          }
+        ]
+      }
+    ]
+  }
+}

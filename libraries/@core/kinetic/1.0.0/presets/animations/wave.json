@@ -1,0 +1,43 @@
+{
+  "slug": "wave",
+  "kind": "animation",
+  "summary": "Continuous wave — loop on split chars",
+  "tags": [
+    "animation",
+    "kinetic",
+    "wave",
+    "loop",
+    "bounce",
+    "fun"
+  ],
+  "params": {
+    "amp": "number=24"
+  },
+  "duration": {
+    "default": 1.2
+  },
+  "body": {
+    "tracks": {
+      "dy": [
+        [
+          0,
+          0
+        ],
+        [
+          0.25,
+          "{{-amp}}",
+          "inOut"
+        ],
+        [
+          0.5,
+          0,
+          "inOut"
+        ],
+        [
+          1,
+          0
+        ]
+      ]
+    }
+  }
+}

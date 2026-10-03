@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MotionForge</title>
+<style>
+@font-face { font-family: 'Bebas Neue'; src: url(/v1/fonts/bebas-neue/bebas-neue-latin-400-normal.woff2) format('woff2'); font-weight: 400; }
+@font-face { font-family: 'Inter'; src: url(/v1/fonts/inter/inter-latin-400-normal.woff2) format('woff2'); font-weight: 400; }
+@font-face { font-family: 'Inter'; src: url(/v1/fonts/inter/inter-latin-600-normal.woff2) format('woff2'); font-weight: 600; }
+@font-face { font-family: 'JetBrains Mono'; src: url(/v1/fonts/jetbrains-mono/jetbrains-mono-latin-400-normal.woff2) format('woff2'); font-weight: 400; }
+:root {
+  --booth: #12151c; --panel: #181c25; --rule: #283040; --paper: #e8e4da; --dim: #8a909c;
+  --tungsten: #f2a93b; --cyan: #5fd3c6; --fault: #ef5b5b;
+  --display: 'Bebas Neue', 'Arial Narrow', sans-serif; --text: 'Inter', 'Segoe UI', sans-serif; --mono: 'JetBrains Mono', Consolas, monospace;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--booth); color: var(--paper); font: 400 14px/1.45 var(--text); }
+a { color: var(--cyan); }
+button { font: 600 13px var(--text); color: var(--booth); background: var(--paper); border: 0; border-radius: 3px; padding: 6px 12px; cursor: pointer; }
+button.ghost { background: transparent; color: var(--paper); box-shadow: inset 0 0 0 1px var(--rule); }
+button:focus-visible, a:focus-visible, [tabindex]:focus-visible { outline: 2px solid var(--tungsten); outline-offset: 2px; }
+.id { font: 12px var(--mono); color: var(--dim); }
+
+header { display: flex; align-items: baseline; gap: 28px; flex-wrap: wrap; padding: 22px 32px 18px; border-bottom: 1px solid var(--rule); }
+header h1 { font: 400 44px/1 var(--display); letter-spacing: .02em; margin: 0; }
+header h1 span { color: var(--tungsten); }
+.live { font-size: 13px; color: var(--dim); display: flex; gap: 8px; align-items: center; }
+.live i { width: 8px; height: 8px; border-radius: 50%; background: var(--dim); }
+.live.on i { background: var(--cyan); box-shadow: 0 0 0 4px #5fd3c622; }
+.counts { display: flex; gap: 26px; margin-left: auto; flex-wrap: wrap; }
+.counts div { display: flex; flex-direction: column; }
+.counts b { font: 400 30px/1 var(--display); }
+.counts small { color: var(--dim); font-size: 12px; }
+
+main { display: grid; grid-template-columns: 1fr 1fr; }
+section { padding: 22px 32px 28px; border-bottom: 1px solid var(--rule); min-width: 0; }
+section + section:nth-child(odd) { }
+section.wide { grid-column: 1 / -1; }
+section.left { border-right: 1px solid var(--rule); }
+h2 { font: 400 28px/1 var(--display); letter-spacing: .03em; margin: 0 0 4px; }
+.lede { color: var(--dim); margin: 0 0 16px; max-width: 70ch; }
+.empty { color: var(--dim); padding: 14px 0; }
+
+/* hero: the render queue as film strips */
+.queue { display: flex; flex-direction: column; gap: 10px; }
+.job { display: grid; grid-template-columns: 170px 1fr 220px; gap: 18px; align-items: center; padding: 12px 14px; background: var(--panel); border-left: 3px solid var(--rule); }
+.job.running { border-left-color: var(--tungsten); }
+.job.done { border-left-color: var(--cyan); }
+.job.failed { border-left-color: var(--fault); }
+.job .tc { font: 400 30px/1 var(--display); }
+.job .meta { color: var(--dim); font-size: 12px; }
+.strip { position: relative; height: 34px; background: #0e1117; border-radius: 2px; overflow: hidden;
+  background-image: repeating-linear-gradient(90deg, transparent 0 22px, #ffffff0d 22px 24px); }
+.strip .fill { position: absolute; inset: 0 auto 0 0; background: linear-gradient(90deg, #f2a93b55, #f2a93bcc); transition: width .4s; }
+.strip .segs { position: absolute; inset: 6px; display: flex; gap: 3px; }
+.strip .segs span { flex: 1; border-radius: 2px; background: #f2a93bcc; }
+.strip .segs span.hit { background: #5fd3c6bb; }
+.strip .stage { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); font-size: 12px; color: var(--paper); text-shadow: 0 1px 2px #000; }
+.job .out { display: flex; gap: 10px; align-items: center; justify-content: flex-end; min-width: 0; }
+.job .out img { width: 96px; height: 54px; object-fit: cover; border-radius: 2px; background: #000; }
+.job .err { color: var(--fault); font-size: 12px; grid-column: 2 / -1; }
+.legend { display: flex; gap: 16px; color: var(--dim); font-size: 12px; margin-top: 12px; }
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: -1px; }
+
+table { width: 100%; border-collapse: collapse; }
+th { text-align: left; font: 600 12px var(--text); color: var(--dim); padding: 6px 8px 6px 0; border-bottom: 1px solid var(--rule); }
+td { padding: 7px 8px 7px 0; border-bottom: 1px solid #ffffff08; vertical-align: top; }
+td.num { font-variant-numeric: tabular-nums; text-align: right; }
+.ok { color: var(--cyan); } .bad { color: var(--fault); }
+
+.feed { list-style: none; margin: 0; padding: 0; max-height: 320px; overflow: auto; }
+.feed li { display: grid; grid-template-columns: 64px 120px 1fr auto; gap: 10px; padding: 6px 0; border-bottom: 1px solid #ffffff08; font-size: 13px; }
+.feed .t { font: 12px var(--mono); color: var(--dim); }
+.feed .who { color: var(--tungsten); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.feed .what { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.feed .tok { color: var(--dim); font-variant-numeric: tabular-nums; }
+
+.preview { margin-top: 14px; }
+.preview img { width: 100%; border-radius: 2px; display: block; }
+
+.cand { padding: 12px 0; border-bottom: 1px solid #ffffff08; display: grid; grid-template-columns: 1fr auto; gap: 8px 16px; }
+.checks { display: flex; gap: 14px; flex-wrap: wrap; font-size: 12px; color: var(--dim); }
+.checks span.met { color: var(--cyan); }
+.rule { color: var(--dim); font-size: 13px; margin-bottom: 8px; }
+.toast { position: fixed; right: 24px; bottom: 24px; background: var(--paper); color: var(--booth); padding: 10px 14px; border-radius: 3px; font-weight: 600; opacity: 0; transition: opacity .2s; }
+.toast.show { opacity: 1; }
+
+@media (max-width: 960px) {
+  main { grid-template-columns: 1fr; }
+  section.left { border-right: 0; }
+  .job { grid-template-columns: 1fr; }
+  .job .out { justify-content: flex-start; }
+  header { padding: 18px 16px; } section { padding: 18px 16px 22px; }
+}
+@media (prefers-reduced-motion: reduce) { .strip .fill { transition: none; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>Motion<span>Forge</span></h1>
+  <div class="live" id="live"><i></i><span>connecting</span></div>
+  <div class="counts" id="counts"></div>
+</header>
+<main>
+  <section class="wide">
+    <h2>Render queue</h2>
+    <p class="lede">Every render is split into scene segments. Segments that did not change since an earlier render are reused instead of rendered again.</p>
+    <div class="queue" id="queue"></div>
+    <div class="legend"><span><i style="background:#5fd3c6bb"></i>Reused from cache</span><span><i style="background:#f2a93bcc"></i>Rendered this time</span></div>
+  </section>
+
+  <section class="left">
+    <h2>Agents</h2>
+    <p class="lede">Tool calls as they happen, with their approximate token cost (characters ÷ 4).</p>
+    <ul class="feed" id="feed"></ul>
+    <table style="margin-top:18px"><thead><tr><th>Agent</th><th style="text-align:right">Calls</th><th style="text-align:right">Tokens in</th><th style="text-align:right">Tokens out</th></tr></thead><tbody id="agents"></tbody></table>
+  </section>
+
+  <section>
+    <h2>Compositions</h2>
+    <p class="lede">Latest revision of each video. Open a contact sheet to see one frame per scene.</p>
+    <table><thead><tr><th>Composition</th><th>Status</th><th style="text-align:right">Length</th><th>Agent</th><th></th></tr></thead><tbody id="comps"></tbody></table>
+    <div class="preview" id="preview"></div>
+  </section>
+
+  <section class="left">
+    <h2>Libraries</h2>
+    <p class="lede">What agents can build with, and what changed recently.</p>
+    <table><thead><tr><th>Library</th><th>Version</th><th style="text-align:right">Presets</th><th>Visibility</th></tr></thead><tbody id="libs"></tbody></table>
+    <ul class="feed" id="libfeed" style="margin-top:16px;max-height:220px"></ul>
+  </section>
+
+  <section>
+    <h2>Shared hub</h2>
+    <p class="rule" id="rule"></p>
+    <div id="cands"></div>
+    <h3 style="font:600 13px var(--text);color:var(--dim);margin:20px 0 6px">Promoted</h3>
+    <table><thead><tr><th>Shared preset</th><th>From</th><th>How</th><th></th></tr></thead><tbody id="promos"></tbody></table>
+  </section>
+</main>
+<div class="toast" id="toast" role="status"></div>
+<script>
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+const api = async (url, opts = {}) => {
+  const r = await fetch(url, { ...opts, headers: { 'content-type': 'application/json', 'x-mf-client': 'dashboard', ...(opts.headers || {}) } });
+  const body = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(body.error || r.status);
+  return body;
+};
+const tc = (sec) => { if (sec == null) return '—'; const m = Math.floor(sec / 60), s = sec - m * 60; return `${String(m).padStart(2, '0')}:${s.toFixed(2).padStart(5, '0')}`; };
+const clock = (ts) => { const d = new Date(ts.endsWith('Z') ? ts : ts.replace(' ', 'T') + 'Z'); return d.toTimeString().slice(0, 8); };
+const toast = (msg) => { const t = $('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2600); };
+const jobs = new Map();
+
+async function loadCounts() {
+  const o = await api('/v1/overview');
+  const items = [['Libraries', o.libraries], ['Presets', o.presets], ['Compositions', o.compositions], ['Renders', o.renders], ['In queue', o.queued + o.running], ['Tokens used', o.tokens.toLocaleString()]];
+  $('counts').innerHTML = items.map(([k, v]) => `<div><b>${esc(v)}</b><small>${k}</small></div>`).join('');
+}
+
+function jobRow(j) {
+  const r = j.result || {};
+  const pct = Math.round((j.progress || 0) * 100);
+  let strip;
+  if (j.status === 'done' && r.segments) {
+    const segs = Array.from({ length: r.segments }, (_, i) => `<span class="${i < r.cacheHits ? 'hit' : ''}"></span>`).join('');
+    strip = `<div class="strip"><div class="segs">${segs}</div></div>`;
+  } else if (j.status === 'done') {
+    strip = `<div class="strip"><div class="fill" style="width:100%"></div><div class="stage">Rendered in one pass</div></div>`;
+  } else {
+    strip = `<div class="strip"><div class="fill" style="width:${pct}%"></div><div class="stage">${esc(j.status === 'queued' ? 'Waiting for a free renderer' : `${pct}% · ${j.stage || 'rendering'}`)}</div></div>`;
+  }
+  const out = j.status === 'done'
+    ? `<a href="${esc(r.url)}" target="_blank" rel="noopener"><img src="${esc(r.poster)}" alt="Poster frame of ${esc(j.comp_id)}"></a><div><div>${esc(r.size)}</div><div class="meta">${(r.ms / 1000).toFixed(1)} s to render</div></div>`
+    : j.status === 'running' || j.status === 'queued' ? `<button class="ghost" data-cancel="${esc(j.id)}">Cancel</button>` : '';
+  return `<div class="job ${esc(j.status)}" data-job="${esc(j.id)}">
+    <div><div class="tc">${tc(r.duration ?? null)}</div><div class="meta">${esc(j.comp_id)} r${esc(j.rev)} · ${esc(j.params.quality)}</div><div class="id">${esc(j.id)} · ${esc(j.agent)}</div></div>
+    ${strip}
+    <div class="out">${out}</div>
+    ${j.status === 'failed' ? `<div class="err">${esc(j.error)}</div>` : ''}
+  </div>`;
+}
+function renderQueue() {
+  const list = [...jobs.values()].sort((a, b) => (b.created + b.id).localeCompare(a.created + a.id)).slice(0, 12);
+  $('queue').innerHTML = list.length ? list.map(jobRow).join('') : '<div class="empty">No renders yet. Agents start one with mf_render; it will show up here while it runs.</div>';
+}
+async function loadJobs() {
+  const { jobs: list } = await api('/v1/renders?limit=12');
+  jobs.clear();
+  list.forEach((j) => jobs.set(j.id, j));
+  renderQueue();
+}
+
+async function loadComps() {
+  const { compositions } = await api('/v1/compositions?limit=12');
+  $('comps').innerHTML = compositions.length ? compositions.map((c) => `<tr>
+    <td>${esc(c.title || 'Untitled')}<div class="id">${esc(c.id)} r${esc(c.rev)}</div></td>
+    <td class="${c.ok ? 'ok' : 'bad'}">${c.ok ? 'Valid' : 'Has errors'}</td>
+    <td class="num">${tc(c.duration)}</td><td>${esc(c.agent)}</td>
+    <td>${c.ok ? `<button class="ghost" data-sheet="${esc(c.id)}">Contact sheet</button> <a href="/editor?id=${esc(c.id)}">Edit</a>` : ''}</td></tr>`).join('')
+    : '<tr><td colspan="5" class="empty">No compositions yet. They appear when an agent calls mf_validate.</td></tr>';
+}
+
+const feedLine = (ev) => {
+  const d = ev.data || {};
+  const what = {
+    tool: () => `${d.tool}${d.ok === false ? ' (failed)' : ''}`,
+    composition: () => `${d.ok ? 'Validated' : 'Rejected'} ${d.id} r${d.rev}${d.ok ? '' : ` with ${d.errors} errors`}`,
+    job: () => `${d.type === 'thumb' ? 'Thumbnail' : d.type === 'preview' ? 'Preview' : 'Render'} ${d.id} ${d.status}${d.error ? ': ' + d.error : ''}`,
+    library: () => `${d.action.replace('_', ' ')} ${d.preset || d.library}${d.version && d.version !== 'draft' ? '@' + d.version : ''}`,
+    promotion: () => `${d.action} ${d.shared || d.source}${d.mode ? ` (${d.mode})` : ''}`,
+    rating: () => `Rated ${d.preset} ${d.score}/5`,
+    asset: () => `Added asset ${d.name}`,
+  }[ev.kind];
+  const tok = ev.kind === 'tool' ? `${d.inTokens}+${d.outTokens}` : '';
+  return `<li><span class="t">${clock(ev.ts)}</span><span class="who">${esc(ev.agent || 'system')}</span><span class="what">${esc(what ? what() : ev.kind)}</span><span class="tok">${tok}</span></li>`;
+};
+async function loadFeeds() {
+  const [{ events }, { events: libEvents }] = await Promise.all([
+    api('/v1/activity?limit=60&kinds=tool,composition,job,rating,asset'),
+    api('/v1/activity?limit=30&kinds=library,promotion'),
+  ]);
+  $('feed').innerHTML = events.length ? events.map(feedLine).join('') : '<li class="empty">Waiting for the first agent. Connect one to /mcp and its tool calls appear here.</li>';
+  $('libfeed').innerHTML = libEvents.map(feedLine).join('');
+  const t = await api('/v1/stats/tokens');
+  $('agents').innerHTML = t.byAgent.map((a) => `<tr><td>${esc(a.agent)}</td><td class="num">${a.calls}</td><td class="num">${a.inTokens.toLocaleString()}</td><td class="num">${a.outTokens.toLocaleString()}</td></tr>`).join('');
+}
+
+async function loadLibs() {
+  const { libraries } = await api('/v1/libraries');
+  $('libs').innerHTML = libraries.map((l) => `<tr><td>${esc(l.name)} <span class="id">${esc(l.alias)}:</span><div style="color:var(--dim);font-size:12px">${esc(l.summary)}</div></td><td>${esc(l.latest)}${l.hasDraft ? ' + draft' : ''}</td><td class="num">${l.presets}</td><td>${esc(l.visibility)}</td></tr>`).join('');
+}
+
+async function loadPromotion() {
+  const p = await api('/v1/promotion');
+  const r = p.rule;
+  $('rule').textContent = `A preset joins the shared hub when it has at least ${r.minRatings} ratings averaging ${r.minAverage}+, ${r.minRenders} successful renders and a ${Math.round(r.minSuccessRate * 100)}% success rate — or when you promote it here.`;
+  const label = { ratings: 'ratings', average: 'average', renders: 'renders', successRate: 'success' };
+  $('cands').innerHTML = p.candidates.length ? p.candidates.map((c) => `<div class="cand">
+      <div><div>${esc(c.id)}</div><div class="checks">${Object.entries(c.checks).map(([k, v]) => `<span class="${v.ok ? 'met' : ''}">${label[k]} ${k === 'successRate' ? `${Math.round(v.have * 100)}% of ${Math.round(v.need * 100)}%` : `${v.have} of ${v.need}`}</span>`).join('')}</div></div>
+      <div>${c.published ? `<button data-promote="${esc(c.ref)}">Promote</button>` : '<span class="id">publish first</span>'}</div></div>`).join('')
+    : '<div class="empty">No candidates yet. Presets show up here once agents rate them or render with them.</div>';
+  $('promos').innerHTML = p.promotions.map((x) => `<tr><td>${esc(x.shared_id)}</td><td class="id">${esc(x.source)}</td><td>${x.mode === 'auto' ? 'Earned' : `By ${esc(x.by)}`}${x.status === 'demoted' ? ' · demoted' : ''}</td>
+      <td>${x.status === 'active' ? `<button class="ghost" data-demote="${esc(x.shared_id)}">Demote</button>` : ''}</td></tr>`).join('');
+}
+
+document.addEventListener('click', async (e) => {
+  const b = e.target.closest('button');
+  if (!b) return;
+  try {
+    if (b.dataset.sheet) {
+      b.disabled = true; b.textContent = 'Rendering frames…';
+      const r = await api(`/v1/compositions/${b.dataset.sheet}/preview`, { method: 'POST', body: JSON.stringify({ scale: 0.4 }) });
+      const src = (r.sheet || r.frames[0]).url;
+      $('preview').innerHTML = `<img src="${esc(src)}" alt="Contact sheet for ${esc(b.dataset.sheet)}">`;
+      b.disabled = false; b.textContent = 'Contact sheet';
+    }
+    if (b.dataset.promote) { const r = await api(`/v1/presets/${encodeURIComponent(b.dataset.promote)}/promote`, { method: 'POST', body: '{}' }); toast(`Promoted to ${r.shared}`); loadPromotion(); }
+    if (b.dataset.demote) { await api(`/v1/presets/${encodeURIComponent(b.dataset.demote)}/demote`, { method: 'POST', body: '{}' }); toast(`Demoted ${b.dataset.demote}`); loadPromotion(); }
+    if (b.dataset.cancel) { await api(`/v1/renders/${b.dataset.cancel}/cancel`, { method: 'POST', body: '{}' }); toast('Render cancelled'); loadJobs(); }
+  } catch (err) { toast(err.message); b.disabled = false; }
+});
+
+let refreshTimer = null;
+const refreshSoon = () => { clearTimeout(refreshTimer); refreshTimer = setTimeout(() => { loadCounts(); loadFeeds(); loadComps(); loadLibs(); loadPromotion(); }, 400); };
+
+function connect() {
+  const es = new EventSource('/v1/events');
+  es.onopen = () => { $('live').className = 'live on'; $('live').lastElementChild.textContent = 'Live'; };
+  es.onerror = () => { $('live').className = 'live'; $('live').lastElementChild.textContent = 'Reconnecting'; };
+  es.onmessage = (m) => {
+    const ev = JSON.parse(m.data);
+    if (ev.kind === 'progress' && ev.data.type === 'render') {
+      const j = jobs.get(ev.data.id);
+      if (j) { j.status = 'running'; j.progress = ev.data.progress / 100; j.stage = ev.data.stage; renderQueue(); }
+      return;
+    }
+    if (ev.kind === 'job') loadJobs();
+    if (ev.kind !== 'progress') refreshSoon();
+  };
+}
+
+Promise.all([loadCounts(), loadJobs(), loadComps(), loadFeeds(), loadLibs(), loadPromotion()]).catch((e) => toast(e.message));
+connect();
+</script>
+</body>
+</html>

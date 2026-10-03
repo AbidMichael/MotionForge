@@ -1,0 +1,45 @@
+{
+  "slug": "slide-out",
+  "kind": "animation",
+  "summary": "Slide out to a side",
+  "tags": [
+    "animation",
+    "slide",
+    "out"
+  ],
+  "params": {
+    "to": "enum:left|right|up|down=left",
+    "distance": "number=240"
+  },
+  "duration": {
+    "default": 0.6
+  },
+  "body": {
+    "tracks": {
+      "opacity": [
+        [
+          0,
+          1
+        ],
+        [
+          0.6,
+          1
+        ],
+        [
+          1,
+          0,
+          "in"
+        ]
+      ],
+      "dx": [
+        0,
+        "{{to == 'left' ? -distance : to == 'right' ? distance : 0}}"
+      ],
+      "dy": [
+        0,
+        "{{to == 'up' ? -distance : to == 'down' ? distance : 0}}"
+      ]
+    },
+    "ease": "in"
+  }
+}

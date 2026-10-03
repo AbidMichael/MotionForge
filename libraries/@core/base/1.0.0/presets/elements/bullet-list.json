@@ -1,0 +1,103 @@
+{
+  "slug": "bullet-list",
+  "kind": "element",
+  "summary": "List of items appearing one after another with accent bullets",
+  "tags": [
+    "list",
+    "bullets",
+    "points",
+    "features",
+    "agenda"
+  ],
+  "params": {
+    "items": "array<string>!",
+    "size": {
+      "type": "number",
+      "default": "$size.h3"
+    },
+    "gap": "number=34",
+    "interval": "number=0.35",
+    "color": {
+      "type": "color",
+      "default": "$color.fg"
+    },
+    "bullet": {
+      "type": "color",
+      "default": "$color.accent"
+    },
+    "width": "number=1300"
+  },
+  "duration": {
+    "default": 4,
+    "perWord": 0.18,
+    "wordsFrom": "items",
+    "min": 3
+  },
+  "example": {
+    "use": "core:bullet-list",
+    "items": [
+      "Fast",
+      "Private",
+      "Local-first"
+    ]
+  },
+  "body": {
+    "layers": [
+      {
+        "type": "group",
+        "anchor": "center",
+        "layout": {
+          "dir": "column",
+          "gap": "{{gap}}",
+          "align": "start"
+        },
+        "children": [
+          {
+            "repeat": "{{items}}",
+            "layer": {
+              "type": "group",
+              "layout": {
+                "dir": "row",
+                "gap": 28,
+                "align": "center"
+              },
+              "at": "{{0.2 + index * interval}}",
+              "in": [
+                {
+                  "p": "core:slide-in",
+                  "from": "left",
+                  "distance": 60
+                }
+              ],
+              "children": [
+                {
+                  "type": "ellipse",
+                  "w": "{{size * 0.28}}",
+                  "h": "{{size * 0.28}}",
+                  "fill": "{{bullet}}",
+                  "in": [
+                    {
+                      "p": "core:pop",
+                      "d": 0.4
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "text": "{{item}}",
+                  "size": "{{size}}",
+                  "font": "$font.body",
+                  "weight": 500,
+                  "color": "{{color}}",
+                  "align": "left",
+                  "w": "{{width}}",
+                  "lineHeight": 1.2
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

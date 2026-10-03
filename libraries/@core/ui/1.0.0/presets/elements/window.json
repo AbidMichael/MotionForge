@@ -1,0 +1,112 @@
+{
+  "slug": "window",
+  "kind": "element",
+  "summary": "App window frame with title bar (put your interface in the content slot)",
+  "tags": [
+    "ui",
+    "window",
+    "app",
+    "frame",
+    "browser",
+    "mockup"
+  ],
+  "params": {
+    "title": "string=",
+    "width": "number=1280",
+    "height": "number=760",
+    "kind": "enum:app|browser=app",
+    "url": "string=app.example.com"
+  },
+  "example": {
+    "use": "ui:window",
+    "title": "Dashboard"
+  },
+  "body": {
+    "layers": [
+      {
+        "type": "group",
+        "w": "{{width}}",
+        "h": "{{height}}",
+        "in": [
+          "core:scale-in"
+        ],
+        "children": [
+          {
+            "type": "rect",
+            "x": "{{width / 2}}",
+            "y": "{{height / 2}}",
+            "w": "{{width}}",
+            "h": "{{height}}",
+            "fill": "$color.surface",
+            "radius": 18,
+            "boxShadow": "0 40px 120px rgba(0,0,0,0.45)"
+          },
+          {
+            "type": "rect",
+            "x": "{{width / 2}}",
+            "y": 28,
+            "w": "{{width}}",
+            "h": 56,
+            "fill": "$color.bg2",
+            "radius": "18px 18px 0 0"
+          },
+          {
+            "type": "ellipse",
+            "x": 34,
+            "y": 28,
+            "w": 16,
+            "h": 16,
+            "fill": "#ff5f57"
+          },
+          {
+            "type": "ellipse",
+            "x": 60,
+            "y": 28,
+            "w": 16,
+            "h": 16,
+            "fill": "#febc2e"
+          },
+          {
+            "type": "ellipse",
+            "x": 86,
+            "y": 28,
+            "w": 16,
+            "h": 16,
+            "fill": "#28c840"
+          },
+          {
+            "if": "{{kind == 'browser'}}",
+            "type": "rect",
+            "x": "{{width / 2}}",
+            "y": 28,
+            "w": "{{width * 0.5}}",
+            "h": 34,
+            "fill": "$color.bg",
+            "radius": 10
+          },
+          {
+            "type": "text",
+            "x": "{{width / 2}}",
+            "y": 28,
+            "text": "{{kind == 'browser' ? url : title}}",
+            "size": 22,
+            "color": "$color.muted"
+          },
+          {
+            "type": "group",
+            "id": "content",
+            "x": "{{width / 2}}",
+            "y": "{{height / 2 + 28}}",
+            "w": "{{width}}",
+            "h": "{{height - 56}}",
+            "children": [
+              {
+                "slot": "content"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

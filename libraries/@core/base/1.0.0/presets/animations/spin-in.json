@@ -1,0 +1,44 @@
+{
+  "slug": "spin-in",
+  "kind": "animation",
+  "summary": "Spin and scale into place",
+  "tags": [
+    "animation",
+    "spin",
+    "rotate",
+    "in"
+  ],
+  "params": {
+    "angle": "number=-120"
+  },
+  "duration": {
+    "default": 0.7
+  },
+  "body": {
+    "tracks": {
+      "opacity": [
+        [
+          0,
+          0
+        ],
+        [
+          0.4,
+          1
+        ],
+        [
+          1,
+          1
+        ]
+      ],
+      "rotate": [
+        "{{angle}}",
+        0
+      ],
+      "scale": [
+        0.4,
+        1
+      ]
+    },
+    "ease": "outBack"
+  }
+}

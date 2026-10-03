@@ -1,0 +1,10 @@
+{
+  "slug": "collapse",
+  "kind": "transition",
+  "summary": "The current scene shrinks back into a card of the next scene (reverse of expand)",
+  "tags": ["transition", "collapse", "shrink", "card", "continuity", "close"],
+  "params": {"to": "string!", "ease": "string=cubic(0.7,0,0.2,1)"},
+  "duration": {"default": 0.9},
+  "body": {"continuity": "collapse"},
+  "example": {"to": "#card"}
+}

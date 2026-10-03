@@ -1,0 +1,38 @@
+{
+  "slug": "drag-drop",
+  "kind": "choreography",
+  "summary": "Hover an item, drag it onto a target and highlight the target",
+  "tags": [
+    "ui",
+    "drag",
+    "drop",
+    "kanban",
+    "reorder"
+  ],
+  "params": {
+    "from": "string!",
+    "to": "string!"
+  },
+  "example": {
+    "p": "ui:drag-drop",
+    "from": "#field",
+    "to": "#button"
+  },
+  "body": {
+    "steps": [
+      {
+        "do": "hover",
+        "on": "{{from}}"
+      },
+      {
+        "do": "drag",
+        "from": "{{from}}",
+        "to": "{{to}}"
+      },
+      {
+        "do": "highlight",
+        "on": "{{to}}"
+      }
+    ]
+  }
+}

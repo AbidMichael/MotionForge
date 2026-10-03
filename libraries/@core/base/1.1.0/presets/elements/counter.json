@@ -1,0 +1,90 @@
+{
+  "slug": "counter",
+  "kind": "element",
+  "summary": "Big number that counts up, with optional label underneath",
+  "tags": [
+    "number",
+    "stat",
+    "counter",
+    "count",
+    "data",
+    "kpi"
+  ],
+  "params": {
+    "value": "number!",
+    "from": "number=0",
+    "prefix": "string=",
+    "suffix": "string=",
+    "decimals": "integer=0",
+    "label": "string=",
+    "size": {
+      "type": "number",
+      "default": "$size.hero"
+    },
+    "color": {
+      "type": "color",
+      "default": "$color.fg"
+    },
+    "labelColor": {
+      "type": "color",
+      "default": "$color.muted"
+    },
+    "countD": "number=1.6",
+    "glow": {
+      "type": "color",
+      "default": "$fx.glow"
+    }
+  },
+  "example": {
+    "use": "core:counter",
+    "value": 1250,
+    "label": "Beta users",
+    "suffix": "+"
+  },
+  "body": {
+    "layers": [
+      {
+        "type": "text",
+        "counter": {
+          "from": "{{from}}",
+          "to": "{{value}}",
+          "d": "{{countD}}",
+          "prefix": "{{prefix}}",
+          "suffix": "{{suffix}}",
+          "decimals": "{{decimals}}",
+          "ease": "outExpo"
+        },
+        "size": "{{size}}",
+        "font": "$font.display",
+        "weight": "$weight.display",
+        "color": "{{color}}",
+        "tracking": -0.03,
+        "glow": "{{glow}}",
+        "y": "{{label ? -size * 0.22 : 0}}",
+        "in": [
+          {
+            "p": "core:scale-in",
+            "from": 0.85
+          }
+        ]
+      },
+      {
+        "if": "{{label}}",
+        "type": "text",
+        "text": "{{label}}",
+        "y": "{{size * 0.5}}",
+        "size": "$size.h3",
+        "font": "$font.body",
+        "weight": 500,
+        "color": "{{labelColor}}",
+        "in": [
+          {
+            "p": "core:fade-up",
+            "at": 0.35,
+            "distance": 30
+          }
+        ]
+      }
+    ]
+  }
+}

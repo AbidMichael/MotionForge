@@ -1,0 +1,75 @@
+{
+  "slug": "cinematic",
+  "kind": "direction",
+  "summary": "Film look: letterbox, grain, vignette, slow dissolves, warm accent",
+  "tags": [
+    "direction",
+    "look",
+    "style",
+    "cinematic",
+    "film",
+    "trailer",
+    "dramatic"
+  ],
+  "params": {
+    "accent": {
+      "type": "color",
+      "default": "#f2b45a"
+    }
+  },
+  "example": {
+    "p": "dir:cinematic"
+  },
+  "body": {
+    "theme": {
+      "p": "core:dark",
+      "accent": "{{accent}}"
+    },
+    "pace": 1.15,
+    "animScale": 1.25,
+    "tokens": {
+      "font": {
+        "display": "'Playfair Display', Georgia, serif"
+      }
+    },
+    "fonts": [
+      {
+        "family": "Playfair Display",
+        "source": "google",
+        "weights": [
+          400,
+          700,
+          800
+        ]
+      }
+    ],
+    "transitions": [
+      {
+        "t": "core:crossfade",
+        "d": 0.9
+      },
+      {
+        "t": "core:fade-through",
+        "d": 0.8
+      }
+    ],
+    "sceneDefaults": {
+      "backdrop": "spotlight"
+    },
+    "overlays": [
+      {
+        "use": "dir:vignette"
+      },
+      {
+        "use": "dir:grain",
+        "amount": 0.06
+      },
+      {
+        "use": "dir:letterbox"
+      }
+    ],
+    "sfx": {
+      "transitions": "whoosh"
+    }
+  }
+}

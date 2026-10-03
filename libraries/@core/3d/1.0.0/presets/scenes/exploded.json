@@ -1,0 +1,146 @@
+{
+  "slug": "exploded",
+  "kind": "scene",
+  "summary": "Exploded view: stacked layers fly apart to show what the product is made of",
+  "tags": [
+    "3d",
+    "exploded",
+    "layers",
+    "architecture",
+    "stack",
+    "anatomy"
+  ],
+  "params": {
+    "items": "array<object>!",
+    "title": "string=",
+    "split": "number=0.8",
+    "gap": "number=0.9"
+  },
+  "duration": {
+    "default": 5.5,
+    "min": 3.5,
+    "max": 12
+  },
+  "example": {
+    "p": "three:exploded",
+    "title": "What's inside",
+    "items": [
+      {
+        "label": "Interface",
+        "color": "#4f8cff"
+      },
+      {
+        "label": "API",
+        "color": "#2ec4b6"
+      },
+      {
+        "label": "Data",
+        "color": "#ffb020"
+      }
+    ]
+  },
+  "body": {
+    "layers": [
+      {
+        "use": "core:backdrop",
+        "style": "gradient"
+      },
+      {
+        "type": "three",
+        "x": "{{W * 0.62}}",
+        "y": "{{H / 2}}",
+        "w": "{{W * 0.76}}",
+        "h": "{{H}}",
+        "@portrait": {
+          "x": "{{W / 2}}",
+          "y": "{{H * 0.42}}",
+          "w": "{{W}}",
+          "h": "{{H * 0.6}}"
+        },
+        "lights": "studio",
+        "camera": {
+          "fov": 30,
+          "keys": {
+            "position": [
+              [
+                0,
+                [
+                  4.5,
+                  2.4,
+                  6.5
+                ]
+              ],
+              [
+                "{{dur}}",
+                [
+                  5.5,
+                  3.2,
+                  5
+                ],
+                "inOutSine"
+              ]
+            ]
+          },
+          "target": [
+            0,
+            0,
+            0
+          ]
+        },
+        "stack": {
+          "items": "{{items}}",
+          "shape": "roundedBox",
+          "size": [
+            2.6,
+            0.18,
+            1.8,
+            0.07
+          ],
+          "step": [
+            0,
+            0.24,
+            0
+          ],
+          "explode": [
+            0,
+            "{{gap}}",
+            0
+          ],
+          "material": "plastic"
+        },
+        "explode": {
+          "at": "{{split}}",
+          "d": 1.4,
+          "amount": 1
+        }
+      },
+      {
+        "if": "{{len(title) > 0}}",
+        "use": "core:heading",
+        "text": "{{title}}",
+        "size": "$size.h2",
+        "align": "left",
+        "anchor": [
+          0,
+          0
+        ],
+        "x": "{{$space.margin}}",
+        "y": "{{$space.margin}}",
+        "split": "words"
+      },
+      {
+        "use": "core:bullet-list",
+        "items": "{{pluck(items, 'label')}}",
+        "x": "{{$space.margin + 300}}",
+        "y": "{{H / 2 + 40}}",
+        "width": 600,
+        "@portrait": {
+          "x": "{{W / 2}}",
+          "y": "{{H * 0.8}}"
+        },
+        "at": "{{split + 0.6}}",
+        "interval": 0.25
+      }
+    ]
+  }
+}

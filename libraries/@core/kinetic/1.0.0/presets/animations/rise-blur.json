@@ -1,0 +1,36 @@
+{
+  "slug": "rise-blur",
+  "kind": "animation",
+  "summary": "Rise from below with motion blur",
+  "tags": [
+    "animation",
+    "kinetic",
+    "rise",
+    "blur",
+    "in",
+    "cinematic"
+  ],
+  "params": {
+    "distance": "number=120"
+  },
+  "duration": {
+    "default": 0.7
+  },
+  "body": {
+    "tracks": {
+      "dy": [
+        "{{distance}}",
+        0
+      ],
+      "blur": [
+        16,
+        0
+      ],
+      "opacity": [
+        0,
+        1
+      ]
+    },
+    "ease": "cubic(0.2,0.9,0.1,1)"
+  }
+}

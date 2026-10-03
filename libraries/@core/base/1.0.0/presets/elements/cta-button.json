@@ -1,0 +1,54 @@
+{
+  "slug": "cta-button",
+  "kind": "element",
+  "summary": "Call-to-action button that pops in and gently pulses",
+  "tags": [
+    "cta",
+    "button",
+    "call-to-action",
+    "subscribe",
+    "link"
+  ],
+  "params": {
+    "text": "string!",
+    "fill": {
+      "type": "color",
+      "default": "$color.accent"
+    },
+    "color": {
+      "type": "color",
+      "default": "$color.bg"
+    },
+    "size": "number=40"
+  },
+  "example": {
+    "use": "core:cta-button",
+    "text": "Get started"
+  },
+  "body": {
+    "layers": [
+      {
+        "type": "text",
+        "text": "{{text}}",
+        "size": "{{size}}",
+        "font": "$font.body",
+        "weight": 700,
+        "color": "{{color}}",
+        "bg": "{{fill}}",
+        "padding": "{{size * 0.55 + 'px ' + size * 1.3 + 'px'}}",
+        "radius": 999,
+        "boxShadow": "{{'0 12px 40px ' + alpha(fill, 0.45)}}",
+        "in": [
+          "core:pop"
+        ],
+        "loop": [
+          {
+            "p": "core:pulse",
+            "at": 0.8,
+            "amount": 1.04
+          }
+        ]
+      }
+    ]
+  }
+}

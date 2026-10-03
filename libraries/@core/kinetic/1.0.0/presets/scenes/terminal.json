@@ -1,0 +1,114 @@
+{
+  "slug": "terminal",
+  "kind": "scene",
+  "summary": "A command line typed character by character with a blinking cursor",
+  "tags": [
+    "terminal",
+    "typewriter",
+    "code",
+    "cli",
+    "hacker",
+    "kinetic",
+    "type"
+  ],
+  "params": {
+    "text": "string!",
+    "prompt": {
+      "type": "string",
+      "default": "> "
+    },
+    "size": "number=64",
+    "speed": "number=0.045",
+    "color": {
+      "type": "color",
+      "default": "$color.accent3"
+    }
+  },
+  "duration": {
+    "default": 1.6,
+    "perWord": 0.35,
+    "wordsFrom": "text",
+    "min": 2.5,
+    "max": 10
+  },
+  "example": {
+    "p": "kinetic:terminal",
+    "text": "motionforge render launch.json --hq"
+  },
+  "body": {
+    "layers": [
+      {
+        "use": "core:backdrop",
+        "style": "grid"
+      },
+      {
+        "type": "group",
+        "x": "{{$space.margin}}",
+        "y": "{{H / 2}}",
+        "children": [
+          {
+            "type": "text",
+            "text": "{{prompt + text}}",
+            "anchor": "left",
+            "size": "{{size}}",
+            "font": "$font.mono",
+            "weight": 500,
+            "color": "{{color}}",
+            "align": "left",
+            "in": [
+              {
+                "p": "core:typewriter",
+                "d": "{{len(prompt + text) * speed}}",
+                "at": 0.2
+              }
+            ]
+          },
+          {
+            "type": "rect",
+            "anchor": "left",
+            "x": "{{len(prompt) * size * 0.6 + 4}}",
+            "w": "{{size * 0.55}}",
+            "h": "{{size * 1.05}}",
+            "fill": "{{color}}",
+            "anim": [
+              {
+                "tracks": {
+                  "dx": [
+                    0,
+                    "{{len(text) * size * 0.6}}"
+                  ]
+                },
+                "d": "{{len(prompt + text) * speed}}",
+                "at": 0.2,
+                "ease": "linear"
+              }
+            ],
+            "loop": [
+              {
+                "tracks": {
+                  "opacity": [
+                    [
+                      0,
+                      1
+                    ],
+                    [
+                      0.5,
+                      0,
+                      "hold"
+                    ],
+                    [
+                      1,
+                      1,
+                      "hold"
+                    ]
+                  ]
+                },
+                "d": 0.9
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

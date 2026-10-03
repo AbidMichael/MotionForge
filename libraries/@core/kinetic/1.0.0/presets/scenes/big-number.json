@@ -1,0 +1,124 @@
+{
+  "slug": "big-number",
+  "kind": "scene",
+  "summary": "Giant counter over a huge outlined ghost number, label underneath",
+  "tags": [
+    "number",
+    "counter",
+    "stat",
+    "kpi",
+    "big",
+    "kinetic",
+    "data"
+  ],
+  "params": {
+    "value": "number!",
+    "label": "string=",
+    "prefix": "string=",
+    "suffix": "string=",
+    "decimals": "integer=0",
+    "color": {
+      "type": "color",
+      "default": "$color.accent"
+    },
+    "countD": "number=1.4",
+    "exit": "enum:none|fade=none"
+  },
+  "duration": {
+    "default": 3,
+    "min": 2
+  },
+  "example": {
+    "p": "kinetic:big-number",
+    "value": 10,
+    "suffix": "x",
+    "label": "faster renders"
+  },
+  "body": {
+    "layers": [
+      {
+        "use": "core:backdrop",
+        "style": "spotlight"
+      },
+      {
+        "type": "text",
+        "counter": {
+          "to": "{{value}}",
+          "d": "{{countD * 1.3}}",
+          "prefix": "{{prefix}}",
+          "suffix": "{{suffix}}",
+          "decimals": "{{decimals}}"
+        },
+        "size": "{{$size.hero * 2.2}}",
+        "color": "transparent",
+        "stroke": "$color.line",
+        "strokeWidth": 3,
+        "font": "$font.display",
+        "weight": "$weight.display",
+        "opacity": 0.9,
+        "anim": [
+          {
+            "tracks": {
+              "scale": [
+                1.15,
+                1
+              ],
+              "opacity": [
+                0,
+                1
+              ]
+            },
+            "d": "{{dur}}",
+            "ease": "out"
+          }
+        ]
+      },
+      {
+        "type": "group",
+        "x": "{{W / 2}}",
+        "y": "{{H / 2}}",
+        "out": "{{exit == 'fade' ? {p: 'core:fade-out', d: 0.4} : null}}",
+        "children": [
+          {
+            "type": "text",
+            "counter": {
+              "to": "{{value}}",
+              "d": "{{countD}}",
+              "prefix": "{{prefix}}",
+              "suffix": "{{suffix}}",
+              "decimals": "{{decimals}}"
+            },
+            "y": "{{label ? -40 : 0}}",
+            "size": "$size.hero",
+            "color": "{{color}}",
+            "glow": "$fx.glow",
+            "font": "$font.display",
+            "weight": "$weight.display",
+            "in": [
+              "kinetic:slam"
+            ]
+          },
+          {
+            "if": "{{label}}",
+            "type": "text",
+            "text": "{{label}}",
+            "y": "{{$size.hero * 0.5}}",
+            "size": "$size.small",
+            "font": "$font.body",
+            "weight": 600,
+            "case": "upper",
+            "tracking": 0.25,
+            "color": "$color.fg",
+            "in": [
+              {
+                "p": "core:tracking-in",
+                "at": 0.4,
+                "d": 0.9
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

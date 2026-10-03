@@ -1,0 +1,18 @@
+{
+  "name": "@core/3d",
+  "alias": "three",
+  "summary": "3D made simple: product spins, exploded views, depth travelling, hero objects.",
+  "guide": "3D without a 3D tool. Scenes: three:product-spin {image, device: phone|tablet|card|box, title, subtitle, side, turn}, three:exploded {items:[{label,color}], title, split (seconds), gap}, three:depth-cards {items:[{image|color}], title, spacing}, three:hero-object {title, shape, material, color, lights}.\nThe raw layer {\"type\":\"three\"} takes objects (shape box|roundedBox|sphere|cylinder|cone|torus|knot|plane|capsule|ring|card|device|image|icosahedron|octahedron|group, size, position, rotation in degrees, scale, material glass|metal|matte|plastic|emissive|toon|wire or {type,color,metalness,roughness,…}, image \"asset:<id>\" on cards/devices (transparent PNG/WebP are detected: no slab or black behind, shadow shaped like the drawing; \"alpha\":true|false|\"auto\", \"alphaTest\" 0.5; shape \"image\" = free cut-out sized to the picture), keys {position|rotation|scale|opacity: [[s, value, \"ease\"]]}, spin [deg/s], float, explode, children),\nlights (\"studio\"|\"soft\"|\"dramatic\"|\"neon\" or a list), camera {fov, position, target, keys, orbit {speed,radius,height}, dolly {from,to}, shake}, stack {items, shape, size, step, explode} to build piles from data, explode {at,d,amount}, ground {opacity,y}, fog, environment.\nRendering uses WebGL (render.gl in config: \"angle\" with a GPU, \"swangle\" on servers).",
+  "depends": {
+    "@core/base": "^1.1.0"
+  },
+  "visibility": "public",
+  "owner": "system",
+  "tags": [
+    "core",
+    "3d",
+    "three",
+    "product"
+  ],
+  "publishedAt": "2026-10-03T00:00:00.000Z"
+}

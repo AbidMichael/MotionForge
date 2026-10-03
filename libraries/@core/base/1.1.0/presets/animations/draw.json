@@ -1,0 +1,26 @@
+{
+  "slug": "draw",
+  "kind": "animation",
+  "summary": "Draw a line or path stroke",
+  "tags": [
+    "animation",
+    "draw",
+    "stroke",
+    "line",
+    "path",
+    "in"
+  ],
+  "duration": {
+    "default": 1.0
+  },
+  "body": {
+    "tracks": {
+      "draw": [
+        0,
+        1
+      ]
+    },
+    "ease": "inOut",
+    "unit": false
+  }
+}

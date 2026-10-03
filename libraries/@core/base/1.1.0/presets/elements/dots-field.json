@@ -1,0 +1,54 @@
+{
+  "slug": "dots-field",
+  "kind": "element",
+  "summary": "Ambient field of softly floating dots (deterministic)",
+  "tags": [
+    "particles",
+    "dots",
+    "ambient",
+    "background",
+    "bokeh"
+  ],
+  "params": {
+    "count": "integer=36",
+    "color": {
+      "type": "color",
+      "default": "$color.accent"
+    },
+    "maxSize": "number=10",
+    "seed": "number=1"
+  },
+  "example": {
+    "use": "core:dots-field"
+  },
+  "body": {
+    "layers": [
+      {
+        "repeat": "{{count}}",
+        "layer": {
+          "type": "ellipse",
+          "x": "{{(rand(index, seed) - 0.5) * W}}",
+          "y": "{{(rand(index, seed + 7) - 0.5) * H}}",
+          "w": "{{2 + maxSize * rand(index, seed + 3)}}",
+          "h": "{{2 + maxSize * rand(index, seed + 3)}}",
+          "fill": "{{color}}",
+          "opacity": "{{0.15 + 0.5 * rand(index, seed + 11)}}",
+          "in": [
+            {
+              "p": "core:fade-in",
+              "d": 1.5,
+              "at": "{{rand(index, seed + 5) * 0.8}}"
+            }
+          ],
+          "loop": [
+            {
+              "p": "core:float",
+              "d": "{{3 + 3 * rand(index, seed + 13)}}",
+              "distance": "{{10 + 30 * rand(index, seed + 17)}}"
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

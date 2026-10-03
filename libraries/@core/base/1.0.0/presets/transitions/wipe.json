@@ -1,0 +1,29 @@
+{
+  "slug": "wipe",
+  "kind": "transition",
+  "summary": "Hard-edged wipe revealing the next scene",
+  "tags": [
+    "transition",
+    "wipe",
+    "reveal",
+    "mask"
+  ],
+  "params": {
+    "dir": "enum:left|right|top|bottom|center=left"
+  },
+  "duration": {
+    "default": 0.7
+  },
+  "body": {
+    "in": {
+      "tracks": {
+        "clip": [
+          0,
+          1
+        ]
+      },
+      "ease": "cubic(0.65,0,0.35,1)",
+      "clipDir": "{{dir}}"
+    }
+  }
+}

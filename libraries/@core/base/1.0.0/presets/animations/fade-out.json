@@ -1,0 +1,22 @@
+{
+  "slug": "fade-out",
+  "kind": "animation",
+  "summary": "Opacity 1 → 0",
+  "tags": [
+    "animation",
+    "fade",
+    "out"
+  ],
+  "duration": {
+    "default": 0.4
+  },
+  "body": {
+    "tracks": {
+      "opacity": [
+        1,
+        0
+      ]
+    },
+    "ease": "in"
+  }
+}

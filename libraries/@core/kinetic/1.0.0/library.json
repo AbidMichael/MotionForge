@@ -1,0 +1,15 @@
+{
+  "name": "@core/kinetic",
+  "alias": "kinetic",
+  "summary": "Kinetic typography: slams, stacks, swaps, countdowns, glitches, marquees.",
+  "guide": "Kinetic typography: big words that move with intent. Pair with theme kinetic:impact (Bebas Neue, yellow) or any core theme.\nSCENES: title-slam (words slam in + shake), word-stack (lines fly in alternately, one highlighted), highlight (sentence + marker-boxed phrase), big-number (giant counter over an outlined ghost), word-swap (prefix + rotating words), countdown (3-2-1-GO), terminal (typed line with cursor), glitch-title (RGB-split title), split-reveal (two halves slide together), marquee (rows of scrolling text).\nANIMATIONS: slam, stretch-in, flip-y, elastic-in, letter-drop, rise-blur (in) · wave, jitter (loop; wave runs per char on split text).\nHouse rules: one idea per scene, 1–6 words per line, let the last word land before cutting (use kinetic:title-slam d ≥ 2).",
+  "depends": {
+    "@core/base": "^1.0.0"
+  },
+  "visibility": "public",
+  "owner": "system",
+  "tags": [
+    "core",
+    "typography"
+  ]
+}

@@ -1,0 +1,71 @@
+{
+  "slug": "section",
+  "kind": "scene",
+  "summary": "Chapter divider: big index number and section title",
+  "tags": [
+    "section",
+    "chapter",
+    "divider",
+    "part"
+  ],
+  "params": {
+    "number": "string!",
+    "title": "string!",
+    "backdrop": "enum:solid|gradient|grid|dots|spotlight=grid",
+    "exit": "enum:none|fade=none"
+  },
+  "duration": {
+    "default": 2.5,
+    "min": 1.5
+  },
+  "example": {
+    "p": "core:section",
+    "number": "01",
+    "title": "The problem"
+  },
+  "body": {
+    "layers": [
+      {
+        "use": "core:backdrop",
+        "style": "{{backdrop}}"
+      },
+      {
+        "type": "group",
+        "x": "{{$space.margin}}",
+        "y": "{{H / 2}}",
+        "out": "{{exit == 'fade' ? {p: 'core:fade-out', d: 0.4} : null}}",
+        "children": [
+          {
+            "type": "text",
+            "text": "{{number}}",
+            "anchor": "left",
+            "y": -90,
+            "size": 220,
+            "font": "$font.display",
+            "weight": "$weight.display",
+            "color": "transparent",
+            "stroke": "$color.accent",
+            "strokeWidth": 3,
+            "in": [
+              {
+                "p": "core:wipe-in",
+                "dir": "bottom",
+                "d": 0.7
+              }
+            ]
+          },
+          {
+            "use": "core:heading",
+            "text": "{{title}}",
+            "align": "left",
+            "size": "$size.h2",
+            "split": "chars",
+            "stagger": 0.02,
+            "y": 110,
+            "at": 0.25
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,127 @@
+{
+  "slug": "compare",
+  "kind": "scene",
+  "summary": "Two columns side by side: before/after, us/them, old/new",
+  "tags": [
+    "compare",
+    "versus",
+    "vs",
+    "before-after",
+    "comparison",
+    "two-column"
+  ],
+  "params": {
+    "leftTitle": "string!",
+    "rightTitle": "string!",
+    "left": "array<string>!",
+    "right": "array<string>!",
+    "leftColor": {
+      "type": "color",
+      "default": "$color.muted"
+    },
+    "rightColor": {
+      "type": "color",
+      "default": "$color.accent"
+    },
+    "exit": "enum:none|fade=none"
+  },
+  "duration": {
+    "default": 2.5,
+    "perWord": 0.15,
+    "wordsFrom": "right",
+    "min": 4,
+    "max": 12
+  },
+  "example": {
+    "p": "core:compare",
+    "leftTitle": "Before",
+    "rightTitle": "After",
+    "left": [
+      "Hand-written code"
+    ],
+    "right": [
+      "One preset"
+    ]
+  },
+  "body": {
+    "layers": [
+      {
+        "use": "core:backdrop",
+        "style": "solid"
+      },
+      {
+        "type": "rect",
+        "x": "{{W / 2}}",
+        "y": "{{H / 2}}",
+        "w": 2,
+        "h": "{{H * 0.6}}",
+        "fill": "$color.line",
+        "in": [
+          "core:grow-y"
+        ]
+      },
+      {
+        "type": "group",
+        "x": "{{W * 0.25}}",
+        "y": "{{H / 2}}",
+        "out": "{{exit == 'fade' ? {p: 'core:fade-out', d: 0.4} : null}}",
+        "children": [
+          {
+            "type": "text",
+            "text": "{{leftTitle}}",
+            "y": -230,
+            "size": "$size.h3",
+            "font": "$font.display",
+            "weight": "$weight.heading",
+            "color": "{{leftColor}}",
+            "in": [
+              "core:fade-up"
+            ]
+          },
+          {
+            "use": "core:bullet-list",
+            "items": "{{left}}",
+            "size": 44,
+            "bullet": "{{leftColor}}",
+            "color": "$color.muted",
+            "width": 620,
+            "y": 40,
+            "at": 0.3
+          }
+        ]
+      },
+      {
+        "type": "group",
+        "x": "{{W * 0.75}}",
+        "y": "{{H / 2}}",
+        "out": "{{exit == 'fade' ? {p: 'core:fade-out', d: 0.4} : null}}",
+        "children": [
+          {
+            "type": "text",
+            "text": "{{rightTitle}}",
+            "y": -230,
+            "size": "$size.h3",
+            "font": "$font.display",
+            "weight": "$weight.heading",
+            "color": "{{rightColor}}",
+            "in": [
+              {
+                "p": "core:fade-up",
+                "at": 0.5
+              }
+            ]
+          },
+          {
+            "use": "core:bullet-list",
+            "items": "{{right}}",
+            "size": 44,
+            "bullet": "{{rightColor}}",
+            "width": 620,
+            "y": 40,
+            "at": "{{0.8 + len(left) * 0.35}}"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "slug": "editorial",
+  "kind": "direction",
+  "summary": "Editorial: serif display, generous pace, framed, quiet crossfades",
+  "tags": [
+    "direction",
+    "look",
+    "style",
+    "editorial",
+    "magazine",
+    "elegant",
+    "story"
+  ],
+  "params": {
+    "accent": {
+      "type": "color",
+      "default": "#c2410c"
+    }
+  },
+  "example": {
+    "p": "dir:editorial"
+  },
+  "body": {
+    "theme": {
+      "p": "core:editorial",
+      "accent": "{{accent}}"
+    },
+    "pace": 1.1,
+    "animScale": 1.15,
+    "transition": {
+      "t": "core:crossfade",
+      "d": 0.7
+    },
+    "overlays": [
+      {
+        "use": "dir:frame"
+      }
+    ],
+    "sfx": {
+      "transitions": "swipe"
+    }
+  }
+}

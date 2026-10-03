@@ -1,0 +1,104 @@
+{
+  "slug": "split-reveal",
+  "kind": "scene",
+  "summary": "A big word built from two halves that slide in from opposite sides",
+  "tags": [
+    "split",
+    "reveal",
+    "slice",
+    "title",
+    "kinetic"
+  ],
+  "params": {
+    "text": "string!",
+    "size": {
+      "type": "number",
+      "default": "$size.hero"
+    },
+    "sub": "string=",
+    "exit": "enum:none|fade=none"
+  },
+  "duration": {
+    "default": 2.6,
+    "min": 1.5
+  },
+  "example": {
+    "p": "kinetic:split-reveal",
+    "text": "Forge",
+    "sub": "motion for agents"
+  },
+  "body": {
+    "layers": [
+      {
+        "use": "core:backdrop",
+        "style": "solid"
+      },
+      {
+        "type": "group",
+        "x": "{{W / 2}}",
+        "y": "{{H / 2 - (sub ? 30 : 0)}}",
+        "out": "{{exit == 'fade' ? {p: 'core:fade-out', d: 0.4} : null}}",
+        "children": [
+          {
+            "type": "text",
+            "text": "{{text}}",
+            "size": "{{size}}",
+            "color": "$color.fg",
+            "case": "upper",
+            "lineHeight": 1,
+            "font": "$font.display",
+            "weight": "$weight.display",
+            "clipPath": "inset(0 0 50% 0)",
+            "in": [
+              {
+                "p": "core:slide-in",
+                "from": "left",
+                "distance": "{{W * 0.6}}",
+                "d": 0.7,
+                "ease": "cubic(0.76,0,0.24,1)"
+              }
+            ]
+          },
+          {
+            "type": "text",
+            "text": "{{text}}",
+            "size": "{{size}}",
+            "color": "$color.accent",
+            "case": "upper",
+            "lineHeight": 1,
+            "font": "$font.display",
+            "weight": "$weight.display",
+            "clipPath": "inset(50% 0 0 0)",
+            "in": [
+              {
+                "p": "core:slide-in",
+                "from": "right",
+                "distance": "{{W * 0.6}}",
+                "d": 0.7,
+                "ease": "cubic(0.76,0,0.24,1)"
+              }
+            ]
+          },
+          {
+            "if": "{{sub}}",
+            "type": "text",
+            "text": "{{sub}}",
+            "y": "{{size * 0.62}}",
+            "size": "$size.small",
+            "font": "$font.body",
+            "weight": 600,
+            "tracking": 0.3,
+            "case": "upper",
+            "color": "$color.muted",
+            "in": [
+              {
+                "p": "core:fade-in",
+                "at": 0.7
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

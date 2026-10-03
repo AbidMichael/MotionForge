@@ -1,0 +1,90 @@
+{
+  "slug": "word-swap",
+  "kind": "scene",
+  "summary": "Static prefix with rotating words that replace each other in place",
+  "tags": [
+    "swap",
+    "rotate",
+    "words",
+    "kinetic",
+    "tagline",
+    "cycle"
+  ],
+  "params": {
+    "prefix": "string!",
+    "words": "array<string>!",
+    "period": "number=0.8",
+    "pivot": "number=0.5",
+    "size": {
+      "type": "number",
+      "default": "$size.h2"
+    },
+    "exit": "enum:none|fade=none"
+  },
+  "duration": {
+    "default": 1,
+    "perWord": 0.8,
+    "wordsFrom": "words",
+    "min": 2.5,
+    "max": 10
+  },
+  "example": {
+    "p": "kinetic:word-swap",
+    "prefix": "Make it",
+    "words": [
+      "faster",
+      "bolder",
+      "yours"
+    ]
+  },
+  "body": {
+    "layers": [
+      {
+        "use": "core:backdrop",
+        "style": "solid"
+      },
+      {
+        "type": "text",
+        "text": "{{prefix}}",
+        "anchor": "right",
+        "x": "{{W * pivot - size * 0.12}}",
+        "y": "{{H / 2}}",
+        "size": "{{size}}",
+        "color": "$color.fg",
+        "font": "$font.display",
+        "weight": "$weight.display",
+        "in": [
+          {
+            "p": "core:fade-up",
+            "distance": 40
+          }
+        ],
+        "out": "{{exit == 'fade' ? {p: 'core:fade-out', d: 0.4} : null}}"
+      },
+      {
+        "repeat": "{{words}}",
+        "layer": {
+          "type": "text",
+          "text": "{{item}}",
+          "anchor": "left",
+          "x": "{{W * pivot + size * 0.12}}",
+          "y": "{{H / 2}}",
+          "size": "{{size}}",
+          "color": "$color.accent",
+          "font": "$font.display",
+          "weight": "$weight.display",
+          "at": "{{0.3 + index * period}}",
+          "dur": "{{index == count - 1 ? dur : period}}",
+          "in": [
+            {
+              "p": "kinetic:rise-blur",
+              "distance": 90,
+              "d": 0.35
+            }
+          ],
+          "out": "{{index == count - 1 ? (exit == 'fade' ? {p: 'core:fade-out', d: 0.4} : null) : {p: 'core:slide-out', to: 'up', distance: 90, d: 0.25} }}"
+        }
+      }
+    ]
+  }
+}

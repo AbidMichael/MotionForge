@@ -1,0 +1,52 @@
+{
+  "slug": "breathe",
+  "kind": "animation",
+  "summary": "Very slow scale + opacity drift for backgrounds — use as loop",
+  "tags": [
+    "animation",
+    "breathe",
+    "loop",
+    "background",
+    "ambient"
+  ],
+  "duration": {
+    "default": 8.0
+  },
+  "body": {
+    "tracks": {
+      "scale": [
+        [
+          0,
+          1
+        ],
+        [
+          0.5,
+          1.06,
+          "inOut"
+        ],
+        [
+          1,
+          1,
+          "inOut"
+        ]
+      ],
+      "opacity": [
+        [
+          0,
+          0.85
+        ],
+        [
+          0.5,
+          1,
+          "inOut"
+        ],
+        [
+          1,
+          0.85,
+          "inOut"
+        ]
+      ]
+    },
+    "unit": false
+  }
+}

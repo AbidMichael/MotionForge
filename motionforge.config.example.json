@@ -1,0 +1,25 @@
+{
+  "host": "127.0.0.1",
+  "port": 7420,
+  "auth": "none",
+  "agents": [
+    { "id": "claude-code", "projects": ["acme"] },
+    { "id": "claude-desktop" },
+    { "id": "michael", "admin": true }
+  ],
+  "defaultFormat": "1920x1080@30",
+  "defaultTheme": "core:dark",
+  "render": {
+    "concurrency": null,
+    "jobs": 1,
+    "browserExecutable": null,
+    "segmentCache": true,
+    "gl": "angle"
+  },
+  "promotion": {
+    "minRatings": 3,
+    "minAverage": 4,
+    "minRenders": 5,
+    "minSuccessRate": 0.9
+  }
+}

@@ -1,0 +1,47 @@
+{
+  "slug": "quote",
+  "kind": "scene",
+  "summary": "Testimonial or quote with attribution",
+  "tags": [
+    "quote",
+    "testimonial",
+    "review",
+    "citation"
+  ],
+  "params": {
+    "quote": "string!",
+    "author": "string=",
+    "role": "string=",
+    "backdrop": "enum:solid|gradient|grid|dots|spotlight=gradient",
+    "exit": "enum:none|fade=none"
+  },
+  "duration": {
+    "default": 1.5,
+    "perWord": 0.3,
+    "wordsFrom": "quote",
+    "min": 3,
+    "max": 12
+  },
+  "example": {
+    "p": "core:quote",
+    "quote": "The best tool we adopted this year.",
+    "author": "Sam Rivera",
+    "role": "CTO"
+  },
+  "body": {
+    "layers": [
+      {
+        "use": "core:backdrop",
+        "style": "{{backdrop}}"
+      },
+      {
+        "use": "core:quote-block",
+        "quote": "{{quote}}",
+        "author": "{{author}}",
+        "role": "{{role}}",
+        "y": "{{H / 2 + 20}}",
+        "out": "{{exit == 'fade' ? {p: 'core:fade-out', d: 0.4} : null}}"
+      }
+    ]
+  }
+}

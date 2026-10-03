@@ -1,0 +1,62 @@
+{
+  "slug": "media-full",
+  "kind": "scene",
+  "summary": "Full-bleed image or video with slow push-in, optional caption",
+  "tags": [
+    "media",
+    "image",
+    "video",
+    "full",
+    "background",
+    "photo",
+    "b-roll"
+  ],
+  "params": {
+    "src": "asset!",
+    "kind": "enum:image|video=image",
+    "caption": "string=",
+    "darken": "number=0.35",
+    "exit": "enum:none|fade=none"
+  },
+  "duration": {
+    "default": 4,
+    "min": 1.5
+  },
+  "example": {
+    "p": "core:media-full",
+    "caption": "Built for speed"
+  },
+  "body": {
+    "layers": [
+      {
+        "type": "{{kind}}",
+        "src": "{{src}}",
+        "w": "{{W}}",
+        "h": "{{H}}",
+        "anim": [
+          {
+            "p": "core:ken-burns",
+            "d": "{{dur}}"
+          }
+        ],
+        "out": "{{exit == 'fade' ? {p: 'core:fade-out', d: 0.4} : null}}"
+      },
+      {
+        "type": "rect",
+        "w": "{{W}}",
+        "h": "{{H}}",
+        "fill": "{{'linear-gradient(to top, rgba(0,0,0,' + (darken + 0.3) + ') 0%, rgba(0,0,0,' + darken * 0.4 + ') 60%)'}}"
+      },
+      {
+        "if": "{{caption}}",
+        "use": "core:heading",
+        "text": "{{caption}}",
+        "size": "$size.h2",
+        "align": "left",
+        "x": "{{$space.margin}}",
+        "y": "{{H - 200}}",
+        "at": 0.4
+      }
+    ]
+  }
+}

@@ -1,0 +1,67 @@
+{
+  "slug": "bars",
+  "kind": "transition",
+  "summary": "Vertical bars sweep across to cover and reveal",
+  "tags": [
+    "transition",
+    "bars",
+    "shutter",
+    "stripes",
+    "graphic"
+  ],
+  "params": {
+    "count": "integer=6",
+    "color": {
+      "type": "color",
+      "default": "$color.accent"
+    },
+    "color2": {
+      "type": "color",
+      "default": "$color.bg2"
+    }
+  },
+  "duration": {
+    "default": 0.9
+  },
+  "body": {
+    "overlap": false,
+    "overlay": [
+      {
+        "repeat": "{{count}}",
+        "layer": {
+          "type": "rect",
+          "x": "{{(index + 0.5) * W / count}}",
+          "y": "{{H}}",
+          "w": "{{W / count + 2}}",
+          "h": "{{H}}",
+          "fill": "{{index % 2 == 0 ? color : color2}}",
+          "anchor": "bottom",
+          "anim": [
+            {
+              "tracks": {
+                "scaleY": [
+                  [
+                    0,
+                    0
+                  ],
+                  [
+                    0.5,
+                    1,
+                    "cubic(0.65,0,0.35,1)"
+                  ],
+                  [
+                    1,
+                    0,
+                    "cubic(0.65,0,0.35,1)"
+                  ]
+                ]
+              },
+              "d": "{{dur * 0.8}}",
+              "at": "{{dur * 0.2 * index / count}}"
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

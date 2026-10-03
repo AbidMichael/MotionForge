@@ -1,0 +1,76 @@
+{
+  "slug": "heading",
+  "kind": "element",
+  "summary": "Headline text with an entrance animation; optional per-char/word split",
+  "tags": [
+    "text",
+    "title",
+    "headline",
+    "heading"
+  ],
+  "params": {
+    "text": "string!",
+    "size": {
+      "type": "number",
+      "default": "$size.h1"
+    },
+    "color": {
+      "type": "color",
+      "default": "$color.fg"
+    },
+    "font": {
+      "type": "string",
+      "default": "$font.display"
+    },
+    "weight": {
+      "type": "number",
+      "default": "$weight.display"
+    },
+    "align": "enum:left|center|right=center",
+    "maxWidth": "number=1600",
+    "split": "enum:none|chars|words|lines=words",
+    "enter": "preset:animation=core:rise",
+    "enterD": "number=0.7",
+    "stagger": "number=0.06",
+    "tracking": "number=-0.02",
+    "case": "enum:none|upper|lower=none",
+    "lineHeight": "number=1.02",
+    "glow": {
+      "type": "color",
+      "default": "$fx.glow"
+    }
+  },
+  "example": {
+    "use": "core:heading",
+    "text": "Ship faster",
+    "split": "chars",
+    "enter": "core:rise"
+  },
+  "body": {
+    "layers": [
+      {
+        "type": "text",
+        "text": "{{text}}",
+        "size": "{{size}}",
+        "color": "{{color}}",
+        "font": "{{font}}",
+        "weight": "{{weight}}",
+        "align": "{{align}}",
+        "anchor": "{{align == 'left' ? 'left' : align == 'right' ? 'right' : 'center'}}",
+        "w": "{{min(maxWidth, W - 2 * $space.margin)}}",
+        "split": "{{split == 'none' ? null : split}}",
+        "stagger": "{{stagger}}",
+        "tracking": "{{tracking}}",
+        "case": "{{case}}",
+        "lineHeight": "{{lineHeight}}",
+        "glow": "{{glow}}",
+        "in": [
+          {
+            "p": "{{enter}}",
+            "d": "{{enterD}}"
+          }
+        ]
+      }
+    ]
+  }
+}

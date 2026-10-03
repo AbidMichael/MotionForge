@@ -1,0 +1,67 @@
+{
+  "slug": "luxury",
+  "kind": "direction",
+  "summary": "Luxury: black and gold, slow reveals, serif",
+  "tags": [
+    "direction",
+    "look",
+    "style",
+    "luxury",
+    "premium",
+    "gold",
+    "fashion"
+  ],
+  "params": {
+    "accent": {
+      "type": "color",
+      "default": "#c9a45c"
+    }
+  },
+  "example": {
+    "p": "dir:luxury"
+  },
+  "body": {
+    "theme": {
+      "p": "core:dark",
+      "accent": "{{accent}}"
+    },
+    "pace": 1.25,
+    "animScale": 1.4,
+    "tokens": {
+      "color": {
+        "bg": "#070707",
+        "bg2": "#121110"
+      },
+      "font": {
+        "display": "'Playfair Display', Georgia, serif"
+      }
+    },
+    "fonts": [
+      {
+        "family": "Playfair Display",
+        "source": "google",
+        "weights": [
+          400,
+          700,
+          800
+        ]
+      }
+    ],
+    "transition": {
+      "t": "core:fade-through",
+      "d": 0.9
+    },
+    "sceneDefaults": {
+      "backdrop": "spotlight"
+    },
+    "overlays": [
+      {
+        "use": "dir:vignette",
+        "amount": 0.6
+      }
+    ],
+    "sfx": {
+      "transitions": "rise"
+    }
+  }
+}

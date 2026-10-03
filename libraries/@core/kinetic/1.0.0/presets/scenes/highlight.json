@@ -1,0 +1,99 @@
+{
+  "slug": "highlight",
+  "kind": "scene",
+  "summary": "A sentence, then a key phrase revealed inside a marker box",
+  "tags": [
+    "highlight",
+    "marker",
+    "emphasis",
+    "kinetic",
+    "quote",
+    "statement"
+  ],
+  "params": {
+    "text": "string!",
+    "mark": "string!",
+    "size": {
+      "type": "number",
+      "default": "$size.h2"
+    },
+    "markColor": {
+      "type": "color",
+      "default": "$color.accent"
+    },
+    "markText": {
+      "type": "color",
+      "default": "$color.bg"
+    },
+    "backdrop": "enum:solid|gradient|grid|dots|spotlight=solid",
+    "exit": "enum:none|fade=none"
+  },
+  "duration": {
+    "default": 1.4,
+    "perWord": 0.28,
+    "wordsFrom": "text",
+    "min": 2.8,
+    "max": 8
+  },
+  "example": {
+    "p": "kinetic:highlight",
+    "text": "Most tools make you",
+    "mark": "start from zero"
+  },
+  "body": {
+    "layers": [
+      {
+        "use": "core:backdrop",
+        "style": "{{backdrop}}"
+      },
+      {
+        "type": "group",
+        "x": "{{W / 2}}",
+        "y": "{{H / 2}}",
+        "out": "{{exit == 'fade' ? {p: 'core:fade-out', d: 0.4} : null}}",
+        "children": [
+          {
+            "type": "text",
+            "text": "{{text}}",
+            "y": "{{-size * 0.62}}",
+            "size": "{{size}}",
+            "color": "$color.fg",
+            "w": "{{W - 2 * $space.margin}}",
+            "font": "$font.display",
+            "weight": "$weight.display",
+            "lineHeight": 1,
+            "split": "words",
+            "stagger": 0.08,
+            "in": [
+              {
+                "p": "core:rise",
+                "distance": 50
+              }
+            ]
+          },
+          {
+            "type": "text",
+            "text": "{{mark}}",
+            "y": "{{size * 0.6}}",
+            "size": "{{size * 1.08}}",
+            "color": "{{markText}}",
+            "bg": "{{markColor}}",
+            "padding": "{{'0.02em 0.28em'}}",
+            "radius": "$radius.s",
+            "lineHeight": 1.05,
+            "font": "$font.display",
+            "weight": "$weight.display",
+            "in": [
+              {
+                "p": "core:wipe-in",
+                "dir": "left",
+                "d": 0.55,
+                "at": "{{0.25 + words(text) * 0.08}}"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

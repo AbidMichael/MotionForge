@@ -1,0 +1,16 @@
+{
+  "slug": "morph",
+  "kind": "transition",
+  "summary": "Magic move: layers with the same id in both scenes fly and resize to their new place; the rest crossfades",
+  "tags": ["transition", "morph", "magic-move", "continuity", "shared-element", "smart"],
+  "params": {
+    "match": {"type": "any", "default": "auto", "desc": "\"auto\" (same ids) or [[\"idInA\", \"idInB\"], …]"},
+    "ease": "string=cubic(0.65,0,0.25,1)"
+  },
+  "duration": {"default": 0.9},
+  "body": {
+    "continuity": "match",
+    "out": {"tracks": {"opacity": [[0, 1], [0.6, 0, "inOut"]]}},
+    "in": {"tracks": {"opacity": [[0, 0], [0.4, 0], [1, 1, "inOut"]]}}
+  }
+}

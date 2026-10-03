@@ -1,0 +1,35 @@
+{
+  "slug": "blur-in",
+  "kind": "animation",
+  "summary": "Focus pull: blurred and slightly large → sharp",
+  "tags": [
+    "animation",
+    "blur",
+    "in",
+    "focus",
+    "cinematic"
+  ],
+  "params": {
+    "amount": "number=24"
+  },
+  "duration": {
+    "default": 0.9
+  },
+  "body": {
+    "tracks": {
+      "opacity": [
+        0,
+        1
+      ],
+      "blur": [
+        "{{amount}}",
+        0
+      ],
+      "scale": [
+        1.08,
+        1
+      ]
+    },
+    "ease": "cubic(0.2,0.9,0.1,1)"
+  }
+}

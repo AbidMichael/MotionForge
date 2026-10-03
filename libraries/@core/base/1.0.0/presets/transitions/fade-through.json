@@ -1,0 +1,54 @@
+{
+  "slug": "fade-through",
+  "kind": "transition",
+  "summary": "Dip to a colour (default background) then into the next scene",
+  "tags": [
+    "transition",
+    "fade",
+    "dip",
+    "black"
+  ],
+  "params": {
+    "color": {
+      "type": "color",
+      "default": "$color.bg"
+    }
+  },
+  "duration": {
+    "default": 0.8
+  },
+  "body": {
+    "overlap": false,
+    "overlay": [
+      {
+        "type": "rect",
+        "w": "{{W}}",
+        "h": "{{H}}",
+        "fill": "{{color}}",
+        "anim": [
+          {
+            "tracks": {
+              "opacity": [
+                [
+                  0,
+                  0
+                ],
+                [
+                  0.5,
+                  1,
+                  "inOut"
+                ],
+                [
+                  1,
+                  0,
+                  "inOut"
+                ]
+              ]
+            },
+            "d": "{{dur}}"
+          }
+        ]
+      }
+    ]
+  }
+}

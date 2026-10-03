@@ -1,0 +1,70 @@
+{
+  "slug": "zoom-through",
+  "kind": "transition",
+  "summary": "Fly through the current scene into the next",
+  "tags": [
+    "transition",
+    "zoom",
+    "scale",
+    "energetic"
+  ],
+  "duration": {
+    "default": 0.6
+  },
+  "body": {
+    "out": {
+      "tracks": {
+        "scale": [
+          1,
+          1.8
+        ],
+        "opacity": [
+          [
+            0,
+            1
+          ],
+          [
+            0.6,
+            1
+          ],
+          [
+            1,
+            0
+          ]
+        ],
+        "blur": [
+          0,
+          20
+        ]
+      },
+      "ease": "in"
+    },
+    "in": {
+      "tracks": {
+        "scale": [
+          1.4,
+          1
+        ],
+        "opacity": [
+          [
+            0,
+            0
+          ],
+          [
+            0.5,
+            1
+          ],
+          [
+            1,
+            1
+          ]
+        ],
+        "blur": [
+          18,
+          0
+        ]
+      },
+      "ease": "out"
+    }
+  }
+}

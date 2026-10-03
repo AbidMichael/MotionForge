@@ -1,0 +1,119 @@
+{
+  "slug": "glitch-in",
+  "kind": "animation",
+  "summary": "Digital glitch entrance: jittery offsets and flicker",
+  "tags": [
+    "animation",
+    "glitch",
+    "digital",
+    "in",
+    "cyber"
+  ],
+  "duration": {
+    "default": 0.5
+  },
+  "body": {
+    "tracks": {
+      "opacity": [
+        [
+          0,
+          0
+        ],
+        [
+          0.1,
+          1,
+          "hold"
+        ],
+        [
+          0.2,
+          0.3,
+          "hold"
+        ],
+        [
+          0.3,
+          1,
+          "hold"
+        ],
+        [
+          1,
+          1
+        ]
+      ],
+      "dx": [
+        [
+          0,
+          -40
+        ],
+        [
+          0.15,
+          30,
+          "hold"
+        ],
+        [
+          0.3,
+          -18,
+          "hold"
+        ],
+        [
+          0.45,
+          10,
+          "hold"
+        ],
+        [
+          0.6,
+          -4,
+          "hold"
+        ],
+        [
+          0.75,
+          0,
+          "hold"
+        ],
+        [
+          1,
+          0
+        ]
+      ],
+      "skewX": [
+        [
+          0,
+          20
+        ],
+        [
+          0.3,
+          -10,
+          "hold"
+        ],
+        [
+          0.6,
+          0,
+          "hold"
+        ],
+        [
+          1,
+          0
+        ]
+      ],
+      "hue": [
+        [
+          0,
+          90
+        ],
+        [
+          0.4,
+          -60,
+          "hold"
+        ],
+        [
+          0.7,
+          0,
+          "hold"
+        ],
+        [
+          1,
+          0
+        ]
+      ]
+    }
+  }
+}

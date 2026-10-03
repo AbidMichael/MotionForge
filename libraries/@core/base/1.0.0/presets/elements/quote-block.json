@@ -1,0 +1,79 @@
+{
+  "slug": "quote-block",
+  "kind": "element",
+  "summary": "Large quote with quotation mark and attribution",
+  "tags": [
+    "quote",
+    "testimonial",
+    "citation",
+    "text"
+  ],
+  "params": {
+    "quote": "string!",
+    "author": "string=",
+    "role": "string=",
+    "size": {
+      "type": "number",
+      "default": "$size.h3"
+    },
+    "maxWidth": "number=1400"
+  },
+  "example": {
+    "use": "core:quote-block",
+    "quote": "It just works.",
+    "author": "Someone"
+  },
+  "body": {
+    "layers": [
+      {
+        "type": "text",
+        "text": "“",
+        "y": "{{-size * 2.1}}",
+        "size": "{{size * 3.2}}",
+        "font": "$font.display",
+        "weight": 800,
+        "color": "$color.accent",
+        "lineHeight": 1,
+        "in": [
+          "core:pop"
+        ]
+      },
+      {
+        "type": "text",
+        "text": "{{quote}}",
+        "size": "{{size}}",
+        "w": "{{maxWidth}}",
+        "font": "$font.display",
+        "weight": "$weight.heading",
+        "color": "$color.fg",
+        "lineHeight": 1.18,
+        "split": "words",
+        "stagger": 0.04,
+        "in": [
+          {
+            "p": "core:fade-up",
+            "distance": 24,
+            "d": 0.6,
+            "at": 0.15
+          }
+        ]
+      },
+      {
+        "if": "{{author}}",
+        "type": "text",
+        "text": "{{'— ' + author + (role ? ', ' + role : '')}}",
+        "y": "{{size * 2.4}}",
+        "size": "$size.small",
+        "font": "$font.body",
+        "weight": 500,
+        "color": "$color.muted",
+        "in": [
+          {
+            "p": "core:fade-in",
+            "at": "{{0.6 + words(quote) * 0.04}}"
+          }
+        ]
+      }
+    ]
+  }
+}

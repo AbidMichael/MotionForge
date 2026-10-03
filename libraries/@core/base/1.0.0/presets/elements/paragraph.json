@@ -1,0 +1,51 @@
+{
+  "slug": "paragraph",
+  "kind": "element",
+  "summary": "Body copy block, fades up",
+  "tags": [
+    "text",
+    "body",
+    "paragraph",
+    "copy"
+  ],
+  "params": {
+    "text": "string!",
+    "size": {
+      "type": "number",
+      "default": "$size.body"
+    },
+    "color": {
+      "type": "color",
+      "default": "$color.muted"
+    },
+    "align": "enum:left|center|right=center",
+    "maxWidth": "number=1100",
+    "lineHeight": "number=1.4"
+  },
+  "example": {
+    "use": "core:paragraph",
+    "text": "Everything you need, nothing you don't."
+  },
+  "body": {
+    "layers": [
+      {
+        "type": "text",
+        "text": "{{text}}",
+        "size": "{{size}}",
+        "color": "{{color}}",
+        "font": "$font.body",
+        "weight": "$weight.body",
+        "align": "{{align}}",
+        "anchor": "{{align == 'left' ? 'left' : align == 'right' ? 'right' : 'center'}}",
+        "w": "{{maxWidth}}",
+        "lineHeight": "{{lineHeight}}",
+        "in": [
+          {
+            "p": "core:fade-up",
+            "distance": 30
+          }
+        ]
+      }
+    ]
+  }
+}

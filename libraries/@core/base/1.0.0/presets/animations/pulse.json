@@ -1,0 +1,38 @@
+{
+  "slug": "pulse",
+  "kind": "animation",
+  "summary": "Gentle scale pulse — use as loop",
+  "tags": [
+    "animation",
+    "pulse",
+    "loop",
+    "attention"
+  ],
+  "params": {
+    "amount": "number=1.06"
+  },
+  "duration": {
+    "default": 1.4
+  },
+  "body": {
+    "tracks": {
+      "scale": [
+        [
+          0,
+          1
+        ],
+        [
+          0.5,
+          "{{amount}}",
+          "inOut"
+        ],
+        [
+          1,
+          1,
+          "inOut"
+        ]
+      ]
+    },
+    "unit": false
+  }
+}

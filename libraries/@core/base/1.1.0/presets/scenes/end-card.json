@@ -1,0 +1,77 @@
+{
+  "slug": "end-card",
+  "kind": "scene",
+  "summary": "Closing card: headline, CTA button, URL/handle",
+  "tags": [
+    "end",
+    "outro",
+    "cta",
+    "closing",
+    "subscribe",
+    "call-to-action"
+  ],
+  "params": {
+    "headline": "string!",
+    "cta": "string=",
+    "url": "string=",
+    "backdrop": "enum:solid|gradient|grid|dots|spotlight=gradient",
+    "exit": "enum:none|fade=none"
+  },
+  "duration": {
+    "default": 3.5,
+    "min": 2.5
+  },
+  "example": {
+    "p": "core:end-card",
+    "headline": "Try it today",
+    "cta": "Get started",
+    "url": "motionforge.local"
+  },
+  "body": {
+    "layers": [
+      {
+        "use": "core:backdrop",
+        "style": "{{backdrop}}"
+      },
+      {
+        "type": "group",
+        "x": "{{W / 2}}",
+        "y": "{{H / 2}}",
+        "out": "{{exit == 'fade' ? {p: 'core:fade-out', d: 0.4} : null}}",
+        "children": [
+          {
+            "use": "core:heading",
+            "text": "{{headline}}",
+            "size": "$size.h1",
+            "split": "words",
+            "stagger": 0.08,
+            "y": "{{cta || url ? -90 : 0}}"
+          },
+          {
+            "if": "{{cta}}",
+            "use": "core:cta-button",
+            "text": "{{cta}}",
+            "y": 90,
+            "at": 0.6
+          },
+          {
+            "if": "{{url}}",
+            "type": "text",
+            "text": "{{url}}",
+            "y": "{{cta ? 210 : 80}}",
+            "size": "$size.small",
+            "font": "$font.mono",
+            "color": "$color.muted",
+            "in": [
+              {
+                "p": "core:typewriter",
+                "at": 0.9,
+                "d": 0.8
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

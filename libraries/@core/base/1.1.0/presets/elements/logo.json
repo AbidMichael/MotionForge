@@ -1,0 +1,39 @@
+{
+  "slug": "logo",
+  "kind": "element",
+  "summary": "Logo image (asset) that scales in with an optional glow",
+  "tags": [
+    "logo",
+    "brand",
+    "image",
+    "mark"
+  ],
+  "params": {
+    "src": "asset!",
+    "width": "number=360",
+    "height": "number=360",
+    "glow": {
+      "type": "color",
+      "default": "$fx.glow"
+    },
+    "enter": "preset:animation=core:scale-in"
+  },
+  "example": {
+    "use": "core:logo"
+  },
+  "body": {
+    "layers": [
+      {
+        "type": "image",
+        "src": "{{src}}",
+        "w": "{{width}}",
+        "h": "{{height}}",
+        "fit": "contain",
+        "in": [
+          "{{enter}}"
+        ],
+        "filter": "{{glow == 'transparent' ? 'none' : 'drop-shadow(0 0 30px ' + glow + ')'}}"
+      }
+    ]
+  }
+}

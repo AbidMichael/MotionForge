@@ -1,0 +1,110 @@
+{
+  "slug": "depth-cards",
+  "kind": "scene",
+  "summary": "Cards (screens, photos) floating at different depths; the camera travels through them",
+  "tags": [
+    "3d",
+    "depth",
+    "parallax",
+    "cards",
+    "gallery",
+    "travelling",
+    "screens"
+  ],
+  "params": {
+    "items": "array<object>!",
+    "title": "string=",
+    "spacing": "number=2.2"
+  },
+  "duration": {
+    "default": 6,
+    "min": 3.5,
+    "max": 14
+  },
+  "example": {
+    "p": "three:depth-cards",
+    "title": "Every screen",
+    "items": [
+      {
+        "color": "#4f8cff"
+      },
+      {
+        "color": "#ff5d73"
+      },
+      {
+        "color": "#2ec4b6"
+      },
+      {
+        "color": "#ffb020"
+      }
+    ]
+  },
+  "body": {
+    "layers": [
+      {
+        "use": "core:backdrop",
+        "style": "spotlight"
+      },
+      {
+        "type": "three",
+        "w": "{{W}}",
+        "h": "{{H}}",
+        "lights": "soft",
+        "fog": [
+          "$color.bg",
+          4,
+          16
+        ],
+        "camera": {
+          "fov": 40,
+          "dolly": {
+            "from": [
+              -1.2,
+              0.4,
+              "{{len(items) * spacing * 0.5 + 5}}"
+            ],
+            "to": [
+              1.0,
+              0.1,
+              "{{-(len(items) * spacing * 0.5) + 3}}"
+            ]
+          },
+          "target": [
+            0,
+            0,
+            -40
+          ]
+        },
+        "stack": {
+          "items": "{{items}}",
+          "shape": "card",
+          "size": [
+            3.2,
+            2.0,
+            0.04,
+            0.08
+          ],
+          "step": [
+            1.1,
+            0,
+            "{{-spacing}}"
+          ],
+          "rotation": [
+            0,
+            -14,
+            0
+          ],
+          "float": 0.05
+        }
+      },
+      {
+        "if": "{{len(title) > 0}}",
+        "use": "core:heading",
+        "text": "{{title}}",
+        "size": "$size.h1",
+        "y": "{{H * 0.82}}",
+        "split": "words"
+      }
+    ]
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "name": "@core/explain",
+  "alias": "explain",
+  "summary": "Explanatory simulations: algorithms, physics with animatable parameters, workflows.",
+  "guide": "Scenes: explain:sort {algorithm, n|values, words}, explain:pathfinding {algorithm, grid}, explain:physics {kind: pendulum|spring|projectile|orbit|particles|wave, settings}, explain:pipeline {steps, packets}.\nRaw layer {\"type\":\"sim\", \"kind\":…}: every physics parameter can be keyframed in seconds, e.g. \"gravity\": [[0, 9.8], [3, 1.6]] (Earth → Moon), \"temperature\": [[0, 0.3], [2, 3]].\nReadout words are English by default; translate with \"words\": {\"comparisons\": \"comparaisons\", \"swaps\": \"échanges\", \"visited\": \"visitées\", \"path\": \"chemin\", \"found\": \"trouvé\"}.",
+  "depends": {
+    "@core/base": "^1.1.0"
+  },
+  "visibility": "public",
+  "owner": "system",
+  "tags": [
+    "core",
+    "algorithm",
+    "physics",
+    "education"
+  ],
+  "publishedAt": "2026-10-03T00:00:00.000Z"
+}

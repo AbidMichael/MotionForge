@@ -1,0 +1,47 @@
+{
+  "slug": "pill",
+  "kind": "element",
+  "summary": "Rounded badge with text",
+  "tags": [
+    "badge",
+    "pill",
+    "tag",
+    "chip",
+    "label"
+  ],
+  "params": {
+    "text": "string!",
+    "fill": {
+      "type": "color",
+      "default": "$color.accent"
+    },
+    "color": {
+      "type": "color",
+      "default": "$color.bg"
+    },
+    "size": "number=28"
+  },
+  "example": {
+    "use": "core:pill",
+    "text": "BETA"
+  },
+  "body": {
+    "layers": [
+      {
+        "type": "text",
+        "text": "{{text}}",
+        "size": "{{size}}",
+        "font": "$font.body",
+        "weight": 700,
+        "color": "{{color}}",
+        "bg": "{{fill}}",
+        "padding": "{{size * 0.45 + 'px ' + size * 0.9 + 'px'}}",
+        "radius": 999,
+        "tracking": 0.04,
+        "in": [
+          "core:pop"
+        ]
+      }
+    ]
+  }
+}

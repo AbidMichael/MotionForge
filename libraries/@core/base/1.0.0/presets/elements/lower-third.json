@@ -1,0 +1,97 @@
+{
+  "slug": "lower-third",
+  "kind": "element",
+  "summary": "Name + title strap with accent bar, bottom-left by default",
+  "tags": [
+    "lower-third",
+    "name",
+    "title",
+    "caption",
+    "interview",
+    "strap"
+  ],
+  "params": {
+    "name": "string!",
+    "title": "string=",
+    "accent": {
+      "type": "color",
+      "default": "$color.accent"
+    },
+    "panel": {
+      "type": "color",
+      "default": "$color.surface"
+    }
+  },
+  "example": {
+    "use": "core:lower-third",
+    "name": "Ada Lovelace",
+    "title": "Head of Research"
+  },
+  "body": {
+    "layers": [
+      {
+        "type": "group",
+        "x": "{{-W / 2 + $space.margin}}",
+        "y": "{{H / 2 - $space.margin - 40}}",
+        "anchor": "bottom-left",
+        "layout": {
+          "dir": "column",
+          "gap": 6,
+          "align": "start"
+        },
+        "padding": "22px 40px 22px 32px",
+        "background": "{{panel}}",
+        "borderLeft": "{{'10px solid ' + accent}}",
+        "in": [
+          {
+            "p": "core:wipe-in",
+            "dir": "left",
+            "d": 0.7
+          }
+        ],
+        "out": [
+          {
+            "p": "core:wipe-out",
+            "dir": "left",
+            "d": 0.5
+          }
+        ],
+        "children": [
+          {
+            "type": "text",
+            "text": "{{name}}",
+            "size": 46,
+            "font": "$font.display",
+            "weight": "$weight.heading",
+            "color": "$color.fg",
+            "align": "left",
+            "in": [
+              {
+                "p": "core:fade-up",
+                "at": 0.25,
+                "distance": 20
+              }
+            ]
+          },
+          {
+            "if": "{{title}}",
+            "type": "text",
+            "text": "{{title}}",
+            "size": 28,
+            "font": "$font.body",
+            "weight": 500,
+            "color": "$color.muted",
+            "align": "left",
+            "in": [
+              {
+                "p": "core:fade-up",
+                "at": 0.4,
+                "distance": 16
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

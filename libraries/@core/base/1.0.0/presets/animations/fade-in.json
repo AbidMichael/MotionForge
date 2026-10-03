@@ -1,0 +1,22 @@
+{
+  "slug": "fade-in",
+  "kind": "animation",
+  "summary": "Opacity 0 → 1",
+  "tags": [
+    "animation",
+    "fade",
+    "in"
+  ],
+  "duration": {
+    "default": 0.5
+  },
+  "body": {
+    "tracks": {
+      "opacity": [
+        0,
+        1
+      ]
+    },
+    "ease": "out"
+  }
+}

@@ -1,0 +1,75 @@
+{
+  "slug": "marquee",
+  "kind": "scene",
+  "summary": "Rows of huge repeated text scrolling in opposite directions (solid / outline)",
+  "tags": [
+    "marquee",
+    "ticker",
+    "scroll",
+    "loop",
+    "kinetic",
+    "banner"
+  ],
+  "params": {
+    "text": "string!",
+    "rows": "integer=3",
+    "size": {
+      "type": "number",
+      "default": "$size.h1"
+    },
+    "speed": "number=1",
+    "sep": "string= • "
+  },
+  "duration": {
+    "default": 4,
+    "min": 2
+  },
+  "example": {
+    "p": "kinetic:marquee",
+    "text": "Now streaming"
+  },
+  "body": {
+    "layers": [
+      {
+        "use": "core:backdrop",
+        "style": "solid"
+      },
+      {
+        "repeat": "{{rows}}",
+        "layer": {
+          "type": "text",
+          "text": "{{rep(upper(text) + sep, 8)}}",
+          "anchor": "left",
+          "x": "{{index % 2 == 0 ? -W * 0.1 : -W * 0.1 - speed * W * 0.35}}",
+          "y": "{{H / 2 + (index - (rows - 1) / 2) * size * 1.0}}",
+          "size": "{{size}}",
+          "lineHeight": 1,
+          "font": "$font.display",
+          "weight": "$weight.display",
+          "color": "{{index % 2 == 0 ? $color.fg : 'transparent'}}",
+          "stroke": "{{index % 2 == 0 ? 'transparent' : $color.accent}}",
+          "strokeWidth": 2,
+          "anim": [
+            {
+              "tracks": {
+                "dx": [
+                  0,
+                  "{{(index % 2 == 0 ? -1 : 1) * speed * W * 0.35}}"
+                ]
+              },
+              "d": "{{dur}}",
+              "ease": "linear"
+            }
+          ],
+          "in": [
+            {
+              "p": "core:fade-in",
+              "d": 0.4,
+              "at": "{{index * 0.1}}"
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

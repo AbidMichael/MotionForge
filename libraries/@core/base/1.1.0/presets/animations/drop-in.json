@@ -1,0 +1,40 @@
+{
+  "slug": "drop-in",
+  "kind": "animation",
+  "summary": "Drop from above with a bounce",
+  "tags": [
+    "animation",
+    "drop",
+    "in",
+    "bounce"
+  ],
+  "params": {
+    "distance": "number=180"
+  },
+  "duration": {
+    "default": 0.8
+  },
+  "body": {
+    "tracks": {
+      "opacity": [
+        [
+          0,
+          0
+        ],
+        [
+          0.2,
+          1
+        ],
+        [
+          1,
+          1
+        ]
+      ],
+      "dy": [
+        "{{-distance}}",
+        0
+      ]
+    },
+    "ease": "outBounce"
+  }
+}

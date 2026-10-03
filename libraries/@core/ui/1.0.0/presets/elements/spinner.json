@@ -1,0 +1,47 @@
+{
+  "slug": "spinner",
+  "kind": "element",
+  "summary": "Loading spinner (use it in a \"loading\" state)",
+  "tags": [
+    "ui",
+    "loading",
+    "spinner",
+    "progress",
+    "wait"
+  ],
+  "params": {
+    "size": "number=72",
+    "color": {
+      "type": "color",
+      "default": "$color.accent"
+    }
+  },
+  "example": {
+    "use": "ui:spinner"
+  },
+  "body": {
+    "layers": [
+      {
+        "type": "ellipse",
+        "w": "{{size}}",
+        "h": "{{size}}",
+        "fill": "transparent",
+        "border": "{{(size / 9) + 'px solid ' + alpha(color, 0.2)}}",
+        "borderTop": "{{(size / 9) + 'px solid ' + color}}",
+        "keys": {
+          "rotate": [
+            [
+              0,
+              0
+            ],
+            [
+              "{{dur}}",
+              "{{dur * 400}}",
+              "linear"
+            ]
+          ]
+        }
+      }
+    ]
+  }
+}

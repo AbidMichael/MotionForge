@@ -1,0 +1,106 @@
+{
+  "slug": "list-item",
+  "kind": "element",
+  "summary": "List row: avatar, title, meta and a value",
+  "tags": [
+    "ui",
+    "list",
+    "row",
+    "item",
+    "table"
+  ],
+  "params": {
+    "title": "string!",
+    "meta": "string=",
+    "value": "string=",
+    "width": "number=820",
+    "height": "number=96",
+    "color": {
+      "type": "color",
+      "default": "$color.accent"
+    }
+  },
+  "example": {
+    "use": "ui:list-item",
+    "title": "Ada Lovelace",
+    "meta": "Engineer",
+    "value": "42"
+  },
+  "body": {
+    "layers": [
+      {
+        "type": "group",
+        "w": "{{width}}",
+        "h": "{{height}}",
+        "children": [
+          {
+            "type": "rect",
+            "x": "{{width / 2}}",
+            "y": "{{height / 2}}",
+            "w": "{{width}}",
+            "h": "{{height}}",
+            "fill": "$color.surface",
+            "radius": 16
+          },
+          {
+            "type": "ellipse",
+            "x": "{{height / 2 + 8}}",
+            "y": "{{height / 2}}",
+            "w": "{{height * 0.56}}",
+            "h": "{{height * 0.56}}",
+            "fill": "{{color}}"
+          },
+          {
+            "type": "text",
+            "text": "{{upper(first(split(title, '')))}}",
+            "x": "{{height / 2 + 8}}",
+            "y": "{{height / 2}}",
+            "size": "{{height * 0.28}}",
+            "weight": 800,
+            "color": "$color.bg"
+          },
+          {
+            "type": "text",
+            "text": "{{title}}",
+            "anchor": [
+              0,
+              0.5
+            ],
+            "x": "{{height + 20}}",
+            "y": "{{len(meta) > 0 ? height * 0.36 : height / 2}}",
+            "size": "{{height * 0.3}}",
+            "weight": 700,
+            "color": "$color.fg"
+          },
+          {
+            "if": "{{len(meta) > 0}}",
+            "type": "text",
+            "text": "{{meta}}",
+            "anchor": [
+              0,
+              0.5
+            ],
+            "x": "{{height + 20}}",
+            "y": "{{height * 0.68}}",
+            "size": "{{height * 0.22}}",
+            "color": "$color.muted"
+          },
+          {
+            "if": "{{len(value) > 0}}",
+            "type": "text",
+            "text": "{{value}}",
+            "anchor": [
+              1,
+              0.5
+            ],
+            "x": "{{width - 28}}",
+            "y": "{{height / 2}}",
+            "size": "{{height * 0.3}}",
+            "weight": 700,
+            "color": "$color.fg"
+          }
+        ]
+      }
+    ]
+  }
+}

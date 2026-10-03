@@ -1,0 +1,108 @@
+{
+  "slug": "impact",
+  "kind": "theme",
+  "summary": "Kinetic poster look: Bebas Neue display, off-black, signal yellow",
+  "tags": [
+    "theme",
+    "kinetic",
+    "bold",
+    "poster",
+    "sports",
+    "hype"
+  ],
+  "params": {
+    "accent": {
+      "type": "color",
+      "default": "#ffd400"
+    }
+  },
+  "body": {
+    "tokens": {
+      "color": {
+        "bg": "#0b0b0c",
+        "bg2": "#18181b",
+        "surface": "#1f1f23",
+        "fg": "#f5f4ee",
+        "muted": "#a1a1aa",
+        "accent": "{{accent}}",
+        "accent2": "#ff3b30",
+        "accent3": "#22d3ee",
+        "line": "#ffffff24"
+      },
+      "font": {
+        "display": "'Bebas Neue', Impact, 'Arial Narrow', sans-serif",
+        "body": "'Inter', 'Segoe UI', Arial, sans-serif",
+        "mono": "'JetBrains Mono', Consolas, monospace"
+      },
+      "weight": {
+        "display": 400,
+        "heading": 400,
+        "body": 500
+      },
+      "size": {
+        "hero": 300,
+        "h1": 190,
+        "h2": 130,
+        "h3": 80,
+        "body": 44,
+        "small": 32,
+        "label": 26
+      },
+      "space": {
+        "margin": 140,
+        "xs": 12,
+        "s": 24,
+        "m": 48,
+        "l": 96
+      },
+      "radius": {
+        "s": 4,
+        "m": 8,
+        "l": 16
+      },
+      "ease": {
+        "in": "in",
+        "out": "out",
+        "inOut": "inOut",
+        "snap": "cubic(0.2,0.9,0.1,1)",
+        "smooth": "cubic(0.45,0,0.2,1)",
+        "spring": "spring(0.4)",
+        "bounce": "outBack"
+      },
+      "dur": {
+        "fast": 0.25,
+        "base": 0.5,
+        "slow": 0.9
+      },
+      "fx": {
+        "glow": "transparent"
+      }
+    },
+    "fonts": [
+      {
+        "family": "Bebas Neue",
+        "source": "google",
+        "weights": [
+          400
+        ]
+      },
+      {
+        "family": "Inter",
+        "source": "google",
+        "weights": [
+          400,
+          500,
+          700
+        ]
+      },
+      {
+        "family": "JetBrains Mono",
+        "source": "google",
+        "weights": [
+          400,
+          700
+        ]
+      }
+    ]
+  }
+}

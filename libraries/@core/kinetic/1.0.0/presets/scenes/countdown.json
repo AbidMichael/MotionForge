@@ -1,0 +1,105 @@
+{
+  "slug": "countdown",
+  "kind": "scene",
+  "summary": "3-2-1 countdown: numbers pop inside a drawing ring, then a final word",
+  "tags": [
+    "countdown",
+    "timer",
+    "intro",
+    "kinetic",
+    "launch"
+  ],
+  "params": {
+    "from": "integer=3",
+    "step": "number=0.7",
+    "go": "string=GO",
+    "size": "number=360"
+  },
+  "duration": {
+    "default": 3.3,
+    "min": 1.5
+  },
+  "example": {
+    "p": "kinetic:countdown"
+  },
+  "body": {
+    "layers": [
+      {
+        "use": "core:backdrop",
+        "style": "spotlight"
+      },
+      {
+        "repeat": "{{from}}",
+        "layer": {
+          "type": "group",
+          "x": "{{W / 2}}",
+          "y": "{{H / 2}}",
+          "at": "{{index * step}}",
+          "dur": "{{step}}",
+          "children": [
+            {
+              "type": "path",
+              "d": "M 270 20 A 250 250 0 1 1 269.9 20",
+              "w": 540,
+              "h": 540,
+              "viewBox": "0 0 540 540",
+              "stroke": "$color.accent",
+              "strokeWidth": 8,
+              "fill": "none",
+              "anim": [
+                {
+                  "p": "core:draw",
+                  "d": "{{step}}",
+                  "ease": "linear"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "text": "{{from - index}}",
+              "size": "{{size}}",
+              "color": "$color.fg",
+              "font": "$font.display",
+              "weight": "$weight.display",
+              "lineHeight": 1,
+              "in": [
+                {
+                  "p": "core:pop",
+                  "d": 0.35
+                }
+              ],
+              "out": [
+                {
+                  "p": "core:scale-out",
+                  "d": 0.15,
+                  "to": 1.4
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "type": "text",
+        "text": "{{go}}",
+        "x": "{{W / 2}}",
+        "y": "{{H / 2}}",
+        "at": "{{from * step}}",
+        "size": "{{size * 0.8}}",
+        "color": "$color.accent",
+        "glow": "$fx.glow",
+        "font": "$font.display",
+        "weight": "$weight.display",
+        "in": [
+          "kinetic:slam"
+        ],
+        "anim": [
+          {
+            "p": "core:shake",
+            "at": 0.3
+          }
+        ]
+      }
+    ]
+  }
+}

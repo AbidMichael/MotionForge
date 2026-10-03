@@ -1,0 +1,157 @@
+{
+  "slug": "glitch-cut",
+  "kind": "transition",
+  "summary": "Digital glitch cut with RGB slices",
+  "tags": [
+    "transition",
+    "glitch",
+    "digital",
+    "cut",
+    "cyber"
+  ],
+  "duration": {
+    "default": 0.4
+  },
+  "body": {
+    "overlap": false,
+    "out": {
+      "tracks": {
+        "dx": [
+          [
+            0,
+            0
+          ],
+          [
+            0.3,
+            24,
+            "hold"
+          ],
+          [
+            0.6,
+            -36,
+            "hold"
+          ],
+          [
+            1,
+            50,
+            "hold"
+          ]
+        ],
+        "hue": [
+          [
+            0,
+            0
+          ],
+          [
+            0.5,
+            120,
+            "hold"
+          ],
+          [
+            1,
+            -90,
+            "hold"
+          ]
+        ]
+      }
+    },
+    "in": {
+      "tracks": {
+        "dx": [
+          [
+            0,
+            -40
+          ],
+          [
+            0.35,
+            20,
+            "hold"
+          ],
+          [
+            0.7,
+            -8,
+            "hold"
+          ],
+          [
+            1,
+            0,
+            "hold"
+          ]
+        ],
+        "hue": [
+          [
+            0,
+            -90
+          ],
+          [
+            0.5,
+            60,
+            "hold"
+          ],
+          [
+            1,
+            0,
+            "hold"
+          ]
+        ]
+      }
+    },
+    "overlay": [
+      {
+        "repeat": 7,
+        "layer": {
+          "type": "rect",
+          "x": "{{W / 2}}",
+          "y": "{{H * rand(index, 1)}}",
+          "w": "{{W * (0.4 + rand(index, 2))}}",
+          "h": "{{8 + 70 * rand(index, 3)}}",
+          "fill": "{{pick(index, $color.accent, $color.accent2, $color.fg)}}",
+          "blend": "screen",
+          "anim": [
+            {
+              "tracks": {
+                "opacity": [
+                  [
+                    0,
+                    0
+                  ],
+                  [
+                    "{{0.2 + 0.4 * rand(index, 4)}}",
+                    0.9,
+                    "hold"
+                  ],
+                  [
+                    0.8,
+                    0,
+                    "hold"
+                  ],
+                  [
+                    1,
+                    0
+                  ]
+                ],
+                "dx": [
+                  [
+                    0,
+                    "{{(rand(index, 5) - 0.5) * 300}}"
+                  ],
+                  [
+                    0.5,
+                    "{{(rand(index, 6) - 0.5) * 300}}",
+                    "hold"
+                  ],
+                  [
+                    1,
+                    0,
+                    "hold"
+                  ]
+                ]
+              },
+              "d": "{{dur}}"
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

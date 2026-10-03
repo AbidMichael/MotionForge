@@ -1,0 +1,63 @@
+{
+  "slug": "stat",
+  "kind": "scene",
+  "summary": "Key number counting up with a label (KPI, metric, result)",
+  "tags": [
+    "stat",
+    "number",
+    "kpi",
+    "metric",
+    "counter",
+    "data"
+  ],
+  "params": {
+    "value": "number!",
+    "label": "string!",
+    "prefix": "string=",
+    "suffix": "string=",
+    "decimals": "integer=0",
+    "kicker": "string=",
+    "backdrop": "enum:solid|gradient|grid|dots|spotlight=spotlight",
+    "exit": "enum:none|fade=none"
+  },
+  "duration": {
+    "default": 3,
+    "min": 2
+  },
+  "example": {
+    "p": "core:stat",
+    "value": 98,
+    "suffix": "%",
+    "label": "Customer satisfaction"
+  },
+  "body": {
+    "layers": [
+      {
+        "use": "core:backdrop",
+        "style": "{{backdrop}}"
+      },
+      {
+        "type": "group",
+        "x": "{{W / 2}}",
+        "y": "{{H / 2}}",
+        "out": "{{exit == 'fade' ? {p: 'core:fade-out', d: 0.4} : null}}",
+        "children": [
+          {
+            "if": "{{kicker}}",
+            "use": "core:kicker",
+            "text": "{{kicker}}",
+            "y": -250
+          },
+          {
+            "use": "core:counter",
+            "value": "{{value}}",
+            "label": "{{label}}",
+            "prefix": "{{prefix}}",
+            "suffix": "{{suffix}}",
+            "decimals": "{{decimals}}"
+          }
+        ]
+      }
+    ]
+  }
+}

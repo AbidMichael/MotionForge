@@ -1,0 +1,17 @@
+{
+  "name": "@core/directions",
+  "alias": "dir",
+  "summary": "Art directions: one composition, many looks (theme, pace, transitions, overlays, sounds).",
+  "guide": "Art directions change the whole look of a composition without touching its scenes. Put \"direction\": \"dir:cinematic\" (or {\"p\": \"dir:tech\", \"accent\": \"#0ff\"}) at the top of a composition.\nDIRECTIONS: cinematic, corporate, playful, tech, editorial, brutal, documentary, luxury, minimal — all take {accent}.\nA direction sets theme, tokens, fonts, pace (×scene durations), animScale (×animation durations), default transitions between scenes that have none, defaults for scene params (backdrop…), overlays on every scene and sounds per event. The composition's own theme/tokens/transitions win.\nOVERLAY ELEMENTS (usable anywhere): dir:grain{amount}, dir:vignette{amount}, dir:letterbox{size,color}, dir:scanlines{amount}, dir:frame{inset,color,opacity}.\nCompare looks with mf_variants {\"directions\": [\"dir:cinematic\", \"dir:tech\", \"dir:corporate\"]}.",
+  "depends": {
+    "@core/base": "^1.1.0"
+  },
+  "visibility": "public",
+  "owner": "system",
+  "tags": [
+    "core",
+    "direction",
+    "style"
+  ],
+  "publishedAt": "2026-10-03T00:00:00.000Z"
+}

@@ -1,0 +1,81 @@
+{
+  "slug": "split-media",
+  "kind": "scene",
+  "summary": "Image/video on one side, title + body text on the other",
+  "tags": [
+    "media",
+    "image",
+    "split",
+    "feature",
+    "product",
+    "screenshot"
+  ],
+  "params": {
+    "src": "asset!",
+    "title": "string!",
+    "body": "string=",
+    "side": "enum:left|right=right",
+    "kind": "enum:image|video=image",
+    "kicker": "string=",
+    "exit": "enum:none|fade=none"
+  },
+  "duration": {
+    "default": 4,
+    "min": 3
+  },
+  "example": {
+    "p": "core:split-media",
+    "title": "See it live"
+  },
+  "body": {
+    "layers": [
+      {
+        "use": "core:backdrop",
+        "style": "gradient"
+      },
+      {
+        "use": "core:image-frame",
+        "src": "{{src}}",
+        "kind": "{{kind}}",
+        "width": 820,
+        "height": 640,
+        "x": "{{side == 'right' ? W * 0.72 : W * 0.28}}",
+        "y": "{{H / 2}}",
+        "out": "{{exit == 'fade' ? {p: 'core:fade-out', d: 0.4} : null}}"
+      },
+      {
+        "type": "group",
+        "x": "{{side == 'right' ? $space.margin : W * 0.56}}",
+        "y": "{{H / 2}}",
+        "out": "{{exit == 'fade' ? {p: 'core:fade-out', d: 0.4} : null}}",
+        "children": [
+          {
+            "if": "{{kicker}}",
+            "use": "core:kicker",
+            "text": "{{kicker}}",
+            "align": "left",
+            "y": -170
+          },
+          {
+            "use": "core:heading",
+            "text": "{{title}}",
+            "size": "$size.h2",
+            "align": "left",
+            "maxWidth": 760,
+            "y": -60,
+            "at": 0.2
+          },
+          {
+            "if": "{{body}}",
+            "use": "core:paragraph",
+            "text": "{{body}}",
+            "align": "left",
+            "maxWidth": 720,
+            "y": 90,
+            "at": 0.5
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "name": "@core/ui",
+  "alias": "ui",
+  "summary": "Interface building blocks and reusable gesture choreographies for product demos.",
+  "guide": "Build an interface, then act on it by id. ELEMENTS: ui:window{title,w,h,kind:app|browser,url; slot \"content\"}, ui:input{placeholder,label,icon,w,h}, ui:button{text,variant}, ui:toast{text,kind,at}, ui:list-item{title,meta,value}, ui:spinner.\nCHOREOGRAPHIES (in a scene's \"gestures\"): {\"p\":\"ui:fill-form\",\"field\":\"#email\",\"text\":\"…\",\"button\":\"#go\"}, ui:login{email,password,button,value}, ui:search-pick{field,query,result}, ui:drag-drop{from,to}, ui:tour{a,b}. Every step gets \"speed\" and \"at\" like other gestures.\nGive elements an \"id\" so gestures can find them; add \"cursor\": {\"style\":\"arrow\"} to the scene.",
+  "depends": {
+    "@core/base": "^1.1.0"
+  },
+  "visibility": "public",
+  "owner": "system",
+  "tags": [
+    "core",
+    "ui",
+    "product",
+    "demo"
+  ],
+  "publishedAt": "2026-10-03T00:00:00.000Z"
+}

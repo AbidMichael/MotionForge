@@ -1,0 +1,26 @@
+{
+  "slug": "vignette",
+  "kind": "element",
+  "summary": "Dark vignette on the frame edges",
+  "tags": [
+    "vignette",
+    "overlay",
+    "cinematic"
+  ],
+  "params": {
+    "amount": "number=0.55"
+  },
+  "example": {
+    "use": "dir:vignette"
+  },
+  "body": {
+    "layers": [
+      {
+        "type": "rect",
+        "w": "{{W}}",
+        "h": "{{H}}",
+        "fill": "{{'radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,' + amount + ') 100%)'}}"
+      }
+    ]
+  }
+}

@@ -1,0 +1,64 @@
+{
+  "slug": "grain",
+  "kind": "element",
+  "summary": "Animated film grain over the whole frame",
+  "tags": [
+    "grain",
+    "film",
+    "texture",
+    "overlay",
+    "noise"
+  ],
+  "params": {
+    "amount": "number=0.07"
+  },
+  "example": {
+    "use": "dir:grain",
+    "amount": 0.12
+  },
+  "body": {
+    "layers": [
+      {
+        "type": "svg",
+        "w": "{{W * 1.1}}",
+        "h": "{{H * 1.1}}",
+        "svg": "<svg xmlns='http://www.w3.org/2000/svg' width='100%' height='100%'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.5  0 0 0 0 0.5  0 0 0 0 0.5  0 0 0 1.4 -0.2'/></filter><rect width='100%' height='100%' filter='url(#n)'/></svg>",
+        "opacity": "{{amount}}",
+        "keys": {
+          "dx": [
+            [
+              0,
+              0
+            ],
+            [
+              0.08,
+              -14,
+              "steps(1)"
+            ],
+            [
+              0.16,
+              9,
+              "steps(1)"
+            ],
+            [
+              0.24,
+              -5,
+              "steps(1)"
+            ],
+            [
+              0.32,
+              12,
+              "steps(1)"
+            ]
+          ]
+        },
+        "loop": [
+          {
+            "p": "core:float",
+            "d": 0.4
+          }
+        ]
+      }
+    ]
+  }
+}

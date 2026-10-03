@@ -1,0 +1,145 @@
+{
+  "slug": "title-slam",
+  "kind": "scene",
+  "summary": "Huge words slam in one after another, the frame shakes as the last lands, accent bar underlines",
+  "tags": [
+    "title",
+    "slam",
+    "impact",
+    "intro",
+    "hype",
+    "kinetic",
+    "punchy"
+  ],
+  "params": {
+    "text": "string!",
+    "sub": "string=",
+    "size": {
+      "type": "number",
+      "default": "$size.hero"
+    },
+    "color": {
+      "type": "color",
+      "default": "$color.fg"
+    },
+    "backdrop": "enum:solid|gradient|grid|dots|spotlight=spotlight",
+    "interval": "number=0.14",
+    "exit": "enum:none|fade=none"
+  },
+  "duration": {
+    "default": 2.4,
+    "min": 1.5,
+    "perWord": 0.12,
+    "wordsFrom": "text"
+  },
+  "example": {
+    "p": "kinetic:title-slam",
+    "text": "Built different",
+    "sub": "Season 2"
+  },
+  "body": {
+    "layers": [
+      {
+        "use": "core:backdrop",
+        "style": "{{backdrop}}"
+      },
+      {
+        "type": "group",
+        "x": "{{W / 2}}",
+        "y": "{{H / 2 - (sub ? 40 : 0)}}",
+        "out": "{{exit == 'fade' ? {p: 'core:fade-out', d: 0.4} : null}}",
+        "anim": [
+          {
+            "p": "core:shake",
+            "at": "{{0.32 + (words(text) - 1) * interval}}",
+            "d": 0.35
+          }
+        ],
+        "children": [
+          {
+            "type": "text",
+            "text": "{{text}}",
+            "size": "{{size}}",
+            "color": "{{color}}",
+            "case": "upper",
+            "tracking": -0.01,
+            "lineHeight": 0.9,
+            "w": "{{W - 2 * $space.margin}}",
+            "split": "words",
+            "stagger": "{{interval}}",
+            "glow": "$fx.glow",
+            "font": "$font.display",
+            "weight": "$weight.display",
+            "in": [
+              "kinetic:slam"
+            ]
+          },
+          {
+            "type": "rect",
+            "y": "{{size * 0.58}}",
+            "w": "{{min(W * 0.5, size * 2.6)}}",
+            "h": "{{max(8, size * 0.05)}}",
+            "fill": "$color.accent",
+            "in": [
+              {
+                "p": "core:grow-x",
+                "at": "{{0.35 + (words(text) - 1) * interval}}",
+                "d": 0.4
+              }
+            ]
+          },
+          {
+            "if": "{{sub}}",
+            "type": "text",
+            "text": "{{sub}}",
+            "y": "{{size * 0.58 + 70}}",
+            "size": "$size.h3",
+            "font": "$font.body",
+            "weight": 500,
+            "color": "$color.muted",
+            "tracking": 0.08,
+            "case": "upper",
+            "in": [
+              {
+                "p": "core:fade-up",
+                "at": "{{0.5 + (words(text) - 1) * interval}}",
+                "distance": 24
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "rect",
+        "w": "{{W}}",
+        "h": "{{H}}",
+        "fill": "$color.accent",
+        "blend": "screen",
+        "anim": [
+          {
+            "tracks": {
+              "opacity": [
+                [
+                  0,
+                  0
+                ],
+                [
+                  0.15,
+                  0.35
+                ],
+                [
+                  1,
+                  0,
+                  "out"
+                ]
+              ]
+            },
+            "at": "{{0.28 + (words(text) - 1) * interval}}",
+            "d": 0.35
+          }
+        ],
+        "opacity": 1
+      }
+    ]
+  }
+}
