@@ -34,7 +34,7 @@ https://github.com/user-attachments/assets/32802bee-ba6c-448b-aa4d-e8aa5f173b72
   - kinetic type, UI mock-ups with a synthetic cursor and gestures, and real web captures;
   - charts, bar races, maps and networks from JSON or CSV;
   - explanatory simulations (sorting, path-finding, physics);
-  - a 3D scene graph (three.js) with transparent image cut-outs.
+  - 3D with three.js: imported models (GLB, glTF, FBX, OBJ with textures and animations), HDRI lighting, contact shadows, bloom / ambient occlusion / depth of field / motion blur, GPU path tracing for hero shots, and particle effects (models crumbling into sand, assembling, morphing, simulated sand piles).
 - **Audio**: music beds with beat/bar snapping, event-driven sound effects and loudness-normalised mixing.
 - **Visual editor and live dashboard** in the browser.
 - **Works offline** after installation: fonts, player and Chrome Headless Shell are all local.
@@ -144,6 +144,7 @@ The agent name decides which libraries an agent owns: agent `my-agent` writes to
 | `mf_edit` | Visual-editor operations (move, retext, rescale, retime) written back into the source JSON. |
 | `mf_capture` | Record a real interface (URL or HTML): clicks, typing, scrolling → a `capture` layer. |
 | `mf_audio` | Music analysis: tempo, beats, bars, hits, energy, suggested cut points. |
+| `mf_model_inspect` | What a 3D model contains: meshes, size, materials, named parts, animations, missing textures. |
 
 A typical loop is search → validate → patch → preview → render, then save the good parts as presets. See [`AGENTS.md`](AGENTS.md) for the agent-facing guide; it is worth pasting into your agent's instructions.
 
@@ -176,7 +177,11 @@ A typical loop is search → validate → patch → preview → render, then sav
 - **Data-driven videos**:
   - charts, bar races, maps and networks from JSON or CSV;
   - compositions with `params` are templates, rendered once per data row.
-- **3D**: `{"type":"three"}` with objects, materials, lights and cameras. Transparent PNG/WebP images become cut-outs with image-shaped shadows.
+- **3D**: `{"type":"three"}` with objects, materials, lights and cameras (three.js, rendered frame by frame inside the video).
+  - Models: `.glb`, `.gltf`, `.fbx`, `.obj` (or a `.zip` with textures) with their animations, inspected on upload (`mf_model_inspect`).
+  - Look: HDRI environments, tone mapping, soft and contact shadows, bloom, ambient occlusion, depth of field, motion blur, and GPU path tracing (`"quality":"pathtrace"`).
+  - Particles: a model or shape can crumble into sand coloured by its texture, assemble from sand, swirl, burst, morph into another model, or fall into a simulated pile — millions of grains on a GPU.
+  - Transparent PNG/WebP images become cut-outs with image-shaped shadows; `"cache": true` renders a heavy shot once and reuses it.
 - **Captures**: real web interfaces recorded with `mf_capture` and replayed with a synthetic cursor, in sync with sounds.
 
 ## Shipped libraries
@@ -187,7 +192,7 @@ A typical loop is search → validate → patch → preview → render, then sav
 | `@core/kinetic` | `kinetic:` | The `impact` theme and kinetic-type scenes (title slam, word stack, big number, countdown, terminal, glitch…) |
 | `@core/directions` | `dir:` | 9 art directions (cinematic, corporate, playful, tech…) and overlays (grain, vignette, letterbox…) |
 | `@core/data` | `data:` | Chart story, bar race, map story, network |
-| `@core/3d` | `three:` | Product spin, exploded view, depth cards, hero object |
+| `@core/3d` | `three:` | Model hero, turntable, exploded model, character intro, sand disintegrate / assemble, particle morph, product spin, exploded view, depth cards, hero object |
 | `@core/ui` | `ui:` | Window, input, button, toast, list, spinner, and choreographies (fill-form, login, search-pick, drag-drop, tour) |
 | `@core/explain` | `explain:` | Sorting, path-finding, physics, pipelines |
 
@@ -296,6 +301,8 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) to contribute.
 - **First render is slow**: that is the one-time Chrome download and player bundle.
 - **Chrome fails to start on Linux**: install the system libraries listed in Requirements, or set `render.browserExecutable` to an installed Chromium.
 - **3D layers are blank**: WebGL is not available with the current `render.gl`. Try `"swangle"` (software) or `"angle"`.
+- **3D is slow / particles or path tracing time out**: render on a machine with a GPU and `render.gl` = `"angle"`; software WebGL (`swangle`, Linux servers) works but is far slower. Lower `count`, `samples` or `motionBlur.samples`, or use `"cache": true`.
+- **A model shows up grey or without textures**: `mf_model_inspect` lists missing textures — upload a `.zip` holding the model and its texture files.
 - **`mf_capture` cannot start Chrome**: set `render.browserExecutable` to your Chrome/Chromium.
 - **Text falls back to Arial**: the font isn't in `node_modules/@fontsource`. Install `@fontsource/<font-name>` or use `"source":"url"` with a font file.
 - **Changes to the player don't show up**: restart the server so the player bundle is rebuilt.

@@ -63,7 +63,7 @@ export async function buildApp(ctx: Ctx): Promise<FastifyInstance> {
   // token accounting for direct REST clients (MCP calls are measured by the MCP layer)
   app.addHook('onSend', async (req, reply, payload) => {
     if (!req.url.startsWith('/v1/') || req.headers['x-mf-client'] === 'mcp' || req.headers['x-mf-client'] === 'dashboard') return payload;
-    if (/^\/v1\/(events|fonts|assets\/[^/]+\/raw|overview|activity|stats)/.test(req.url)) return payload;
+    if (/^\/v1\/(events|fonts|assets\/[^/]+\/(raw|files)|overview|activity|stats)/.test(req.url)) return payload;
     const inChars = req.body ? JSON.stringify(req.body).length : 0;
     const outChars = typeof payload === 'string' ? payload.length : Buffer.isBuffer(payload) ? payload.length : 0;
     try {
@@ -222,7 +222,7 @@ export async function buildApp(ctx: Ctx): Promise<FastifyInstance> {
     const comp = ctx.comps.get(req.params.id, b.rev);
     if (!comp.ok) throw badRequest(`${req.params.id} r${comp.rev} has errors; fix them first`, comp.errors);
     const P: Record<string, unknown> = {};
-    for (const k of ['at', 'scale', 'sheet', 'scene', 'transition', 'range', 'focus', 'solo', 'n', 'clip']) if (b[k] !== undefined) P[k] = b[k];
+    for (const k of ['at', 'scale', 'sheet', 'scene', 'transition', 'range', 'focus', 'solo', 'n', 'clip', 'final']) if (b[k] !== undefined) P[k] = b[k];
     const job = ctx.jobs.enqueue('preview', req.agent.id, P, { compId: req.params.id, rev: comp.rev, priority: 10 });
     if (b.wait === false) return { job: job.id, status: job.status };
     const done = await ctx.jobs.wait(job.id, 180_000);
@@ -329,6 +329,12 @@ export async function buildApp(ctx: Ctx): Promise<FastifyInstance> {
   });
   app.get('/v1/assets', async () => ({ assets: ctx.assets.list().map((a) => ({ id: a.id, ref: `asset:${a.id}`, name: a.name, mime: a.mime, bytes: a.bytes, created: a.created })) }));
   app.get<{ Params: { id: string } }>('/v1/assets/:id', async (req) => ctx.assets.info(req.params.id));
+  app.get<{ Params: { id: string; '*': string } }>('/v1/assets/:id/files/*', async (req, reply) => {
+    const f = ctx.assets.zipFile(req.params.id, req.params['*']);
+    reply.header('cache-control', 'public, max-age=31536000, immutable');
+    return reply.type(f.mime).send(fs.createReadStream(f.file));
+  });
+  app.get<{ Params: { id: string } }>('/v1/assets/:id/model', async (req) => ctx.assets.modelInfo(req.params.id));
   app.get<{ Params: { id: string } }>('/v1/assets/:id/raw', async (req, reply) => {
     const a = ctx.assets.get(req.params.id);
     reply.header('cache-control', 'public, max-age=31536000, immutable');

@@ -1,0 +1,120 @@
+{
+  "slug": "model-exploded",
+  "kind": "scene",
+  "summary": "Exploded view of an imported model: its parts slide apart from the centre, then back",
+  "tags": [
+    "3d",
+    "model",
+    "exploded",
+    "parts",
+    "engineering",
+    "product"
+  ],
+  "params": {
+    "model": {
+      "type": "string",
+      "default": "",
+      "desc": "asset:<id> of a model with several parts (empty = stacked sample)"
+    },
+    "title": "string=",
+    "subtitle": "string=",
+    "gap": "number=0.6",
+    "split": "number=1",
+    "fit": "number=2.2",
+    "hdr": "string=",
+    "look": "enum:studio|dark|neon=studio"
+  },
+  "duration": {
+    "default": 5.5,
+    "min": 3,
+    "max": 14
+  },
+  "example": {
+    "p": "three:model-exploded",
+    "title": "Inside"
+  },
+  "body": {
+    "layers": [
+      {
+        "use": "core:backdrop",
+        "style": "{{look == 'studio' ? 'spotlight' : 'gradient'}}"
+      },
+      {
+        "type": "three",
+        "w": "{{W}}",
+        "h": "{{H}}",
+        "environment": "{{hdr ? {src: hdr, intensity: 1, rotation: 20} : 0.9}}",
+        "lights": "{{look == 'neon' ? 'neon' : look == 'dark' ? 'dramatic' : 'studio'}}",
+        "explode": {
+          "at": "{{split}}",
+          "d": 1.6,
+          "amount": 1,
+          "ease": "inOutCubic"
+        },
+        "camera": {
+          "fov": 30,
+          "orbit": {
+            "speed": 10,
+            "radius": "{{fit*3.1}}",
+            "height": "{{fit*0.5}}",
+            "from": -30
+          },
+          "target": [
+            0,
+            0,
+            0
+          ]
+        },
+        "post": {
+          "bloom": {
+            "strength": 0.2
+          }
+        },
+        "objects": "{{model ? [{shape: 'model', src: model, fit: fit, center: 'center', explodeParts: gap}] : [{shape: 'roundedBox', size: [1.6, 0.18, 1.1, 0.05], position: [0, -0.3, 0], explode: [0, -0.5, 0], color: '#5b6478'}, {shape: 'roundedBox', size: [1.4, 0.14, 0.9, 0.05], position: [0, -0.1, 0], explode: [0, 0, 0], color: '#7c8cff'}, {shape: 'roundedBox', size: [1.6, 0.18, 1.1, 0.05], position: [0, 0.1, 0], explode: [0, 0.5, 0], color: '#2ee6a6'}]}}",
+        "x": "{{portrait ? W/2 : (title ? W*0.62 : W/2)}}",
+        "y": "{{portrait ? H*0.42 : H/2}}"
+      },
+      {
+        "type": "text",
+        "text": "{{title}}",
+        "if": "{{title}}",
+        "textStyle": "h1",
+        "size": "{{portrait ? 92 : 110}}",
+        "x": "{{portrait ? W/2 : 140}}",
+        "y": "{{H - (portrait ? 420 : 250)}}",
+        "anchor": "{{portrait ? 'center' : 'left'}}",
+        "align": "{{portrait ? 'center' : 'left'}}",
+        "color": "$color.fg",
+        "at": 0.6,
+        "in": [
+          {
+            "p": "core:fade-up",
+            "d": 0.6
+          }
+        ],
+        "w": "{{portrait ? W*0.86 : W*0.46}}",
+        "fit": "shrink",
+        "maxLines": 1
+      },
+      {
+        "type": "text",
+        "text": "{{subtitle}}",
+        "if": "{{subtitle}}",
+        "textStyle": "body",
+        "x": "{{portrait ? W/2 : 144}}",
+        "y": "{{H - (portrait ? 320 : 160)}}",
+        "anchor": "{{portrait ? 'center' : 'left'}}",
+        "align": "{{portrait ? 'center' : 'left'}}",
+        "color": "$color.muted",
+        "at": 0.85,
+        "in": [
+          {
+            "p": "core:fade-up",
+            "d": 0.6
+          }
+        ],
+        "w": "{{portrait ? W*0.86 : W*0.46}}"
+      }
+    ]
+  }
+}

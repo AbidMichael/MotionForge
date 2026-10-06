@@ -1,3 +1,4 @@
+import fs from 'node:fs';
 import { AssetStore } from './assets';
 import { dataPaths, loadConfig, type MotionForgeConfig } from './config';
 import { openDb, type DB } from './db';
@@ -59,6 +60,19 @@ export function createContext(overrides: Partial<MotionForgeConfig> = {}, log: (
     },
     sfxFile: (name) => sfxFile(path.join(paths.root, 'sfx'), name),
     loadCapture: (id) => loadCapture(ctx, id),
+    modelInfo: (id) => {
+      try {
+        const file = assets.modelFile(id);
+        if (!file) return null;
+        const cache = assets.get(id).path + '.model.json';
+        let info = null;
+        if (fs.existsSync(cache)) info = JSON.parse(fs.readFileSync(cache, 'utf8'));
+        else assets.modelInfo(id).catch((e) => log(`model inspection of ${id} failed: ${(e as Error).message}`));
+        return { ext: path.extname(file).slice(1).toLowerCase(), info };
+      } catch {
+        return null;
+      }
+    },
     audioInfo: (id) => {
       const hit = readAudioInfo(ctx, id);
       if (!hit) analyzeAsset(ctx, id).catch((e) => log(`audio analysis of ${id} failed: ${(e as Error).message}`));

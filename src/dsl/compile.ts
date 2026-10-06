@@ -32,6 +32,8 @@ export interface CompileOptions {
   loadComposition?: (id: string, rev?: number) => { composition: unknown; lock: Record<string, string> } | null;
   /** Beat analysis of an audio asset (montage musical). */
   audioInfo?: (id: string) => AudioInfo | null;
+  /** 3D model assets: format of the model file, and its inspection once known (it is computed in the background). */
+  modelInfo?: (id: string) => { ext: string; info: any | null } | null;
   /** A UI capture made with mf_capture. */
   loadCapture?: (id: string) => any | null;
   /** Built-in sound effects: name → local file. */

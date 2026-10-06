@@ -1,0 +1,192 @@
+{
+  "slug": "character-intro",
+  "kind": "scene",
+  "summary": "An animated character model (FBX/GLB with animations) on a studio floor with a name card",
+  "tags": [
+    "3d",
+    "character",
+    "animation",
+    "fbx",
+    "mixamo",
+    "intro"
+  ],
+  "params": {
+    "model": {
+      "type": "string",
+      "default": "",
+      "desc": "asset:<id> of a rigged, animated model (empty = sample shape)"
+    },
+    "animation": {
+      "type": "string",
+      "default": "",
+      "desc": "animation name (default: the first one)"
+    },
+    "title": "string=",
+    "subtitle": "string=",
+    "fit": "number=2.4",
+    "speed": "number=1",
+    "turn": "number=-20",
+    "hdr": "string=",
+    "floor": "color=$color.bg2"
+  },
+  "duration": {
+    "default": 5,
+    "min": 2.5,
+    "max": 15
+  },
+  "example": {
+    "p": "three:character-intro",
+    "title": "Agent K",
+    "subtitle": "Field operative"
+  },
+  "body": {
+    "layers": [
+      {
+        "type": "three",
+        "w": "{{W}}",
+        "h": "{{H}}",
+        "bg": "{{floor}}",
+        "environment": "{{hdr ? {src: hdr, intensity: 1, rotation: 20} : 0.9}}",
+        "lights": [
+          {
+            "type": "directional",
+            "position": [
+              3,
+              6,
+              4
+            ],
+            "intensity": 2.4,
+            "castShadow": true
+          },
+          {
+            "type": "directional",
+            "position": [
+              -4,
+              2,
+              -3
+            ],
+            "intensity": 0.8,
+            "color": "#9db7ff"
+          },
+          {
+            "type": "ambient",
+            "intensity": 0.25
+          }
+        ],
+        "ground": {
+          "y": 0,
+          "color": "{{floor}}"
+        },
+        "fog": [
+          "{{floor}}",
+          "{{fit*2.6}}",
+          "{{fit*5}}"
+        ],
+        "contactShadow": {
+          "opacity": 0.6,
+          "y": 0,
+          "blur": 2
+        },
+        "camera": {
+          "fov": 28,
+          "keys": {
+            "position": [
+              [
+                0,
+                [
+                  "{{portrait ? 0 : -fit*0.35}}",
+                  "{{fit*0.55}}",
+                  "{{fit*2.3}}"
+                ]
+              ],
+              [
+                "{{dur}}",
+                [
+                  "{{portrait ? 0 : -fit*0.25}}",
+                  "{{fit*0.5}}",
+                  "{{fit*1.9}}"
+                ],
+                "inOutSine"
+              ]
+            ],
+            "target": [
+              [
+                0,
+                [
+                  "{{portrait ? 0 : -fit*0.35}}",
+                  "{{fit*0.45}}",
+                  0
+                ]
+              ]
+            ]
+          }
+        },
+        "objects": [
+          {
+            "shape": "{{model ? 'model' : 'capsule'}}",
+            "src": "{{model}}",
+            "fit": "{{fit}}",
+            "center": "base",
+            "size": [
+              0.4,
+              1.2
+            ],
+            "position": [
+              "{{portrait ? 0 : fit*0.1}}",
+              "{{model ? 0 : 1}}",
+              0
+            ],
+            "rotation": [
+              0,
+              "{{turn}}",
+              0
+            ],
+            "color": "$color.accent",
+            "animation": "{{model ? {name: animation ? animation : 0, speed: speed} : false}}"
+          }
+        ]
+      },
+      {
+        "type": "text",
+        "text": "{{title}}",
+        "if": "{{title}}",
+        "textStyle": "h1",
+        "size": "{{portrait ? 92 : 110}}",
+        "x": "{{portrait ? W/2 : 140}}",
+        "y": "{{H - (portrait ? 420 : 250)}}",
+        "anchor": "{{portrait ? 'center' : 'left'}}",
+        "align": "{{portrait ? 'center' : 'left'}}",
+        "color": "$color.fg",
+        "at": 0.7,
+        "in": [
+          {
+            "p": "core:fade-up",
+            "d": 0.6
+          }
+        ],
+        "w": "{{portrait ? W*0.86 : W*0.46}}",
+        "fit": "shrink",
+        "maxLines": 1
+      },
+      {
+        "type": "text",
+        "text": "{{subtitle}}",
+        "if": "{{subtitle}}",
+        "textStyle": "body",
+        "x": "{{portrait ? W/2 : 144}}",
+        "y": "{{H - (portrait ? 320 : 160)}}",
+        "anchor": "{{portrait ? 'center' : 'left'}}",
+        "align": "{{portrait ? 'center' : 'left'}}",
+        "color": "$color.muted",
+        "at": 0.95,
+        "in": [
+          {
+            "p": "core:fade-up",
+            "d": 0.6
+          }
+        ],
+        "w": "{{portrait ? W*0.86 : W*0.46}}"
+      }
+    ]
+  }
+}

@@ -1,0 +1,154 @@
+{
+  "slug": "sand-disintegrate",
+  "kind": "scene",
+  "summary": "A model (or shape) crumbles into sand carried by the wind — Thanos-snap style, coloured from its texture",
+  "tags": [
+    "3d",
+    "particles",
+    "sand",
+    "disintegrate",
+    "dust",
+    "vfx"
+  ],
+  "params": {
+    "model": {
+      "type": "string",
+      "default": "",
+      "desc": "asset:<id> of a model (empty = a sample shape)"
+    },
+    "title": "string=",
+    "subtitle": "string=",
+    "count": "number=400000",
+    "start": "number=0.8",
+    "wind": "number=1.6",
+    "fit": "number=2.4",
+    "floor": "boolean=false",
+    "hdr": "string=",
+    "look": "enum:studio|dark|neon=dark",
+    "glow": "number=0.3"
+  },
+  "duration": {
+    "default": 5,
+    "min": 3,
+    "max": 12
+  },
+  "example": {
+    "p": "three:sand-disintegrate",
+    "title": "Nothing lasts"
+  },
+  "body": {
+    "layers": [
+      {
+        "use": "core:backdrop",
+        "style": "{{look == 'studio' ? 'spotlight' : 'gradient'}}"
+      },
+      {
+        "type": "three",
+        "w": "{{W}}",
+        "h": "{{H}}",
+        "environment": "{{hdr ? {src: hdr, intensity: 1, rotation: 20} : 0.9}}",
+        "lights": "{{look == 'neon' ? 'neon' : look == 'dark' ? 'dramatic' : 'studio'}}",
+        "contactShadow": {
+          "opacity": 0.5,
+          "y": "{{-fit/2}}"
+        },
+        "camera": {
+          "fov": 30,
+          "position": [
+            0,
+            "{{fit*0.15}}",
+            "{{fit*2.6}}"
+          ],
+          "target": [
+            0,
+            0,
+            0
+          ]
+        },
+        "objects": [
+          {
+            "shape": "{{model ? 'model' : 'knot'}}",
+            "src": "{{model}}",
+            "fit": "{{fit}}",
+            "center": "center",
+            "size": [
+              0.7,
+              0.24
+            ],
+            "material": "metal",
+            "color": "$color.accent",
+            "rotation": [
+              0,
+              15,
+              0
+            ],
+            "effect": {
+              "kind": "disintegrate",
+              "count": "{{count}}",
+              "at": "{{start}}",
+              "d": "{{dur - start - 0.4}}",
+              "sweep": [
+                1,
+                0.3,
+                0
+              ],
+              "wind": [
+                "{{wind}}",
+                "{{wind*0.3}}",
+                -0.2
+              ],
+              "turbulence": 0.55,
+              "grain": "{{fit*0.0055}}",
+              "floor": "{{floor ? -fit/2 : false}}",
+              "fade": "{{!floor}}",
+              "emissive": "{{glow}}"
+            }
+          }
+        ],
+        "x": "{{portrait ? W/2 : (title ? W*0.62 : W/2)}}",
+        "y": "{{portrait ? H*0.42 : H/2}}"
+      },
+      {
+        "type": "text",
+        "text": "{{title}}",
+        "if": "{{title}}",
+        "textStyle": "h1",
+        "size": "{{portrait ? 92 : 110}}",
+        "x": "{{portrait ? W/2 : 140}}",
+        "y": "{{H - (portrait ? 420 : 250)}}",
+        "anchor": "{{portrait ? 'center' : 'left'}}",
+        "align": "{{portrait ? 'center' : 'left'}}",
+        "color": "$color.fg",
+        "at": 1.4,
+        "in": [
+          {
+            "p": "core:fade-up",
+            "d": 0.6
+          }
+        ],
+        "w": "{{portrait ? W*0.86 : W*0.46}}",
+        "fit": "shrink",
+        "maxLines": 1
+      },
+      {
+        "type": "text",
+        "text": "{{subtitle}}",
+        "if": "{{subtitle}}",
+        "textStyle": "body",
+        "x": "{{portrait ? W/2 : 144}}",
+        "y": "{{H - (portrait ? 320 : 160)}}",
+        "anchor": "{{portrait ? 'center' : 'left'}}",
+        "align": "{{portrait ? 'center' : 'left'}}",
+        "color": "$color.muted",
+        "at": 1.65,
+        "in": [
+          {
+            "p": "core:fade-up",
+            "d": 0.6
+          }
+        ],
+        "w": "{{portrait ? W*0.86 : W*0.46}}"
+      }
+    ]
+  }
+}

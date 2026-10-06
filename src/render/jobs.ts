@@ -177,7 +177,7 @@ export function registerJobHandlers(ctx: Ctx) {
     const { r, rev } = comps.compiled(job.comp_id!, job.rev ?? undefined);
     if (!r.ok || !r.ir) throw new Error(`composition does not compile: ${r.errors.map((e) => `${e.path}: ${e.msg}`).join('; ')}`);
     const scale = Number(job.params.scale ?? Q.scale);
-    const ir = await prerenderSubcomps(ctx, prepareIR(r.ir, ctx), scale, (st) => jc.progress(0, st));
+    const ir = await prerenderSubcomps(ctx, { ...prepareIR(r.ir, ctx), q3: quality === 'draft' ? 'draft' : 'final' }, scale, (st) => jc.progress(0, st));
     const t0 = Date.now();
     const outDir = path.join(paths.renders, job.id);
     const name = `${job.comp_id}-r${rev}-${quality}.${Q.ext}`;
@@ -264,8 +264,9 @@ export function registerJobHandlers(ctx: Ctx) {
   jobs.on('preview', async (job, jc) => {
     const { r, rev } = comps.compiled(job.comp_id!, job.rev ?? undefined);
     if (!r.ok || !r.ir) throw new Error(`composition does not compile: ${r.errors.map((e) => `${e.path}: ${e.msg}`).join('; ')}`);
-    let ir = prepareIR(r.ir, ctx);
     const P = job.params;
+    // previews use draft 3D (no AO/DOF/motion blur, fewer particles) unless "final": true
+    let ir = { ...prepareIR(r.ir, ctx), q3: P.final ? 'final' : 'draft' } as typeof r.ir;
     const scale = Math.max(0.1, Math.min(1, Number(P.scale ?? 0.5)));
     const plan = previewPlan(ir, P);
     if (P.solo) ir = soloIR(ir, String(P.solo));

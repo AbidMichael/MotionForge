@@ -1,0 +1,150 @@
+{
+  "slug": "model-hero",
+  "kind": "scene",
+  "summary": "Your 3D model (GLB/FBX/OBJ) as a hero shot: HDRI reflections, soft contact shadow, slow orbit, title",
+  "tags": [
+    "3d",
+    "model",
+    "product",
+    "hero",
+    "glb",
+    "fbx"
+  ],
+  "params": {
+    "model": {
+      "type": "string",
+      "default": "",
+      "desc": "asset:<id> of a .glb/.gltf/.fbx/.obj or a zip with textures (empty = a sample shape)"
+    },
+    "title": "string=",
+    "subtitle": "string=",
+    "hdr": {
+      "type": "string",
+      "default": "",
+      "desc": "asset:<id> of an .hdr/.exr environment (optional)"
+    },
+    "look": "enum:studio|dark|neon=studio",
+    "fit": "number=2.2",
+    "animation": {
+      "type": "string",
+      "default": "",
+      "desc": "name of an animation of the model to play"
+    },
+    "orbit": "number=12"
+  },
+  "duration": {
+    "default": 5,
+    "min": 2.5,
+    "max": 15
+  },
+  "example": {
+    "p": "three:model-hero",
+    "title": "Built to last",
+    "subtitle": "Every detail, in 3D"
+  },
+  "body": {
+    "layers": [
+      {
+        "use": "core:backdrop",
+        "style": "{{look == 'studio' ? 'spotlight' : 'gradient'}}"
+      },
+      {
+        "type": "three",
+        "w": "{{W}}",
+        "h": "{{H}}",
+        "environment": "{{hdr ? {src: hdr, intensity: 1, rotation: 20} : 0.9}}",
+        "lights": "{{look == 'neon' ? 'neon' : look == 'dark' ? 'dramatic' : 'studio'}}",
+        "contactShadow": {
+          "opacity": 0.65,
+          "y": "{{-fit/2}}",
+          "blur": 2.6
+        },
+        "camera": {
+          "fov": 30,
+          "orbit": {
+            "speed": "{{orbit}}",
+            "radius": "{{fit*3.1}}",
+            "height": "{{fit*0.28}}",
+            "from": -25
+          },
+          "target": [
+            0,
+            0,
+            0
+          ]
+        },
+        "post": {
+          "bloom": {
+            "strength": 0.25,
+            "threshold": 0.9
+          },
+          "vignette": 0.25
+        },
+        "objects": [
+          {
+            "shape": "{{model ? 'model' : 'knot'}}",
+            "src": "{{model}}",
+            "fit": "{{fit}}",
+            "center": "center",
+            "size": [
+              0.7,
+              0.24
+            ],
+            "material": "metal",
+            "color": "$color.accent",
+            "animation": "{{animation ? animation : false}}"
+          }
+        ],
+        "in": [
+          {
+            "p": "core:fade-in",
+            "d": 0.6
+          }
+        ],
+        "x": "{{portrait ? W/2 : (title ? W*0.62 : W/2)}}",
+        "y": "{{portrait ? H*0.42 : H/2}}"
+      },
+      {
+        "type": "text",
+        "text": "{{title}}",
+        "if": "{{title}}",
+        "textStyle": "h1",
+        "size": "{{portrait ? 92 : 110}}",
+        "x": "{{portrait ? W/2 : 140}}",
+        "y": "{{H - (portrait ? 420 : 250)}}",
+        "anchor": "{{portrait ? 'center' : 'left'}}",
+        "align": "{{portrait ? 'center' : 'left'}}",
+        "color": "$color.fg",
+        "at": 0.8,
+        "in": [
+          {
+            "p": "core:fade-up",
+            "d": 0.6
+          }
+        ],
+        "w": "{{portrait ? W*0.86 : W*0.46}}",
+        "fit": "shrink",
+        "maxLines": 1
+      },
+      {
+        "type": "text",
+        "text": "{{subtitle}}",
+        "if": "{{subtitle}}",
+        "textStyle": "body",
+        "x": "{{portrait ? W/2 : 144}}",
+        "y": "{{H - (portrait ? 320 : 160)}}",
+        "anchor": "{{portrait ? 'center' : 'left'}}",
+        "align": "{{portrait ? 'center' : 'left'}}",
+        "color": "$color.muted",
+        "at": 1.05,
+        "in": [
+          {
+            "p": "core:fade-up",
+            "d": 0.6
+          }
+        ],
+        "w": "{{portrait ? W*0.86 : W*0.46}}"
+      }
+    ]
+  }
+}

@@ -1,0 +1,156 @@
+{
+  "slug": "model-turntable",
+  "kind": "scene",
+  "summary": "A model turning on a clean studio floor, with motion blur — product spin for imported 3D models",
+  "tags": [
+    "3d",
+    "model",
+    "turntable",
+    "product",
+    "spin"
+  ],
+  "params": {
+    "model": {
+      "type": "string",
+      "default": "",
+      "desc": "asset:<id> of a 3D model (empty = a sample shape)"
+    },
+    "title": "string=",
+    "subtitle": "string=",
+    "turns": "number=1",
+    "fit": "number=2.2",
+    "hdr": "string=",
+    "floor": "color=$color.bg2"
+  },
+  "duration": {
+    "default": 6,
+    "min": 3,
+    "max": 20
+  },
+  "example": {
+    "p": "three:model-turntable",
+    "title": "360°"
+  },
+  "body": {
+    "layers": [
+      {
+        "type": "three",
+        "w": "{{W}}",
+        "h": "{{H}}",
+        "bg": "{{floor}}",
+        "environment": "{{hdr ? {src: hdr, intensity: 1, rotation: 20} : 0.9}}",
+        "lights": "studio",
+        "contactShadow": {
+          "opacity": 0.7,
+          "y": "{{-fit/2}}",
+          "blur": 2.2
+        },
+        "ground": {
+          "y": "{{-fit/2 - 0.01}}",
+          "color": "{{floor}}"
+        },
+        "fog": [
+          "{{floor}}",
+          "{{fit*3.2}}",
+          "{{fit*6}}"
+        ],
+        "camera": {
+          "fov": 28,
+          "position": [
+            0,
+            "{{fit*0.45}}",
+            "{{fit*2.9}}"
+          ],
+          "target": [
+            0,
+            "{{-fit*0.05}}",
+            0
+          ]
+        },
+        "motionBlur": {
+          "samples": 6,
+          "shutter": 0.5
+        },
+        "post": {
+          "vignette": 0.2
+        },
+        "objects": [
+          {
+            "shape": "{{model ? 'model' : 'knot'}}",
+            "src": "{{model}}",
+            "fit": "{{fit}}",
+            "center": "center",
+            "size": [
+              0.7,
+              0.24
+            ],
+            "material": "metal",
+            "color": "$color.accent",
+            "keys": {
+              "rotation": [
+                [
+                  0,
+                  [
+                    0,
+                    0,
+                    0
+                  ]
+                ],
+                [
+                  "{{dur}}",
+                  [
+                    0,
+                    "{{360*turns}}",
+                    0
+                  ],
+                  "linear"
+                ]
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "type": "text",
+        "text": "{{title}}",
+        "if": "{{title}}",
+        "textStyle": "h1",
+        "size": "{{portrait ? 92 : 110}}",
+        "x": "{{portrait ? W/2 : 140}}",
+        "y": "{{H - (portrait ? 420 : 250)}}",
+        "anchor": "{{portrait ? 'center' : 'left'}}",
+        "align": "{{portrait ? 'center' : 'left'}}",
+        "color": "$color.fg",
+        "at": 0.5,
+        "in": [
+          {
+            "p": "core:fade-up",
+            "d": 0.6
+          }
+        ],
+        "w": "{{portrait ? W*0.86 : W*0.46}}",
+        "fit": "shrink",
+        "maxLines": 1
+      },
+      {
+        "type": "text",
+        "text": "{{subtitle}}",
+        "if": "{{subtitle}}",
+        "textStyle": "body",
+        "x": "{{portrait ? W/2 : 144}}",
+        "y": "{{H - (portrait ? 320 : 160)}}",
+        "anchor": "{{portrait ? 'center' : 'left'}}",
+        "align": "{{portrait ? 'center' : 'left'}}",
+        "color": "$color.muted",
+        "at": 0.75,
+        "in": [
+          {
+            "p": "core:fade-up",
+            "d": 0.6
+          }
+        ],
+        "w": "{{portrait ? W*0.86 : W*0.46}}"
+      }
+    ]
+  }
+}

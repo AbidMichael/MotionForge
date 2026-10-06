@@ -4,6 +4,7 @@ import sharp from 'sharp';
 import { badRequest, notFound } from './errors';
 import type { DB } from './db';
 import { sha256 } from './util';
+import { extractZip, inspectModel, MODEL_EXTS, zipDir, type ModelInfo } from './models';
 
 const MIME: Record<string, string> = {
   png: 'image/png',
@@ -25,7 +26,19 @@ const MIME: Record<string, string> = {
   ttf: 'font/ttf',
   otf: 'font/otf',
   json: 'application/json',
+  // 3D: models (or a zip of a model + textures), environment maps, compressed textures
+  glb: 'model/gltf-binary',
+  gltf: 'model/gltf+json',
+  fbx: 'model/vnd.fbx',
+  obj: 'model/obj',
+  zip: 'application/zip',
+  hdr: 'image/vnd.radiance',
+  exr: 'image/x-exr',
+  ktx2: 'image/ktx2',
 };
+
+/** Content types for files served from an extracted zip. */
+export const FILE_MIME: Record<string, string> = { ...MIME, bin: 'application/octet-stream', mtl: 'text/plain', tga: 'image/x-tga', bmp: 'image/bmp', tif: 'image/tiff', tiff: 'image/tiff', dds: 'image/vnd-ms.dds' };
 
 export interface AssetRow {
   id: string;
@@ -48,6 +61,8 @@ export interface AssetInfo {
   width?: number;
   height?: number;
   url: string;
+  /** 3D models: what is inside (meshes, size, materials, animations, missing textures). */
+  model?: ModelInfo;
 }
 
 const MAX_BYTES = 500 * 1024 * 1024;
@@ -64,8 +79,47 @@ export class AssetStore {
   ) {}
 
   url(id: string): string | null {
-    const row = this.db.prepare('SELECT id FROM assets WHERE id = ?').get(id) as { id: string } | undefined;
-    return row ? `${this.baseUrl()}/v1/assets/${row.id}/raw` : null;
+    const row = this.db.prepare('SELECT id, mime, path FROM assets WHERE id = ?').get(id) as { id: string; mime: string; path: string } | undefined;
+    if (!row) return null;
+    // a zipped model is served as a folder so its relative texture paths resolve
+    if (row.mime === 'application/zip') {
+      const z = this.zip(row.path);
+      if (z.main) return `${this.baseUrl()}/v1/assets/${row.id}/files/${z.main.split('/').map(encodeURIComponent).join('/')}`;
+    }
+    return `${this.baseUrl()}/v1/assets/${row.id}/raw`;
+  }
+
+  private zip(file: string) {
+    return extractZip(file);
+  }
+
+  /** Local file of a model asset (the main model inside a zip), or null. */
+  modelFile(id: string): string | null {
+    const row = this.get(id);
+    if (row.mime === 'application/zip') {
+      const z = this.zip(row.path);
+      return z.main ? path.join(z.dir, ...z.main.split('/')) : null;
+    }
+    return MODEL_EXTS.includes(path.extname(row.path).slice(1).toLowerCase()) ? row.path : null;
+  }
+
+  /** Model inspection (cached next to the file). */
+  async modelInfo(id: string): Promise<ModelInfo> {
+    const row = this.get(id);
+    const file = this.modelFile(id);
+    if (!file) throw badRequest(`asset ${id} is not a 3D model`);
+    return inspectModel(file, row.path + '.model.json');
+  }
+
+  /** A file inside an extracted zip asset (path-traversal safe). */
+  zipFile(id: string, rel: string): { file: string; mime: string } {
+    const row = this.get(id);
+    if (row.mime !== 'application/zip') throw notFound(`asset ${id} is not a zip`);
+    const dir = zipDir(row.path);
+    this.zip(row.path);
+    const file = path.resolve(dir, ...decodeURIComponent(rel).split('/'));
+    if (!file.startsWith(path.resolve(dir) + path.sep) || !fs.existsSync(file) || !fs.statSync(file).isFile()) throw notFound(`${rel} in asset ${id}`);
+    return { file, mime: FILE_MIME[path.extname(file).slice(1).toLowerCase()] ?? 'application/octet-stream' };
   }
 
   get(id: string): AssetRow {
@@ -115,6 +169,14 @@ export class AssetStore {
       const file = path.join(this.dir, id.slice(0, 2), `${id}.${ext}`);
       fs.mkdirSync(path.dirname(file), { recursive: true });
       fs.writeFileSync(file, buf);
+      if (ext === 'zip') {
+        const z = extractZip(file);
+        if (!z.main) {
+          fs.rmSync(file, { force: true });
+          fs.rmSync(zipDir(file), { recursive: true, force: true });
+          throw badRequest('the zip holds no 3D model (.glb, .gltf, .fbx or .obj)');
+        }
+      }
       this.db
         .prepare('INSERT INTO assets (id, sha, name, mime, bytes, tags, agent, path) VALUES (?, ?, ?, ?, ?, ?, ?, ?)')
         .run(id, sha, name, MIME[ext], buf.length, input.tags?.join(' ') ?? null, agent, file);
@@ -130,7 +192,14 @@ export class AssetStore {
   async info(id: string): Promise<AssetInfo> {
     const row = this.get(id);
     const out: AssetInfo = { id: row.id, ref: `asset:${row.id}`, name: row.name, mime: row.mime, bytes: row.bytes, url: this.url(row.id)! };
-    if (row.mime.startsWith('image/') && row.mime !== 'image/svg+xml') {
+    if (this.modelFile(row.id)) {
+      try {
+        out.model = await this.modelInfo(row.id);
+      } catch (e: any) {
+        out.model = { error: e.message } as any;
+      }
+    }
+    if (row.mime.startsWith('image/') && !['image/svg+xml', 'image/vnd.radiance', 'image/x-exr', 'image/ktx2'].includes(row.mime)) {
       try {
         const m = await sharp(row.path).metadata();
         out.width = m.width;
@@ -152,6 +221,11 @@ async function sniffExt(buf: Buffer): Promise<string | null> {
   if (h.toString('ascii', 4, 8) === 'ftyp') return 'mp4';
   if (h[0] === 0x1a && h[1] === 0x45) return 'webm';
   if (h.toString('ascii', 0, 4) === 'wOF2') return 'woff2';
+  if (h.toString('ascii', 0, 4) === 'glTF') return 'glb';
+  if (h[0] === 0x50 && h[1] === 0x4b && h[2] === 0x03 && h[3] === 0x04) return 'zip';
+  if (buf.subarray(0, 18).toString('ascii') === 'Kaydara FBX Binary') return 'fbx';
+  if (/^#\?(RADIANCE|RGBE)/.test(buf.subarray(0, 12).toString('ascii'))) return 'hdr';
+  if (h[0] === 0x76 && h[1] === 0x2f && h[2] === 0x31 && h[3] === 0x01) return 'exr';
   if (buf.subarray(0, 200).toString('utf8').includes('<svg')) return 'svg';
   return null;
 }

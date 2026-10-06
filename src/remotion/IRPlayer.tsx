@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { AbsoluteFill, continueRender, delayRender, Freeze, Img, OffthreadVideo, useCurrentFrame } from 'remotion';
 import { clipPath, counterText, evaluateAnims, insetClip, mapTime, type ChannelState } from '../ir/evaluate';
 import type { IRDoc, IRFont, IRLayer } from '../ir/types';
-import { LayerIndex } from './context';
+import { LayerIndex , RenderHints } from './context';
 import { ExtraLayer } from './extras';
 
 export type IRPlayerProps = { ir: IRDoc; transparent?: boolean };
@@ -399,13 +399,16 @@ export const IRPlayer: React.FC<IRPlayerProps> = ({ ir, transparent }) => {
     ir.layers.forEach(walk);
     return m;
   }, [ir]);
+  const hints = useMemo(() => ({ draft: ir.q3 === 'draft' }), [ir.q3]);
   return (
     <LayerIndex.Provider value={index}>
+      <RenderHints.Provider value={hints}>
       <AbsoluteFill style={{ backgroundColor: transparent ? 'transparent' : ir.bg, overflow: 'hidden' }}>
         {ir.layers.map((l) => (
           <LayerView key={l.id} layer={l} frame={frame} />
         ))}
       </AbsoluteFill>
+      </RenderHints.Provider>
     </LayerIndex.Provider>
   );
 };

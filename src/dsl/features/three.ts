@@ -20,7 +20,7 @@ import { isObj } from '../../core/util';
 import type { IRLayer } from '../../ir/types';
 import type { Session } from '../compile';
 import { lookupToken } from '../bind';
-import { registerLayer } from '../registry';
+import { layerHandlers, registerLayer } from '../registry';
 import { palette } from './data';
 
 type V3 = [number, number, number];
@@ -44,6 +44,75 @@ export interface Obj3D {
   explode?: V3;
   children: Obj3D[];
   text?: string;
+  /** shape "model": an imported glTF/GLB/FBX/OBJ. */
+  model?: ModelSpec;
+  /** Exploded view of a model's parts: distance (× model size) each part moves away from the centre at "explode" time. */
+  explodeParts?: number;
+  /** Particle effect built from this object's surface (sand, dust…). */
+  effect?: EffectSpec;
+  castShadow?: boolean;
+}
+
+export interface PartSpec {
+  visible?: boolean;
+  position?: V3;
+  rotation?: V3;
+  scale?: V3;
+  keys?: Record<string, VKey[]>;
+  material?: Record<string, any>;
+}
+
+export interface ModelSpec {
+  src: string;
+  ext: string;
+  /** Largest dimension after normalisation (scene units); null = keep the file's units. */
+  fit: number | null;
+  center: 'center' | 'base' | 'none';
+  animation?: { name?: string; index?: number; speed: number; offset: number; loop: boolean };
+  materials?: Record<string, Record<string, any>>;
+  parts?: Record<string, PartSpec>;
+  /** Convert Phong/Lambert materials (FBX, OBJ) to physically based ones. */
+  pbr: boolean;
+}
+
+export type EffectKind = 'disintegrate' | 'assemble' | 'vortex' | 'scatter' | 'morph' | 'pile';
+export interface EffectSpec {
+  kind: EffectKind;
+  count: number;
+  at: number;
+  d: number;
+  sweep: V3;
+  wind: V3;
+  turbulence: number;
+  gravity: number;
+  /** Grain size in scene units. */
+  grain: number;
+  floor: number | null;
+  /** "texture": colours sampled from the model; or one colour. */
+  color: string;
+  render: 'points' | 'grains';
+  seed: number;
+  /** Fraction of the duration over which grains leave (the rest is travel). */
+  spread: number;
+  /** Hide the solid object as the grains leave (disintegrate) or appear (assemble). */
+  dissolve: boolean;
+  /** morph: the object the grains fly to. */
+  target?: Obj3D;
+  /** vortex: axis and turns. */
+  axis: V3;
+  turns: number;
+  emissive: number;
+  /** Fade grains out at the end (no floor). */
+  fade: boolean;
+}
+
+export interface PostSpec {
+  bloom?: { strength: number; radius: number; threshold: number };
+  ao?: { radius: number; intensity: number };
+  dof?: { focus: number; aperture: number; maxblur: number; keys?: VKey[] };
+  vignette?: number;
+  grain?: number;
+  chromatic?: number;
 }
 
 export interface ThreeIR {
@@ -59,6 +128,18 @@ export interface ThreeIR {
   shadows: boolean;
   /** Environment (reflections) intensity; 0 = off. */
   env: number;
+  /** Image-based lighting from an HDR/EXR (equirectangular). */
+  envMap?: { src: string; ext: string; rotation: number; background: boolean; blur: number };
+  toneMapping: 'aces' | 'agx' | 'neutral' | 'none';
+  exposure: number;
+  shadowMap: 'soft' | 'vsm' | 'basic';
+  /** Soft contact shadow under the objects (product shots). */
+  contact?: { opacity: number; blur: number; far: number; y: number; size: number; color: string };
+  post?: PostSpec;
+  motionBlur?: { samples: number; shutter: number };
+  /** auto: draft in previews/draft renders, final otherwise; pathtrace: GPU path tracing (hero shots). */
+  quality: 'auto' | 'draft' | 'final' | 'pathtrace';
+  samples: number;
 }
 
 const LIGHT_PRESETS: Record<string, Record<string, any>[]> = {
@@ -95,7 +176,195 @@ const MATERIALS: Record<string, Record<string, any>> = {
   wire: { type: 'basic', wireframe: true },
 };
 
-const SHAPES = ['box', 'roundedBox', 'sphere', 'cylinder', 'cone', 'torus', 'knot', 'plane', 'capsule', 'ring', 'card', 'device', 'image', 'group', 'icosahedron', 'octahedron'];
+const SHAPES = ['box', 'roundedBox', 'sphere', 'cylinder', 'cone', 'torus', 'knot', 'plane', 'capsule', 'ring', 'card', 'device', 'image', 'model', 'group', 'icosahedron', 'octahedron'];
+const EFFECTS: EffectKind[] = ['disintegrate', 'assemble', 'vortex', 'scatter', 'morph', 'pile'];
+const TONE = ['aces', 'agx', 'neutral', 'none'];
+
+/** Resolve a model asset: URL for the player + file format. */
+function modelSrc(S: Session, v: unknown, path: string): { src: string; ext: string; info: any | null } | null {
+  if (typeof v !== 'string' || !v) {
+    S.err(path, 'a model needs "src": "asset:<id>" (a .glb/.gltf/.fbx/.obj, or a .zip of a model with its textures)');
+    return null;
+  }
+  const url = S.assetSrc(v, path);
+  if (!url) return null;
+  const m = /^asset:([a-f0-9]{8,64})$/.exec(v);
+  if (m) {
+    const mi = S.opts.modelInfo?.(m[1]);
+    if (S.opts.modelInfo && !mi) {
+      S.err(path, `${v} is not a 3D model (glb, gltf, fbx, obj, or a zip holding one)`);
+      return null;
+    }
+    return { src: url, ext: mi?.ext ?? 'glb', info: mi?.info ?? null };
+  }
+  const ext = /\.(glb|gltf|fbx|obj)(\?|#|$)/i.exec(url)?.[1]?.toLowerCase();
+  if (!ext) S.err(path, 'model URL must end with .glb, .gltf, .fbx or .obj');
+  return { src: url, ext: ext ?? 'glb', info: null };
+}
+
+function partSpecs(S: Session, raw: unknown, path: string, info: any | null): Record<string, PartSpec> | undefined {
+  if (raw === undefined) return undefined;
+  if (!isObj(raw)) {
+    S.err(path, 'parts is {"<node name>": {"visible", "position", "rotation", "scale", "keys", "material"}}');
+    return undefined;
+  }
+  const out: Record<string, PartSpec> = {};
+  for (const [name, p] of Object.entries(raw)) {
+    const pp = `${path}.${name}`;
+    if (info?.parts && !info.parts.includes(name)) S.warn(pp, `no part named "${name}" in the model (parts: ${info.parts.slice(0, 12).join(', ')}${info.parts.length > 12 ? '…' : ''})`);
+    if (!isObj(p)) {
+      S.err(pp, 'a part override is an object');
+      continue;
+    }
+    const keys: Record<string, VKey[]> = {};
+    if (isObj(p.keys))
+      for (const [k, kr] of Object.entries(p.keys)) {
+        if (!['position', 'rotation', 'scale'].includes(k)) {
+          S.err(`${pp}.keys.${k}`, 'part keys: position, rotation, scale (offsets added to the part)');
+          continue;
+        }
+        const ks = vkeys(S, kr, `${pp}.keys.${k}`, 3);
+        if (ks) keys[k] = ks;
+      }
+    out[name] = {
+      visible: p.visible === undefined ? undefined : !!p.visible,
+      position: p.position !== undefined ? vec(p.position, [0, 0, 0]) : undefined,
+      rotation: p.rotation !== undefined ? vec(p.rotation, [0, 0, 0]) : undefined,
+      scale: p.scale !== undefined ? vec(p.scale, [1, 1, 1]) : undefined,
+      keys: Object.keys(keys).length ? keys : undefined,
+      material: p.material !== undefined ? material(S, p.material, '#ffffff', `${pp}.material`) : undefined,
+    };
+  }
+  return out;
+}
+
+function modelSpec(S: Session, o: Record<string, any>, path: string): ModelSpec | null {
+  const r = modelSrc(S, o.src, `${path}.src`);
+  if (!r) return null;
+  let animation: ModelSpec['animation'];
+  if (o.animation !== undefined && o.animation !== false && o.animation !== null) {
+    const a = typeof o.animation === 'string' || typeof o.animation === 'number' ? { name: o.animation } : isObj(o.animation) ? o.animation : {};
+    const named = typeof a.name === 'string' ? a.name : undefined;
+    const index = typeof a.name === 'number' ? a.name : typeof a.index === 'number' ? a.index : undefined;
+    const anims: { name: string }[] = r.info?.animations ?? [];
+    if (named && r.info && !anims.some((x) => x.name === named)) S.err(`${path}.animation`, `no animation "${named}" in the model (${anims.map((x) => x.name).join(', ') || 'it has none'})`);
+    animation = { name: named, index: index ?? (named ? undefined : 0), speed: Number(a.speed ?? 1), offset: Number(a.offset ?? a.start ?? 0), loop: a.loop !== false };
+  }
+  let materials: ModelSpec['materials'];
+  if (isObj(o.materials)) {
+    materials = {};
+    for (const [name, m] of Object.entries(o.materials)) materials[name] = material(S, m, '#ffffff', `${path}.materials.${name}`);
+  }
+  if (r.info?.missing?.length) S.warn(`${path}.src`, `the model references missing textures: ${r.info.missing.slice(0, 4).join(', ')} — upload a .zip with the model and its textures`);
+  return {
+    src: r.src,
+    ext: r.ext,
+    fit: o.fit === false || o.fit === null ? null : Number(o.fit ?? 2),
+    center: o.center === false ? 'none' : o.center === 'base' ? 'base' : o.center === 'none' ? 'none' : 'center',
+    animation,
+    materials,
+    parts: partSpecs(S, o.parts, `${path}.parts`, r.info),
+    pbr: o.pbr !== false,
+  };
+}
+
+function effectSpec(S: Session, raw: unknown, path: string, pal: string[], idx: { n: number }): EffectSpec | undefined {
+  if (raw === undefined || raw === null || raw === false) return undefined;
+  const e = typeof raw === 'string' ? { kind: raw } : isObj(raw) ? raw : null;
+  if (!e || !EFFECTS.includes(e.kind as EffectKind)) {
+    S.err(path, `effect is {"kind": ${EFFECTS.join('|')}, "count", "at", "d", "sweep", "wind", "turbulence", "gravity", "grain", "floor"}`);
+    return undefined;
+  }
+  const kind = e.kind as EffectKind;
+  const count = Math.round(Number(e.count ?? (kind === 'pile' ? 60000 : 300000)));
+  const max = kind === 'pile' ? 400000 : 20000000;
+  if (!(count > 0) || count > max) S.err(`${path}.count`, `count must be 1–${max.toLocaleString('en')}${kind === 'pile' ? ' for a simulated pile' : ''}`);
+  let target: Obj3D | undefined;
+  if (kind === 'morph') {
+    if (!isObj(e.target)) S.err(`${path}.target`, 'morph needs "target": an object (e.g. {"shape":"model","src":"asset:…"} or {"shape":"torus"})');
+    else target = object(S, e.target, `${path}.target`, pal, idx) ?? undefined;
+  }
+  return {
+    kind,
+    count: Math.min(max, Math.max(1, count || 1)),
+    at: S.frames(Number(e.at ?? 0.5)),
+    d: Math.max(1, S.frames(Number(e.d ?? 2.5))),
+    sweep: vec(e.sweep, [1, 0.25, 0]),
+    wind: vec(e.wind, kind === 'pile' || kind === 'vortex' || kind === 'morph' ? [0, 0, 0] : [1.6, 0.6, 0]),
+    turbulence: Number(e.turbulence ?? (kind === 'vortex' ? 0.15 : 0.6)),
+    gravity: Number(e.gravity ?? (kind === 'pile' ? 9.8 : kind === 'vortex' || kind === 'morph' ? 0 : 0.4)),
+    grain: Number(e.grain ?? 0.012),
+    floor: e.floor === undefined || e.floor === false || e.floor === null ? (kind === 'pile' ? -1 : null) : e.floor === true ? -1 : Number(e.floor),
+    color: typeof e.color === 'string' ? e.color : 'texture',
+    render: e.render === 'grains' ? 'grains' : 'points',
+    seed: Number(e.seed ?? 1),
+    spread: Math.min(0.95, Math.max(0, Number(e.spread ?? 0.6))),
+    dissolve: e.dissolve !== false,
+    target,
+    axis: vec(e.axis, [0, 1, 0]),
+    turns: Number(e.turns ?? 1.5),
+    emissive: Number(e.emissive ?? 0),
+    fade: e.fade !== undefined ? !!e.fade : kind !== 'assemble' && kind !== 'morph' && kind !== 'pile',
+  };
+}
+
+/** Warn when an object (at rest, static camera) is outside the camera view or far too small. */
+function viewCheck(S: Session, ir: ThreeIR, path: string) {
+  const cam = ir.camera;
+  if (cam.orbit || Object.keys(cam.keys).length) return; // moving camera: judged on frames, not here
+  const sub = (a: number[], b: number[]) => [a[0] - b[0], a[1] - b[1], a[2] - b[2]];
+  const dot = (a: number[], b: number[]) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+  const cross = (a: number[], b: number[]) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
+  const norm = (a: number[]) => {
+    const l = Math.hypot(a[0], a[1], a[2]) || 1;
+    return a.map((v) => v / l);
+  };
+  const fwd = norm(sub(cam.target, cam.position));
+  const right = norm(cross(fwd, [0, 1, 0]));
+  const up = cross(right, fwd);
+  const tanY = Math.tan((cam.fov * Math.PI) / 360);
+  const tanX = tanY * (ir.w / Math.max(1, ir.h));
+  ir.objects.forEach((o, i) => {
+    if (Object.keys(o.keys).length || o.shape === 'group') return;
+    const r = o.model ? (o.model.fit ?? 1) / 2 : Math.max(0.2, ...o.size.slice(0, 3).map((v) => Math.abs(v))) * (o.shape === 'sphere' ? 1 : 0.6);
+    const radius = r * Math.max(...o.scale);
+    const d = sub(o.position, cam.position);
+    const z = dot(d, fwd);
+    const label = `${path}[${i}] (${o.id})`;
+    if (z <= radius) {
+      S.warn(label, 'the object is behind or around the camera: it will not be visible');
+      return;
+    }
+    const x = dot(d, right) / (z * tanX);
+    const y = dot(d, up) / (z * tanY);
+    const rx = radius / (z * tanX);
+    const ry = radius / (z * tanY);
+    if (Math.abs(x) - rx > 1 || Math.abs(y) - ry > 1) S.warn(label, `the object is outside the camera view (screen position ${x.toFixed(2)}, ${y.toFixed(2)} in -1…1): move it or the camera`);
+    else if (Math.max(rx, ry) < 0.02) S.warn(label, 'the object is tiny in the frame (under 2% of the view): bring it or the camera closer');
+  });
+}
+
+function postSpec(S: Session, raw: unknown, path: string): PostSpec | undefined {
+  if (raw === undefined || raw === false || raw === null) return undefined;
+  if (!isObj(raw)) {
+    S.err(path, 'post is {"bloom", "ao", "dof", "vignette", "grain", "chromatic"}');
+    return undefined;
+  }
+  const out: PostSpec = {};
+  const b = raw.bloom;
+  if (b) out.bloom = { strength: Number(isObj(b) ? b.strength ?? 0.6 : typeof b === 'number' ? b : 0.6), radius: Number(isObj(b) ? b.radius ?? 0.4 : 0.4), threshold: Number(isObj(b) ? b.threshold ?? 0.85 : 0.85) };
+  const a = raw.ao;
+  if (a) out.ao = { radius: Number(isObj(a) ? a.radius ?? 0.25 : 0.25), intensity: Number(isObj(a) ? a.intensity ?? 1 : typeof a === 'number' ? a : 1) };
+  const d = raw.dof;
+  if (d) {
+    const dd = isObj(d) ? d : {};
+    out.dof = { focus: Number(dd.focus ?? 6), aperture: Number(dd.aperture ?? 0.6), maxblur: Number(dd.maxblur ?? 0.01) };
+    if (dd.keys !== undefined) out.dof.keys = vkeys(S, dd.keys, `${path}.dof.keys`, 1) ?? undefined;
+  }
+  for (const k of ['vignette', 'grain', 'chromatic'] as const) if (raw[k] !== undefined && raw[k] !== false) out[k] = raw[k] === true ? (k === 'vignette' ? 0.4 : k === 'grain' ? 0.06 : 0.002) : Number(raw[k]);
+  for (const k of Object.keys(raw)) if (!['bloom', 'ao', 'dof', 'vignette', 'grain', 'chromatic'].includes(k)) S.warn(`${path}.${k}`, 'unknown post effect (bloom, ao, dof, vignette, grain, chromatic)');
+  return out;
+}
 
 function vec(v: unknown, d: V3): V3 {
   if (typeof v === 'number') return [v, v, v];
@@ -160,6 +429,8 @@ function object(S: Session, o: unknown, path: string, pal: string[], idx: { n: n
     return null;
   }
   if (shape === 'image' && (o.image === undefined || o.image === null || o.image === '')) S.err(`${path}.image`, 'shape "image" needs "image":"asset:<id>"');
+  const model = shape === 'model' ? modelSpec(S, o, path) : undefined;
+  if (shape === 'model' && !model) return null;
   const i = idx.n++;
   const color = String(o.color ?? pal[i % pal.length]);
   const size = Array.isArray(o.size) ? o.size.map(Number) : typeof o.size === 'number' ? [o.size] : [];
@@ -195,13 +466,30 @@ function object(S: Session, o: unknown, path: string, pal: string[], idx: { n: n
     explode: o.explode !== undefined ? vec(o.explode, [0, 0, 0]) : undefined,
     children,
     text: o.text !== undefined ? String(o.text) : undefined,
+    model: model ?? undefined,
+    explodeParts: o.explodeParts !== undefined ? Number(o.explodeParts) : undefined,
+    effect: effectSpec(S, o.effect, `${path}.effect`, pal, idx),
+    castShadow: o.castShadow === false ? false : undefined,
   };
 }
 
 registerLayer('three', {
-  keys: ['objects', 'stack', 'lights', 'camera', 'explode', 'ground', 'fog', 'bg', 'shadows', 'colors', 'environment'],
+  keys: ['objects', 'stack', 'lights', 'camera', 'explode', 'ground', 'fog', 'bg', 'shadows', 'colors', 'environment', 'toneMapping', 'exposure', 'contactShadow', 'post', 'motionBlur', 'quality', 'samples', 'cache'],
   compile(S, c) {
     const n = c.node;
+    // "cache": true — render the 3D shot once to a transparent video (sub-composition cache) and reuse it
+    if (n.cache && S.depthLevel < 3) {
+      const W = Math.round(Number(c.base.w ?? S.W) / 2) * 2;
+      const H = Math.round(Number(c.base.h ?? S.H) / 2) * 2;
+      const { cache: _c, x: _x, y: _y, at: _at, dur: _dur, until: _u, in: _in, out: _out, anim: _an, loop: _lp, id: _id, ...inner } = c.raw as Record<string, any>;
+      void [_c, _x, _y, _at, _dur, _u, _in, _out, _an, _lp, _id];
+      const compNode = {
+        type: 'comp',
+        cache: true,
+        src: { format: `${W}x${H}@${S.fps}`, bg: 'transparent', scenes: [{ d: +c.lenSec.toFixed(3), layers: [{ ...inner, type: 'three', x: W / 2, y: H / 2, w: W, h: H }] }] },
+      };
+      return layerHandlers.get('comp')!.compile(S, { ...c, node: { ...compNode }, raw: compNode });
+    }
     const w = Number(c.base.w ?? S.W);
     const h = Number(c.base.h ?? S.H);
     const pal = palette(S, n);
@@ -284,8 +572,46 @@ registerLayer('three', {
       },
       bg: n.bg === undefined || n.bg === null || n.bg === false || n.bg === 'transparent' ? null : String(n.bg),
       shadows: n.shadows !== false,
-      env: n.environment === false ? 0 : typeof n.environment === 'number' ? n.environment : 0.6,
+      env: n.environment === false ? 0 : typeof n.environment === 'number' ? n.environment : isObj(n.environment) ? Number(n.environment.intensity ?? 1) : 0.6,
+      toneMapping: 'aces',
+      exposure: Number(n.exposure ?? 1),
+      shadowMap: 'soft',
+      quality: 'auto',
+      samples: Math.max(1, Math.round(Number(n.samples ?? 128))),
     };
+    if (n.toneMapping !== undefined) {
+      if (!TONE.includes(String(n.toneMapping))) S.err(`${c.path}.toneMapping`, `toneMapping is one of ${TONE.join(', ')}`);
+      else ir.toneMapping = n.toneMapping;
+    }
+    if (isObj(n.environment) && n.environment.src !== undefined) {
+      const src = S.assetSrc(n.environment.src, `${c.path}.environment.src`);
+      const m = /^asset:([a-f0-9]{8,64})$/.exec(String(n.environment.src));
+      const file = m ? S.opts.assetFile?.(m[1]) : null;
+      const ext = (file ?? String(n.environment.src)).toLowerCase().match(/\.(hdr|exr|jpe?g|png|webp)$/)?.[1] ?? 'hdr';
+      const bg = n.environment.background;
+      if (src) ir.envMap = { src, ext, rotation: Number(n.environment.rotation ?? 0), background: !!bg, blur: typeof bg === 'number' ? bg : Number(n.environment.blur ?? 0) };
+    }
+    if (typeof n.shadows === 'string') {
+      if (!['soft', 'vsm', 'basic'].includes(n.shadows)) S.err(`${c.path}.shadows`, 'shadows: true | false | "soft" | "vsm" | "basic"');
+      else ir.shadowMap = n.shadows as ThreeIR['shadowMap'];
+    }
+    if (n.contactShadow) {
+      const cs = isObj(n.contactShadow) ? n.contactShadow : {};
+      ir.contact = { opacity: Number(cs.opacity ?? 0.6), blur: Number(cs.blur ?? 2.5), far: Number(cs.far ?? 1.5), y: Number(cs.y ?? (isObj(n.ground) ? n.ground.y ?? -1 : -1)), size: Number(cs.size ?? 10), color: String(cs.color ?? '#000000') };
+    }
+    ir.post = postSpec(S, n.post, `${c.path}.post`);
+    if (n.motionBlur) {
+      const mb = isObj(n.motionBlur) ? n.motionBlur : {};
+      ir.motionBlur = { samples: Math.max(2, Math.min(32, Math.round(Number(mb.samples ?? 8)))), shutter: Math.max(0.05, Math.min(1, Number(mb.shutter ?? 0.5))) };
+    }
+    if (n.quality !== undefined) {
+      if (!['auto', 'draft', 'final', 'pathtrace'].includes(String(n.quality))) S.err(`${c.path}.quality`, 'quality: auto | draft | final | pathtrace');
+      else ir.quality = n.quality;
+    }
+    viewCheck(S, ir, `${c.path}.objects`);
+    const countGrains = (os: Obj3D[]): number => os.reduce((acc, o) => acc + (o.effect?.count ?? 0) + countGrains(o.children), 0);
+    const grains = countGrains(objects);
+    if (grains > 5_000_000) S.warn(c.path, `${(grains / 1e6).toFixed(1)} M particles: needs a strong GPU (and memory); previews use fewer`);
     if (isObj(n.explode)) ir.explode = { at: S.frames(Number(n.explode.at ?? 0.6)), d: S.frames(Number(n.explode.d ?? 1.4)), amount: Number(n.explode.amount ?? 1), ease: String(n.explode.ease ?? 'inOutCubic') };
     if (n.ground) {
       const g = isObj(n.ground) ? n.ground : {};

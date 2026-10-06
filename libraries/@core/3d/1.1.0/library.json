@@ -1,0 +1,18 @@
+{
+  "name": "@core/3d",
+  "alias": "three",
+  "summary": "3D for motion design: imported models (GLB/FBX/OBJ), studio lighting, sand & particle effects, product spins, exploded views.",
+  "guide": "3D without a 3D tool. Scenes: three:model-hero {model, title, hdr, look, animation}, three:model-turntable {model, turns}, three:model-exploded {model, gap}, three:character-intro {model, animation}, three:sand-disintegrate {model, count, wind, floor}, three:sand-assemble {model, count}, three:particle-morph {from, to}, three:product-spin {image, device}, three:exploded {items}, three:depth-cards {items}, three:hero-object {shape, material}.\nModels: mf_asset_put a .glb/.gltf/.fbx/.obj (or a .zip with its textures), then mf_model_inspect (size, parts, animations, missing textures). Without \"model\" the scenes use a sample shape.\nRaw layer {\"type\":\"three\"}: objects with shape box|roundedBox|sphere|cylinder|cone|torus|knot|plane|capsule|ring|card|device|image|model|icosahedron|octahedron|group, size, position, rotation (degrees), scale, material glass|metal|matte|plastic|emissive|toon|wire or {…}, keys {position|rotation|scale|opacity}, spin, float, explode, children.\nmodel: {\"shape\":\"model\",\"src\":\"asset:…\",\"fit\":2,\"center\":\"center|base\",\"animation\":\"Walk\"|{name,speed,offset},\"materials\":{\"<name>\":{color,roughness…}},\"parts\":{\"<node>\":{visible,position,rotation,keys,material}},\"explodeParts\":0.6}.\neffect (any object): {\"kind\":\"disintegrate|assemble|vortex|scatter|morph|pile\",\"count\":300000,\"at\":1,\"d\":2.5,\"sweep\":[1,0,0],\"wind\":[1.6,0.5,0],\"turbulence\":0.6,\"gravity\":0.4,\"grain\":0.012,\"floor\":-1,\"render\":\"points|grains\",\"target\":{…} (morph)}.\nLook: lights \"studio|soft|dramatic|neon\"|[…], \"environment\":0.8|{\"src\":\"asset:<hdr>\",\"rotation\",\"background\":true}, \"toneMapping\":\"aces|agx|neutral\", \"contactShadow\":true, \"ground\", \"fog\", \"post\":{\"bloom\",\"ao\",\"dof\":{focus,aperture},\"vignette\",\"grain\",\"chromatic\"}, \"motionBlur\":{\"samples\":8}, \"quality\":\"pathtrace\" + \"samples\":256 (GPU hero shots), \"cache\":true (render once, reuse).\nCamera {fov, position, target, keys, orbit {speed,radius,height}, dolly {from,to}}. Previews are draft (fewer particles, no AO/DOF/blur): mf_preview {\"final\":true} for the real look.",
+  "depends": {
+    "@core/base": "^1.1.0"
+  },
+  "visibility": "public",
+  "owner": "system",
+  "tags": [
+    "core",
+    "3d",
+    "three",
+    "product"
+  ],
+  "publishedAt": "2026-10-07T00:00:00.000Z"
+}

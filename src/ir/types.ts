@@ -204,6 +204,8 @@ export interface IRDoc {
   scenes: IRSceneInfo[];
   audio?: IRAudio[];
   markers?: IRMarker[];
+  /** Set by render jobs: "draft" for previews and draft renders (cheaper 3D). */
+  q3?: 'draft' | 'final';
 }
 
 export const IR_PLAYER_VERSION = '2.0.0';

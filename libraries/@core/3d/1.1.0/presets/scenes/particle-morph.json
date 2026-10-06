@@ -1,0 +1,135 @@
+{
+  "slug": "particle-morph",
+  "kind": "scene",
+  "summary": "Thousands of particles fly from one model/shape and re-form as another (A → B transformation)",
+  "tags": [
+    "3d",
+    "particles",
+    "morph",
+    "transform",
+    "vfx"
+  ],
+  "params": {
+    "from": {
+      "type": "string",
+      "default": "",
+      "desc": "asset:<id> of the first model (empty = knot)"
+    },
+    "to": {
+      "type": "string",
+      "default": "",
+      "desc": "asset:<id> of the second model (empty = sphere)"
+    },
+    "title": "string=",
+    "subtitle": "string=",
+    "count": "number=300000",
+    "fit": "number=2.2",
+    "color": "color=$color.accent",
+    "look": "enum:studio|dark|neon=dark",
+    "hdr": "string="
+  },
+  "duration": {
+    "default": 5,
+    "min": 3,
+    "max": 12
+  },
+  "example": {
+    "p": "three:particle-morph",
+    "title": "From idea to product"
+  },
+  "body": {
+    "layers": [
+      {
+        "use": "core:backdrop",
+        "style": "{{look == 'studio' ? 'spotlight' : 'gradient'}}"
+      },
+      {
+        "type": "three",
+        "w": "{{W}}",
+        "h": "{{H}}",
+        "environment": "{{hdr ? {src: hdr, intensity: 1, rotation: 20} : 0.9}}",
+        "lights": "{{look == 'neon' ? 'neon' : look == 'dark' ? 'dramatic' : 'studio'}}",
+        "camera": {
+          "fov": 30,
+          "position": [
+            0,
+            "{{fit*0.15}}",
+            "{{fit*2.7}}"
+          ],
+          "target": [
+            0,
+            0,
+            0
+          ]
+        },
+        "objects": [
+          {
+            "shape": "{{from ? 'model' : 'knot'}}",
+            "src": "{{from}}",
+            "fit": "{{fit}}",
+            "center": "center",
+            "size": [
+              0.7,
+              0.24
+            ],
+            "material": "metal",
+            "color": "{{color}}",
+            "effect": {
+              "kind": "morph",
+              "count": "{{count}}",
+              "at": 0.6,
+              "d": "{{dur - 1.4}}",
+              "grain": "{{fit*0.005}}",
+              "turbulence": 0.5,
+              "emissive": 0.3,
+              "target": "{{ to ? {shape: 'model', src: to, fit: fit, center: 'center'} : {shape: 'sphere', size: [fit*0.4]} }}"
+            }
+          }
+        ],
+        "x": "{{portrait ? W/2 : (title ? W*0.62 : W/2)}}",
+        "y": "{{portrait ? H*0.42 : H/2}}"
+      },
+      {
+        "type": "text",
+        "text": "{{title}}",
+        "if": "{{title}}",
+        "textStyle": "h1",
+        "size": "{{portrait ? 92 : 110}}",
+        "x": "{{portrait ? W/2 : 140}}",
+        "y": "{{H - (portrait ? 420 : 250)}}",
+        "anchor": "{{portrait ? 'center' : 'left'}}",
+        "align": "{{portrait ? 'center' : 'left'}}",
+        "color": "$color.fg",
+        "at": 1.0,
+        "in": [
+          {
+            "p": "core:fade-up",
+            "d": 0.6
+          }
+        ],
+        "w": "{{portrait ? W*0.86 : W*0.46}}",
+        "fit": "shrink",
+        "maxLines": 1
+      },
+      {
+        "type": "text",
+        "text": "{{subtitle}}",
+        "if": "{{subtitle}}",
+        "textStyle": "body",
+        "x": "{{portrait ? W/2 : 144}}",
+        "y": "{{H - (portrait ? 320 : 160)}}",
+        "anchor": "{{portrait ? 'center' : 'left'}}",
+        "align": "{{portrait ? 'center' : 'left'}}",
+        "color": "$color.muted",
+        "at": 1.25,
+        "in": [
+          {
+            "p": "core:fade-up",
+            "d": 0.6
+          }
+        ],
+        "w": "{{portrait ? W*0.86 : W*0.46}}"
+      }
+    ]
+  }
+}

@@ -133,16 +133,30 @@ SIMULATIONS (library @core/explain)
 {"kind":"pendulum|spring|projectile|orbit|particles|wave", parameters… each a number or keyframes [[s,v],…] e.g. "gravity":[[0,9.8],[3,1.6]]}
 "speed","start","labels","words":{"comparisons":"comparaisons",…}, "settings":{…} (all parameters in one object).
 
-3D (library @core/3d)
-{"type":"three","objects":[{"shape":"box|roundedBox|sphere|cylinder|cone|torus|knot|plane|capsule|ring|card|device|image|icosahedron|octahedron|group",
-  "size":[…],"position":[x,y,z],"rotation":[deg…],"scale","material":"glass|metal|matte|plastic|emissive|toon|wire"|{…},"color","image":"asset:<id>",
+3D (library @core/3d — scenes three:model-hero, model-turntable, model-exploded, character-intro, sand-disintegrate, sand-assemble, particle-morph…)
+{"type":"three","objects":[{"shape":"box|roundedBox|sphere|cylinder|cone|torus|knot|plane|capsule|ring|card|device|image|model|icosahedron|octahedron|group",
+  "size":[…],"position":[x,y,z],"rotation":[deg…],"scale","material":"glass|metal|matte|plastic|emissive|toon|wire"|{type,color,metalness,roughness,transmission,clearcoat,sheen,iridescence…},"color","image":"asset:<id>",
   "keys":{"position|rotation|scale|opacity":[[s,value,"ease"]]},"spin":[0,30,0],"float":0.1,"explode":[0,1,0],"children":[…],
-  "alpha":"auto"|true|false,"alphaTest":0.5}],
- Transparent PNG/WebP: detected automatically ("alpha":"auto") — a "card" drops its slab, the picture is a cut-out and its shadow
- follows the drawing; "shape":"image" = a free-standing cut-out sized to the picture (size = height, or [w,h]); "alpha":false forces the opaque card.
+  "alpha":"auto"|true|false,"alphaTest":0.5,"castShadow":false}],
+ Transparent PNG/WebP: detected automatically — a "card" drops its slab, the picture is a cut-out with an image-shaped shadow; "shape":"image" = free cut-out.
+ MODELS (mf_asset_put a .glb/.gltf/.fbx/.obj or a .zip with its textures; mf_model_inspect lists parts, materials, animations):
+ {"shape":"model","src":"asset:<id>","fit":2 (largest side, scene units; false = file units),"center":"center|base|none",
+  "animation":"Walk"|0|{"name","speed":1,"offset":0,"loop":true},"materials":{"<material name>"|"*":{color,roughness,metalness…}},
+  "parts":{"<node name>":{"visible":false,"position","rotation","scale","keys":{position|rotation|scale offsets},"material":{…}}},
+  "explodeParts":0.6 (exploded view of the model's meshes, timed by "explode"),"pbr":true (FBX/OBJ Phong → physically based)}
+ PARTICLES on any object (model or shape): "effect":{"kind":"disintegrate|assemble|vortex|scatter|morph|pile","count":300000,"at":1,"d":2.5,
+  "sweep":[1,0.25,0] (order the surface breaks up),"wind":[1.6,0.6,0],"turbulence":0.6,"gravity":0.4,"grain":0.012 (size),"floor":-1|false,
+  "color":"texture"|"#hex","render":"points|grains" (grains = lit 3D grains, close-ups),"spread":0.6,"dissolve":true,"fade":true,"emissive":0.3 (glowing edge),
+  "target":{object} (morph: where the grains go, position relative to the object),"axis":[0,1,0],"turns":1.5 (vortex)}
+  Grains take the colours of the texture under them; "pile" is a real simulation (grains fall and heap up; count ≤ 400 000). Previews use fewer grains.
  "stack":{"items":[{"color","image"}],"shape","size","step":[0,0.3,0],"explode":[0,0.8,0]},"explode":{"at":1,"d":1.4,"amount":1},
- "lights":"studio|soft|dramatic|neon"|[…],"camera":{"fov","position","target","keys","orbit":{"speed","radius","height"},"dolly":{"from","to"},"shake"},
- "ground":{"opacity":0.35,"y":-1},"fog":["#000",5,18],"environment":0.6,"bg"}
+ "lights":"studio|soft|dramatic|neon"|[{type,position,intensity,color,castShadow}],"camera":{"fov","position","target","keys","orbit":{"speed","radius","height","from"},"dolly":{"from","to"},"shake"},
+ "ground":{"y":-1,"color"}|{"opacity":0.35,"shadow":true},"fog":["#000",5,18],"bg",
+ LOOK: "environment":0.6|{"src":"asset:<.hdr/.exr>","intensity":1,"rotation":30,"background":true|0.4 (blur)},"toneMapping":"aces|agx|neutral|none","exposure":1,
+  "shadows":true|"soft"|"vsm"|"basic","contactShadow":true|{"opacity":0.6,"blur":2.5,"y":-1,"far":1.5},
+  "post":{"bloom":{strength,radius,threshold}|0.5,"ao":{radius,intensity}|true,"dof":{"focus":6,"aperture":0.6,"maxblur":0.01,"keys":[[s,focus]]},"vignette":0.4,"grain":0.06,"chromatic":0.002},
+  "motionBlur":{"samples":8,"shutter":0.5},"quality":"auto|draft|final|pathtrace","samples":256 (pathtrace: GPU path tracing for hero shots; particles are hidden),
+  "cache":true (render the 3D shot once to a transparent video and reuse it). Previews are draft (no AO/DOF/blur, fewer grains); mf_preview {"final":true} shows the real look.
 
 CAPTURES (real interfaces, recorded with mf_capture)
 {"type":"capture","src":"cap_<id>","w":1500,"frame":"browser|none","cursor":true|{"style","color"},"zoom":1.4,"cps":14,"hold":0.8,"fit":true}

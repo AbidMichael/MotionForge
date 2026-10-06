@@ -40,6 +40,19 @@ function revisionText(r: any): string {
   return lines.join('\n');
 }
 
+function modelText(m: any): string {
+  if (m.error) return `model: cannot read it (${m.error})`;
+  const lines = [
+    `model ${m.format} · ${m.meshes} mesh(es) · ${m.triangles.toLocaleString('en')} triangles · size ${m.size.join(' × ')} (fit rescales it)${m.skinned ? ' · skinned' : ''}`,
+    `materials: ${m.materials.map((x: any) => `${x.name}${x.maps.length ? ` [${x.maps.join(', ')}]` : ''}`).join('; ') || 'none'}`,
+  ];
+  if (m.animations.length) lines.push(`animations: ${m.animations.map((x: any) => `${x.name} ${x.duration}s`).join(', ')}`);
+  if (m.parts.length) lines.push(`parts: ${m.parts.slice(0, 30).join(', ')}${m.parts.length > 30 ? ` … (+${m.parts.length - 30})` : ''}`);
+  if (m.missing.length) lines.push(`MISSING textures: ${m.missing.join(', ')} — upload a .zip with the model and its textures`);
+  if (m.warnings.length) lines.push(`warnings: ${m.warnings.slice(0, 3).join(' | ')}`);
+  return lines.join('\n');
+}
+
 function paramLine(name: string, d: any): string {
   let t = d.type === 'enum' ? (d.values ?? []).join('|') : d.type === 'array' && d.items ? `array<${d.items}>` : d.type === 'preset' && d.kind ? `preset:${d.kind}` : d.type;
   if (d.required) t += '!';
@@ -66,6 +79,7 @@ Composition: {"use":["@scope/lib@^1"],"theme":"core:dark"|{"p":"core:neon","acce
 Scene entry = "p" + the preset's params (+ optional "d" seconds, "layers" overlay, "bg"). Transition entry {"t":…} goes between scenes. Values may use tokens "$color.accent" and expressions "{{W/2}}".
 Reuse instead of rebuilding: save what worked with mf_save_as_preset; write presets with mf_preset_put into your own library (@<agent-id>/<name>, created with mf_library_create); version with mf_library_publish; rate presets you used with mf_rate.
 Beyond scenes: sub-compositions, stateful components, gestures (cursor, clicks, typing, drag), connectors, morph/expand transitions, audio & music sync (mf_audio), charts/maps/networks from data (@core/data), simulations (@core/explain), 3D (@core/3d), UI kits (@core/ui), art directions (@core/directions), real interface captures (mf_capture).
+3D: mf_asset_put a model (.glb/.fbx/.obj or a zip with textures) → mf_model_inspect → {"shape":"model","src":"asset:…"} in a "three" layer or three:model-hero / three:sand-disintegrate…
 Production: mf_check (visual QA), mf_storyboard, mf_variants, mf_adapt (formats), mf_template (one video per data row), mf_edit (visual edits → source).
 Official libraries need no "use" (core, dir, three, data, ui, explain, kinetic resolve by alias).
 Full DSL (layers, animations, preset files): mf_library {"name":"dsl"}. Library guides: mf_library {"name":"@core/base"} (or @core/data, @core/3d…).`;
@@ -248,12 +262,20 @@ export function registerTools(server: McpServer, api: Api, record?: Recorder) {
 
   tool(
     'mf_asset_put',
-    'Register an image, video, font or audio file (local path on the server machine, URL, or base64). Returns asset:<id> to use as "src". Same file twice = same id.',
+    'Register an image, video, font, audio file, 3D model (.glb/.gltf/.fbx/.obj, or a .zip of a model with its textures) or environment map (.hdr/.exr) — local path on the server machine, URL, or base64. Returns asset:<id> to use as "src". Same file twice = same id. Models are inspected (see mf_model_inspect).',
     { path: z.string().optional(), url: z.string().optional(), base64: z.string().optional(), name: z.string().optional(), tags: z.array(z.string()).optional() },
     async (a) => {
       const r = await call('POST', '/v1/assets', a);
-      return `${r.ref} · ${r.name} · ${r.mime}${r.width ? ` ${r.width}x${r.height}` : ''} · ${(r.bytes / 1024).toFixed(0)} KB`;
+      const head = `${r.ref} · ${r.name} · ${r.mime}${r.width ? ` ${r.width}x${r.height}` : ''} · ${(r.bytes / 1024).toFixed(0)} KB`;
+      return r.model ? `${head}\n${modelText(r.model)}` : head;
     },
+  );
+
+  tool(
+    'mf_model_inspect',
+    'What is inside a 3D model asset: meshes, triangles, size (model units), materials and their maps, named parts (for "parts" overrides and exploded views), skinning, animations (name, duration) and missing textures.',
+    { id: z.string().describe('asset:<id> or <id>') },
+    async (a) => modelText(await call('GET', `/v1/assets/${enc(a.id.replace(/^asset:/, ''))}/model`)),
   );
 
   tool(
@@ -308,9 +330,10 @@ export function registerTools(server: McpServer, api: Api, record?: Recorder) {
       clip: z.enum(['mp4', 'gif']).optional().describe('a short low-res clip of the selected range instead of stills (mp4 has the sound mix)'),
       inline: z.boolean().optional(),
       rev: z.number().int().optional(),
+      final: z.boolean().optional().describe('full 3D quality (AO, depth of field, motion blur, all particles, path tracing); previews are draft by default'),
     },
     async (a) => {
-      const r = await call('POST', `/v1/compositions/${enc(a.id)}/preview`, { at: a.at, scale: a.scale, rev: a.rev, scene: a.scene, transition: a.transition, range: a.range, focus: a.focus, solo: a.solo, n: a.n, clip: a.clip });
+      const r = await call('POST', `/v1/compositions/${enc(a.id)}/preview`, { at: a.at, scale: a.scale, rev: a.rev, scene: a.scene, transition: a.transition, range: a.range, focus: a.focus, solo: a.solo, n: a.n, clip: a.clip, final: a.final });
       if (r.clip) return `${r.comp} r${r.rev} · ${r.label} · clip ${r.clip.from}–${r.clip.to}s\n  file: ${r.clip.path}\n  url: ${r.clip.url}`;
       if (!r.frames) return `preview still running (${r.job}) — try again`;
       const lines = [`${r.comp} r${r.rev} · ${r.frames.length} frame(s)`];
