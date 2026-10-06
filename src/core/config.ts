@@ -28,6 +28,8 @@ export interface MotionForgeConfig {
     jobs: number;
     browserExecutable: string | null;
     segmentCache: boolean;
+    /** Chrome tabs for frames that contain 3D layers: each tab holds its own models, textures and particles on the GPU, so several at once can exhaust it (blank, flickering 3D). Default 1. */
+    concurrency3d: number;
     /** WebGL backend for 3D layers ("angle", "swangle", "egl", "swiftshader", "vulkan", or null for Chrome's default). */
     gl: string | null;
   };
@@ -51,7 +53,7 @@ const DEFAULTS: MotionForgeConfig = {
   librariesDir: 'libraries',
   defaultFormat: '1920x1080@30',
   defaultTheme: 'core:dark',
-  render: { concurrency: null, jobs: 1, browserExecutable: null, segmentCache: true, gl: process.platform === 'linux' ? 'swangle' : 'angle' },
+  render: { concurrency: null, concurrency3d: 1, jobs: 1, browserExecutable: null, segmentCache: true, gl: process.platform === 'linux' ? 'swangle' : 'angle' },
   files: { read: true, write: true, roots: [] },
   promotion: { minRatings: 3, minAverage: 4, minRenders: 5, minSuccessRate: 0.9 },
 };
@@ -79,6 +81,7 @@ export function loadConfig(overrides: Partial<MotionForgeConfig> = {}): MotionFo
   if (process.env.MF_HOST) cfg.host = process.env.MF_HOST;
   if (process.env.MF_DATA_DIR) cfg.dataDir = process.env.MF_DATA_DIR;
   if (process.env.MF_LIBRARIES_DIR) cfg.librariesDir = process.env.MF_LIBRARIES_DIR;
+  if (process.env.MF_CONCURRENCY_3D) cfg.render.concurrency3d = Math.max(1, Number(process.env.MF_CONCURRENCY_3D) || 1);
   if (process.env.MF_GL) cfg.render.gl = process.env.MF_GL === 'default' ? null : (process.env.MF_GL as any);
   if (process.env.MF_BROWSER_EXECUTABLE) cfg.render.browserExecutable = process.env.MF_BROWSER_EXECUTABLE;
   cfg.dataDir = path.resolve(ROOT, cfg.dataDir);

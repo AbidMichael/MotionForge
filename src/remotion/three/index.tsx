@@ -7,7 +7,7 @@
  * Everything is a function of the frame number, so frames can be rendered in any order.
  */
 import React, { createContext, useContext, useEffect, useLayoutEffect, useMemo, useRef } from 'react';
-import { continueRender, delayRender, useVideoConfig } from 'remotion';
+import { cancelRender, continueRender, delayRender, useVideoConfig } from 'remotion';
 import { ThreeCanvas } from '@remotion/three';
 import { useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
@@ -641,11 +641,13 @@ function Driver({ ir, lfRef, objectsRef, updaters, befores, quality, size }: { i
   const pipeline = useMemo(() => makePipeline(gl, scene, camera, size, ir.post, ir.motionBlur, quality === 'draft'), [gl, scene, camera, ir, quality]);
   useEffect(() => () => pipeline.dispose(), [pipeline]);
   const update = (t: number) => {
-    for (const u of updaters) u.fn(t);
     if (!fitted.current && objectsRef.current) {
+      // fit shadow cameras on the scene at its first frame — the same in every render tab, whatever frame it starts on
+      for (const u of updaters) u.fn(0);
       fitShadows(scene, objectsRef.current);
       fitted.current = true;
     }
+    for (const u of updaters) u.fn(t);
   };
   const before = () => {
     for (const b of befores) b();
@@ -825,6 +827,13 @@ export const ThreeView: React.FC<{ layer: IRLayer; lf: number; st?: ChannelState
         height={h}
         shadows={shadows as any}
         gl={{ antialias: true, alpha: !ir.bg || cssBg(ir, quality), preserveDrawingBuffer: true }}
+        onCreated={(state: any) => {
+          // a lost context renders blank frames (flicker): fail loudly instead of delivering them
+          state.gl.domElement.addEventListener('webglcontextlost', (e: Event) => {
+            e.preventDefault();
+            cancelRender(new Error('MotionForge: the WebGL context of a 3D layer was lost (GPU memory or too many contexts). Lower the particle "count", the number of 3D scenes rendered at once (render.concurrency3d), or use "cache": true on heavy shots.'));
+          });
+        }}
         style={{ background: ir.bg ?? 'transparent' }}
       >
         <Scene ir={ir} lf={lf} quality={quality} size={{ w, h }} />

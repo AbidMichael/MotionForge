@@ -228,6 +228,7 @@ copy motionforge.config.example.json motionforge.config.json    # Windows
 | `agents` | `[]` | `{ "id", "key", "admin", "projects": [] }` per agent. |
 | `defaultFormat`, `defaultTheme` | `1920x1080@30`, `core:dark` | Used when a composition leaves them out. |
 | `render.concurrency` | `null` | Chrome tabs per render (null = half your CPU cores). |
+| `render.concurrency3d` | `1` | Chrome tabs for the frames that contain 3D layers. Each tab loads its own models and particles on the GPU; more tabs can exhaust it (blank or flickering 3D). Raise to 2–3 on a big GPU. |
 | `render.jobs` | `1` | Renders in parallel (previews never wait behind renders). |
 | `render.browserExecutable` | `null` | Use your own Chrome/Chromium instead of the downloaded one (also used by `mf_capture`). |
 | `files.read`, `files.write`, `files.roots` | `true`, `true`, `[]` | Composition files used by `mf_validate`/`mf_patch {"file"}`; `roots` limits them to some folders (`[]` = anywhere). |
@@ -238,7 +239,7 @@ copy motionforge.config.example.json motionforge.config.json    # Windows
 
 - `MF_PORT`, `MF_HOST`;
 - `MF_DATA_DIR`, `MF_LIBRARIES_DIR`;
-- `MF_BROWSER_EXECUTABLE`, `MF_GL`;
+- `MF_BROWSER_EXECUTABLE`, `MF_GL`, `MF_CONCURRENCY_3D`;
 - `MF_CONFIG` (path to a config file);
 - `MF_AGENT` (stdio bridge).
 
@@ -301,6 +302,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) to contribute.
 - **First render is slow**: that is the one-time Chrome download and player bundle.
 - **Chrome fails to start on Linux**: install the system libraries listed in Requirements, or set `render.browserExecutable` to an installed Chromium.
 - **3D layers are blank**: WebGL is not available with the current `render.gl`. Try `"swangle"` (software) or `"angle"`.
+- **3D flickers or is blank on some frames**: the GPU ran out of memory or WebGL contexts with several render tabs. Keep `render.concurrency3d` at 1 (default), lower particle `count`, or use `"cache": true` on heavy shots. A lost context now stops the render with an explicit error.
 - **3D is slow / particles or path tracing time out**: render on a machine with a GPU and `render.gl` = `"angle"`; software WebGL (`swangle`, Linux servers) works but is far slower. Lower `count`, `samples` or `motionBlur.samples`, or use `"cache": true`.
 - **A model shows up grey or without textures**: `mf_model_inspect` lists missing textures — upload a `.zip` holding the model and its texture files.
 - **`mf_capture` cannot start Chrome**: set `render.browserExecutable` to your Chrome/Chromium.

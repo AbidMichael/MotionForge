@@ -11,6 +11,7 @@
   "defaultTheme": "core:dark",
   "render": {
     "concurrency": null,
+    "concurrency3d": 1,
     "jobs": 1,
     "browserExecutable": null,
     "segmentCache": true,

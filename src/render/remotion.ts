@@ -41,6 +41,13 @@ export interface VideoRenderOpts {
   cancel?: { onCancel: (cb: () => void) => void };
 }
 
+/** Does the frame range contain a 3D layer? (each tab would hold its own copy on the GPU) */
+export function has3D(ir: IRDoc, range?: [number, number] | null): boolean {
+  const [a, b] = range ?? [0, ir.duration];
+  const walk = (ls: IRDoc['layers']): boolean => ls.some((l) => l.type === 'three' || walk(l.children ?? []));
+  return ir.layers.some((l) => l.from <= b && l.to > a && (l.type === 'three' || walk(l.children ?? [])));
+}
+
 /** Hash of the player source: a new bundle is built only when the player code changes. */
 function playerHash(): string {
   const files: string[] = [];
@@ -70,6 +77,8 @@ export class RemotionAdapter implements RenderAdapter {
       bundlesDir: string;
       browserExecutable: string | null;
       concurrency: number | null;
+      /** Tabs for frame ranges that contain 3D layers. */
+      concurrency3d?: number;
       log: (msg: string) => void;
       ignoreCertificateErrors?: boolean;
       /** WebGL backend for 3D layers: "angle" (GPU), "swangle" (software, servers without a GPU), "egl", "swiftshader", "vulkan" or null. */
@@ -224,7 +233,8 @@ export class RemotionAdapter implements RenderAdapter {
         pixelFormat: prores && o.transparent ? 'yuva444p10le' : alphaWebm ? 'yuva420p' : 'yuv420p',
         proResProfile: prores ? '4444' : undefined,
         x264Preset: o.codec === 'h264' ? o.x264Preset ?? 'medium' : null,
-        concurrency: this.opts.concurrency,
+        // 3D: one tab (or render.concurrency3d) — parallel tabs each load the models and particles on the GPU
+        concurrency: has3D(o.ir, o.frameRange) ? Math.max(1, this.opts.concurrency3d ?? 1) : this.opts.concurrency,
         muted: true,
         enforceAudioTrack: false,
         puppeteerInstance,

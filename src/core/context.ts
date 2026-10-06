@@ -91,6 +91,7 @@ export function createContext(overrides: Partial<MotionForgeConfig> = {}, log: (
     bundlesDir: paths.bundles,
     browserExecutable: cfg.render.browserExecutable,
     concurrency: cfg.render.concurrency,
+    concurrency3d: cfg.render.concurrency3d,
     log,
     ignoreCertificateErrors: process.env.MF_IGNORE_CERT_ERRORS === '1',
     gl: cfg.render.gl as any,

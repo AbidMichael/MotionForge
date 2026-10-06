@@ -189,3 +189,14 @@ describe('particles', () => {
     expect(Math.max(...ys)).toBeLessThan(1.6);
   });
 });
+
+describe('3D rendering concurrency', async () => {
+  const { has3D } = await import('../src/render/remotion');
+  it('detects 3D layers in a frame range (those ranges render with render.concurrency3d tabs)', () => {
+    const r = run({ scenes: [{ d: 1, layers: [{ type: 'text', text: 'flat' }] }, { d: 1, layers: [{ type: 'three', objects: [{ shape: 'box' }] }] }] });
+    expect(r.errors).toEqual([]);
+    expect(has3D(r.ir!, [0, 20])).toBe(false);
+    expect(has3D(r.ir!, [35, 50])).toBe(true);
+    expect(has3D(r.ir!)).toBe(true);
+  });
+});
